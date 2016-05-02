@@ -1,0 +1,24 @@
+# based on recommendtion from https://github.com/github/gitignore/blob/master/Perl.gitignore
+/blib/
+/.build/
+_build/
+cover_db/
+inc/
+Build
+!Build/
+Build.bat
+.last_cover_stats
+/Makefile
+/Makefile.old
+/MANIFEST.bak
+/META.yml
+/META.json
+/MYMETA.*
+nytprof.out
+/pm_to_blib
+*.o
+*.bs
+/_eumm/
+
+# Ignore config file - it contains passwords
+config.yml
