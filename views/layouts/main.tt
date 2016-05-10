@@ -18,10 +18,21 @@
 	</head>
 	<body>
 
+		<div class="masthead">
+			<div>
+				<div class="masthead_logo">
+					<img src="/images/logo.png" alt="Kronekeeper logo" />
+				</div>
+				<div class="message">
+					not logged in
+				</div>
+			</div>
+		</div>
+
 <% content %>
 
-	<div id="footer">
-		Powered by <a href="http://perldancer.org/">Dancer2</a> <% dancer_version %>
-	</div>
+		<div class="footer">
+			Powered by <a href="http://perldancer.org/">Dancer2</a> <% dancer_version %>
+		</div>
 	</body>
 </html>

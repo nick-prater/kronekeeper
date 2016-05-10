@@ -27,14 +27,21 @@ use warnings;
 use Dancer2;
 use kronekeeper::Frame;
 
-
 our $VERSION = '0.1';
 
-get '/' => sub {
-    template 'index';
+
+prefix '/' => sub {
+
+	get '/' => sub {
+		template 'index';
+	};
+
+
+	get '/login' => sub {
+		template 'login';
+	};
+
 };
-
-
 
 
 

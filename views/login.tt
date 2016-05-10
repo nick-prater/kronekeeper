@@ -1,0 +1,42 @@
+
+<div class="content_box">
+	<div class="content">
+		<div id="header">
+		</div>
+
+		<div class="dialog login">
+			<h1>Login</h1>
+
+			<form action="" method="post" name="login">
+				<ul>
+					<li>
+						<label for="email">email address</label>
+						<input 
+							type="email"
+							id="email"
+							name="email"
+							placeholder="enter your registered email address"
+							required="required"
+							autofocus="autofocus" 
+						/>
+					</li>
+					<li>
+						<label for="password">password</label>
+						<input 
+							type="password"
+							id="password"
+							name="password"
+							placeholder="enter your password"
+						/>
+					</li>
+					<li>
+						<button
+							class="submit"
+							type="submit"
+						>login</button>
+					</li>
+				</ul>
+			</form>
+		</div>
+	</div>
+</div>
