@@ -1,9 +1,6 @@
 
-<div class="content_box">
+<div class="container">
 	<div class="content">
-		<div id="header">
-		</div>
-
 		<div class="dialog login">
 			<h1>Login</h1>
 
