@@ -18,34 +18,34 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
-along with GOALS-logger.  If not, see <http://www.gnu.org/licenses/>.
+along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 =cut
-
 
 
 use strict;
 use warnings;
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
+use Dancer2::Plugin::Auth::Extensible;
 
-prefix '/frame';
 
-get '/' => sub {
+prefix '/frame' => sub {
 
-	my $q = database->prepare("SELECT * FROM frame");
-	$q->execute;
-	my $f = $q->fetchrow_hashref;
+	get '/' => require_login sub {
 
-	return sprintf(
-		"frame %u::%s",
-		$f->{id},
-		$f->{name},
-	);
-	
+		my $q = database->prepare("SELECT * FROM frame");
+		$q->execute;
+		my $f = $q->fetchrow_hashref;
+
+		return sprintf(
+			"frame %u::%s",
+			$f->{id},
+			$f->{name},
+		);
+	};	
+
 };
-
-
 
 
 
