@@ -35,7 +35,12 @@ our $VERSION = '0.1';
 prefix '/' => sub {
 
 	get '/' => sub {
-		template 'index';
+		if(session('logged_in_user')) {
+			redirect '/frame/';
+		}
+		else {
+			redirect '/login';
+		}
 	};
 
 
