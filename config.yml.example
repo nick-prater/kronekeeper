@@ -23,8 +23,14 @@ plugins:
             RaiseError: 1
             AutoCommit: 0
         log_queries: 1
-#    Auth::Extensible:
-#        realms:
-
-
+    Auth::Extensible:
+        realms:
+            users:
+                provider: 'kronekeeper::AuthDB'
+                users_table: 'person'
+                users_username_column: 'email'
+                roles_table: 'role'
+                user_roles_table: 'user_role'
+                user_roles_role_id_column: 'role_id'
+        no_default_pages: 1
 

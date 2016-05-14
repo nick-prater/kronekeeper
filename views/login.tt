@@ -4,14 +4,19 @@
 		<div class="dialog login">
 			<h1>Login</h1>
 
-			<form action="" method="post" name="login">
+			<form method="post">
+				<input
+					type="hidden"
+					name="return_url"
+					value="<% params.return_url %>"
+				/>
 				<ul>
 					<li>
 						<label for="email">email address</label>
 						<input 
 							type="email"
-							id="email"
-							name="email"
+							id="username"
+							name="username"
 							placeholder="enter your registered email address"
 							required="required"
 							autofocus="autofocus" 
@@ -30,6 +35,7 @@
 						<button
 							class="submit"
 							type="submit"
+							value="Login"
 						>login</button>
 					</li>
 				</ul>
