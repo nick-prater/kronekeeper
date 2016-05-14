@@ -1,4 +1,4 @@
-package kronekeeper;
+package kronekeeper::Activity_Log;
 
 =head1 LICENCE
 
@@ -22,28 +22,51 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 =cut
 
+
+
 use strict;
 use warnings;
-use Dancer2;
-use kronekeeper::Frame;
-use kronekeeper::User;
+use Dancer2 appname => 'kronekeeper';
+use Dancer2::Plugin::Database;
+use Moo;
 
 
-our $VERSION = '0.1';
+sub record {
+
+	my $self = shift;
+	my $args = shift;
+
+	defined $args->{note} or die "notes argument missing";
+
+	my $q = database->prepare(
+		"INSERT INTO activity_log (
+			by_person_id,
+			function,
+			account_id,
+			frame_id,
+			note
+		) VALUES (?,?,?,?,?)"
+	);
+
+	$q->execute(
+		$args->{person_id},
+		$args->{function},
+		$args->{account_id},
+		$args->{frame_id},
+		$args->{note},
+	);
+	database->commit;
+		
+	debug sprintf(
+		"activity_log: %s  by_person_id:%s  %s",
+		$args->{function}  || '',
+		$args->{person_id} || '--',
+		$args->{note},
+	);
+
+}
 
 
-prefix '/' => sub {
-
-	get '/' => sub {
-		template 'index';
-	};
-
-
-	get '/login' => sub {
-		template 'login';
-	};
-
-};
 
 
 
