@@ -33,6 +33,7 @@ use kronekeeper::Activity_Log;
 
 my $al = kronekeeper::Activity_Log->new();
 
+#TODO Authentication for these routes
 
 
 prefix '/api/user' => sub {
@@ -58,16 +59,40 @@ prefix '/api/user' => sub {
 		};
 
 		$al->record({
-			function   => '/user/add',
+			function   => '/api/user/add',
 			account_id => param('account_id'),
 			note       => sprintf("added new user '%s'", param('email'))
 		});
 
 		return to_json {
 			user_id => $user_id
-
 		};
 	};
+
+
+	post '/password' => sub {
+
+		param('email')    or send_error('missing email parameter' => 400);
+		param('password') or send_error('missing password parameter' => 400);
+
+		user_password(
+			username     => param('email'),
+			new_password => param('password'),
+		) or do {
+			send_error('error changing password' => 500);
+		};
+
+		$al->record({
+			function   => '/api/user/password',
+			account_id => param('account_id'),
+			note       => sprintf("changed password for user '%s'", param('email'))
+		});
+
+		return to_json {
+			success => 1,
+		};
+	}
+
 };
 
 

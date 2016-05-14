@@ -78,4 +78,36 @@ sub create_user {
 
 
 
+sub set_user_password {
+
+	my $self = shift;
+	my $username = shift;
+	my $password = shift;
+
+	$username or die "no username specified";
+	$password or die "no account name specified";
+
+	my $settings = $self->realm_settings;
+    	my $db = $self->realm_dsl->database($settings->{db_connection_name});
+	my $encrypted_password = $self->encrypt_password($password);
+
+	my $q = $db->prepare("
+		UPDATE person
+		SET password = ?
+		WHERE email = ?
+	");
+
+	$q->execute(
+		$encrypted_password,
+		$username,
+	) or die "failed to update password";
+
+	$db->commit;
+
+	return 1;
+}
+
+
+
+
 1;
