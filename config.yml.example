@@ -33,4 +33,5 @@ plugins:
                 user_roles_table: 'user_role'
                 user_roles_role_id_column: 'role_id'
         no_default_pages: 1
+        exit_page: '/login'
 
