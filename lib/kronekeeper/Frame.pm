@@ -48,7 +48,55 @@ prefix '/frame' => sub {
 		template('frames', { frames => $f });
 	};	
 
+
+	get '/:frame_id' => require_login sub {
+
+		my $frame_id = param('frame_id');
+
+		$frame_id && $frame_id =~ m/^\d+$/ or do {
+			send_error('invalid frame_id parameter', 400);
+		};
+		frame_id_valid_for_account($frame_id) or do {
+			send_error('forbidden' => 403);
+		};
+
+		return $frame_id;
+	}
+
+
 };
+
+
+
+sub frame_id_valid_for_account {
+
+	my $frame_id = shift;
+	my $account_id = shift || session('account')->{id};
+
+	$frame_id =~ m/^\d+$/ or do {
+		error "frame_id is not an integer";
+		return undef;
+	};
+	$account_id =~ m/^\d+$/ or do {
+		error "account_id is not an integer";
+		return undef;
+	};
+
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM frame
+		WHERE id = ?
+		AND account_id = ?
+	");
+
+	$q->execute(
+		$frame_id,
+		$account_id,
+	);
+
+	return $q->fetchrow_hashref;
+}
 
 
 

@@ -6,7 +6,7 @@
 
 				<% FOREACH frame IN frames %>
 				<tr>
-					<td><% frame.name %></td>
+					<td><a href="<% frame.id %>"><% frame.name %></a></td>
 				</tr>
 				<% END %>
 			</table>
