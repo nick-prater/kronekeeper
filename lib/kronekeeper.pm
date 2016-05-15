@@ -25,8 +25,13 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 use strict;
 use warnings;
 use Dancer2;
+use Dancer2::Plugin::Database;
+use Dancer2::Plugin::Auth::Extensible;
 use kronekeeper::Frame;
 use kronekeeper::User;
+use kronekeeper::Activity_Log;
+
+my $al = kronekeeper::Activity_Log->new();
 
 
 our $VERSION = '0.1';
@@ -48,7 +53,78 @@ prefix '/' => sub {
 		template 'login';
 	};
 
+	post '/login' => sub {
+
+		my ($success, $realm) = authenticate_user(
+			param('username'),
+			param('password'),
+		);
+		if($success) {
+			my $account = account_from_username(param('username'));
+			session logged_in_user => param('username');
+			session logged_in_user_realm => $realm;
+			session account => $account;
+			my $user = logged_in_user;
+
+			$al->record({
+				function   => '/login',
+				person_id  => $user->{id},
+				account_id => $account->{account_id},
+				note       => sprintf("user '%s' logged in", param('username'))
+			});
+
+			# Authentication OK - forward to requested page or default 
+			# to frame view
+			if(param('return_url')) {
+				redirect(param('return_url'));
+			}
+			else {
+				redirect('/frame/');
+			}
+		} else {
+			# Authentication failed - return to login page
+			template 'login';
+		}
+	};
+
+        
+	any '/logout' => sub {
+
+		my $user = logged_in_user;
+		if($user) {
+			$al->record({
+				function   => '/logout',
+				person_id  => $user->{id},
+				account_id => $user->{account_id},
+				note       => sprintf("user '%s' logged out", $user->{email}),
+			});
+		}
+
+		app->destroy_session;
+		redirect('/login');
+	};
+
 };
+
+
+sub account_from_username {
+
+	my $username = shift;
+
+	my $q = database->prepare("
+		SELECT 
+			account.id   AS account_id,
+			account.name AS account_name
+		FROM person
+		JOIN account ON (account.id = person.account_id)
+		WHERE person.email = ?
+	");
+
+	$q->execute($username);
+	return $q->fetchrow_hashref;
+}
+
+
 
 
 

@@ -28,7 +28,6 @@ use warnings;
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
-use Dancer2::Plugin::REST;
 use kronekeeper::Activity_Log;
 
 my $al = kronekeeper::Activity_Log->new();
