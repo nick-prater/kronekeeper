@@ -1,0 +1,14 @@
+
+<div class="container">
+			<h1>Frames</h1>
+
+			<table>
+
+				<% FOREACH frame IN frames %>
+				<tr>
+					<td><% frame.name %></td>
+				</tr>
+				<% END %>
+			</table>
+
+</div>

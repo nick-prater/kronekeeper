@@ -34,15 +34,18 @@ prefix '/frame' => sub {
 
 	get '/' => require_login sub {
 
-		my $q = database->prepare("SELECT * FROM frame");
-		$q->execute;
-		my $f = $q->fetchrow_hashref;
-
-		return sprintf(
-			"frame %u::%s",
-			$f->{id},
-			$f->{name},
+		my $q = database->prepare("
+			SELECT * FROM frame
+			WHERE account_id = ?
+			ORDER BY name ASC
+		");
+		$q->execute(
+			session('account')->{id}
 		);
+
+		my $f = $q->fetchall_arrayref({});
+
+		template('frames', { frames => $f });
 	};	
 
 };
