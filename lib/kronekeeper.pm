@@ -61,15 +61,18 @@ prefix '/' => sub {
 		);
 		if($success) {
 			my $account = account_from_username(param('username'));
+			session account => $account;
 			session logged_in_user => param('username');
 			session logged_in_user_realm => $realm;
-			session account => $account;
+
 			my $user = logged_in_user;
+			delete $user->{password};  # Don't want password held in session
+			session user => $user;
 
 			$al->record({
 				function   => '/login',
 				person_id  => $user->{id},
-				account_id => $account->{account_id},
+				account_id => $user->{account_id},
 				note       => sprintf("user '%s' logged in", param('username'))
 			});
 
@@ -113,8 +116,8 @@ sub account_from_username {
 
 	my $q = database->prepare("
 		SELECT 
-			account.id   AS account_id,
-			account.name AS account_name
+			account.id   AS id,
+			account.name AS name
 		FROM person
 		JOIN account ON (account.id = person.account_id)
 		WHERE person.email = ?

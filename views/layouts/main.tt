@@ -24,7 +24,11 @@
 					<img src="/images/logo.png" alt="Kronekeeper logo" />
 				</div>
 				<div class="message">
+				<% IF session.logged_in_user %>
+					<% session.user.name %> : <% session.account.name %>
+				<% ELSE %>
 					not logged in
+				<% END %>
 				</div>
 			</div>
 		</div>
