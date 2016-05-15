@@ -114,7 +114,8 @@ body {
 }
 
 .frame td {
-	width: 10em;
+	width: 17em;
+	height: 16pt;
 	background: white;
 	border: 1px solid black;
 }

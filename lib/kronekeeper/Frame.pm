@@ -61,8 +61,8 @@ prefix '/frame' => sub {
 		};
 
 		template('frame', {
-			frame_info => frame_info($frame_id),
-			verticals  => verticals($frame_id),
+			frame_info   => frame_info($frame_id),
+			frame_blocks => frame_blocks($frame_id),
 		});
 	}
 
@@ -121,7 +121,23 @@ sub verticals {
 	return $q->fetchall_hashref('position');
 }
 
+sub frame_blocks {
+	my $frame_id = shift;
+	my $verticals = verticals($frame_id);
+	my $q = database->prepare("
+		SELECT * from block
+		WHERE vertical_id = ?
+		ORDER BY position ASC
+	");
+	
+	foreach my $vertical_position(keys %{$verticals}) {
+		my $vertical = $verticals->{$vertical_position};
+		$q->execute($vertical->{id});
+		$vertical->{blocks} = $q->fetchall_hashref('position');
+	}	
 
+	return $verticals;
+}
 
 
 
