@@ -4,6 +4,13 @@
 		<div class="dialog login">
 			<h1>Login</h1>
 
+			<% IF login_error %>
+			<p class="error">
+				The e-mail address or password you entered were not recognised.
+                                Please try again, or contact us for assistance.
+			</p>
+			<% END %>
+
 			<form method="post">
 				<input
 					type="hidden"

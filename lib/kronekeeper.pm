@@ -86,7 +86,9 @@ prefix '/' => sub {
 			}
 		} else {
 			# Authentication failed - return to login page
-			template 'login';
+			template 'login' => {
+				login_error => 1
+			};
 		}
 	};
 

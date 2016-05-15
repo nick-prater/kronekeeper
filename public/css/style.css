@@ -62,7 +62,6 @@ body {
 	font-size: 60%;
 }
 
-
 .dialog h1 {
 	text-align: center;
 }
@@ -101,9 +100,10 @@ body {
         font-size: 100%;
 }
 
-
-
-
+.dialog p.error {
+	text-align: center;
+	color: red;
+}
 
 
 
