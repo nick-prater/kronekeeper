@@ -60,7 +60,9 @@ prefix '/frame' => sub {
 			send_error('forbidden' => 403);
 		};
 
-		return $frame_id;
+		template('frame', {
+			frame_info => frame_info($frame_id),
+		});
 	}
 
 
@@ -98,6 +100,14 @@ sub frame_id_valid_for_account {
 	return $q->fetchrow_hashref;
 }
 
+
+
+sub frame_info {
+	my $frame_id = shift;
+	my $q = database->prepare("SELECT * FROM frame_info WHERE id = ?");
+	$q->execute($frame_id);
+	return $q->fetchrow_hashref;
+}
 
 
 

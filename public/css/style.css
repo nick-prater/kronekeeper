@@ -105,5 +105,19 @@ body {
 	color: red;
 }
 
+.frame table {
+	text-align: center;
+}
+
+.frame th {
+	width: 10em;
+}
+
+.frame td {
+	width: 10em;
+	background: white;
+	border: 1px solid black;
+}
+
 
 
