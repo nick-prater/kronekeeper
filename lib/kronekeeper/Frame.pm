@@ -62,6 +62,7 @@ prefix '/frame' => sub {
 
 		template('frame', {
 			frame_info => frame_info($frame_id),
+			verticals  => verticals($frame_id),
 		});
 	}
 
@@ -108,6 +109,20 @@ sub frame_info {
 	$q->execute($frame_id);
 	return $q->fetchrow_hashref;
 }
+
+sub verticals {
+	my $frame_id = shift;
+	my $q = database->prepare("
+		SELECT * from vertical
+		WHERE frame_id = ?
+		ORDER BY position ASC
+	");
+	$q->execute($frame_id);
+	return $q->fetchall_hashref('position');
+}
+
+
+
 
 
 

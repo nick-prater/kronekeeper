@@ -6,21 +6,21 @@
 
 		<tr>
 			<% FOREACH vertical_position IN [1..frame_info.vertical_count] %>
-			<th><% vertical_position %></th>
+			<th><% verticals.$vertical_position.designation %></th>
 			<% END %>
 		</tr>
 		<% block_position = frame_info.block_count %>
 		<% WHILE block_position > 0 %>
 		<tr>
 			<% FOREACH vertical_position IN [1..frame_info.vertical_count] %>
-			<td><% block_position %>:<% vertical_position %></td>
+			<td><% verticals.$vertical_position.designation %><% block_position %></td>
 			<% END %>
 		</tr>
 		<%   block_position = block_position - 1 %>
 		<% END %>
 		<tr>
 			<% FOREACH vertical_position IN [1..frame_info.vertical_count] %>
-			<th><% vertical_position %></th>
+			<th><% verticals.$vertical_position.designation %></th>
 			<% END %>
 		</tr>
 
