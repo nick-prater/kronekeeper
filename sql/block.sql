@@ -57,6 +57,18 @@ END
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE VIEW block_info AS
+SELECT
+	block.id,
+	block.name,
+	CONCAT(vertical.designation, block.designation) AS full_designation,
+	frame.id AS frame_id,
+	frame.name AS frame_name
+FROM block
+JOIN vertical ON (vertical.id = block.vertical_id)
+JOIN frame ON (frame.id = vertical.frame_id);
+
+
 
 /* Show block detail */
 CREATE OR REPLACE VIEW block_detail AS

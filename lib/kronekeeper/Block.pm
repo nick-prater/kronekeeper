@@ -45,15 +45,9 @@ prefix '/block' => sub {
 			send_error('forbidden' => 403);
 		};
 
-		#my $frame_info = frame_info($frame_id);
-		#$frame_info && !$frame_info->{is_deleted} or do {
-		#	send_error('not found' => 404);
-		#};
-
-		my $block_detail = block_detail($id);
-
 		template('block', {
-			block_detail => $block_detail,
+			block_detail => block_detail($id),
+			block_info   => block_info($id),
 		});
 	};
 
@@ -93,6 +87,16 @@ sub block_id_valid_for_account {
 }
 
 
+sub block_info {
+	my $block_id = shift;
+	my $q = database->prepare("
+		SELECT *
+		FROM block_info
+		WHERE id=?
+	");
+	$q->execute($block_id);
+	return $q->fetchrow_hashref;
+};
 
 
 sub block_detail {

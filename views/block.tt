@@ -1,6 +1,7 @@
 
 <div class="container block">
-	<h1><% block_info.name %></h1>
+	<h1><% block_info.frame_name %></h1>
+	<h2><% block_info.full_designation %> <% block_info.name %></h2>
 
 	<table>
 		<tr>
@@ -17,7 +18,7 @@
 			<td><% circuit.name %></td>
 			<td><% circuit.cable_reference %></td>
 			<td></td>
-			<td></td>
+			<td><% circuit.jumpers.join(' ') %></td>
 		</tr>
 		<% END %>
 
