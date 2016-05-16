@@ -131,7 +131,14 @@ sub frame_blocks {
 	my $frame_id = shift;
 	my $verticals = verticals($frame_id);
 	my $q = database->prepare("
-		SELECT * from block
+		SELECT  
+			id,
+			vertical_id,
+			position,
+			designation,
+			name,
+			block_is_free(id) AS is_free
+		FROM block
 		WHERE vertical_id = ?
 		ORDER BY position ASC
 	");

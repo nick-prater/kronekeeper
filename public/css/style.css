@@ -120,6 +120,8 @@ body {
 	border: 1px solid black;
 }
 
+
+
 /* Make link cover entire table cell */
 .frame .block a {
 	display: block;
@@ -127,5 +129,29 @@ body {
 	text-decoration: none;
 	color: black;
 }
+
+.frame td.is_free,
+.frame .block.is_free a {
+	color: grey;
+	font-style: italic;
+	font-size: 70%;
+}
+
+.frame td.unavailable {
+	color: gray;
+	font-style: italic;
+	font-size: 70%;
+	border: none;
+	background: inherit;
+}
+
+
+
+
+
+
+
+
+
 
 
