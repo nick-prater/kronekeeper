@@ -1,0 +1,26 @@
+
+<div class="container block">
+	<h1><% block_info.name %></h1>
+
+	<table>
+		<tr>
+			<th></th>
+			<th>circuit</th>
+			<th>cable</th>
+			<th>connection</th>
+			<th>jumpers</th>
+		</tr>
+
+		<% FOREACH circuit IN block_detail %>
+		<tr>
+			<td><% circuit.designation %></td>
+			<td><% circuit.name %></td>
+			<td><% circuit.cable_reference %></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<% END %>
+
+	</table>
+
+</div>

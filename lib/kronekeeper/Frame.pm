@@ -70,8 +70,19 @@ prefix '/frame' => sub {
 			frame_info   => $frame_info,
 			frame_blocks => frame_blocks($frame_id),
 		});
-	}
+	};
 
+
+	any qr{/\d+(/\d+.*)} => require_login sub {
+		
+		# To keep a nice hierachy, allow access to 'block' routes
+		# responds to routes of the form: /frame/[frame_id]/[block_id]/xxx...
+		# forwards them to /block/[block_id]/xxx...
+		my ($route) = splat;
+		my $target =  "/block" . $route;
+		debug "redirecting to $target";
+		forward $target;
+	};
 
 };
 

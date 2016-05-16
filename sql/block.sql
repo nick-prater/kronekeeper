@@ -57,3 +57,32 @@ END
 $$ LANGUAGE plpgsql;
 
 
+
+/* Show block detail */
+CREATE OR REPLACE VIEW block_detail AS
+SELECT
+	block.id,
+	circuit.id AS circuit_id,
+	circuit.designation,
+	circuit.name,
+	circuit.cable_reference,
+	ARRAY(
+		SELECT DISTINCT CONCAT(vertical2.designation, block2.designation, '.', circuit2.designation)
+		FROM connection AS connection1
+		JOIN pin AS pin1 ON (pin1.id = connection1.pin_id)
+		JOIN circuit AS circuit1 ON (circuit1.id = pin1.circuit_id)
+		JOIN connection AS connection2 ON (
+			connection2.jumper_wire_id = connection1.jumper_wire_id
+			AND connection2.id != connection1.id
+		)
+		JOIN pin AS pin2 ON (pin2.id = connection2.pin_id)
+		JOIN circuit AS circuit2 ON (circuit2.id = pin2.circuit_id)
+		JOIN block AS block2 ON (block2.id = circuit2.block_id)
+		JOIN vertical AS vertical2 ON (vertical2.id = block2.vertical_id)
+		WHERE circuit1.id = circuit.id
+	) AS jumpers
+FROM block
+JOIN circuit ON (circuit.block_id = block.id)
+ORDER BY block_id ASC, block.position ASC, circuit.position ASC;
+
+

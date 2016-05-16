@@ -146,6 +146,23 @@ body {
 }
 
 
+.block table {
+	border-collapse: collapse;
+	background: white;
+}
+
+.block table,
+.block td,
+.block th {
+	border: 1px solid black;
+}
+
+.block td
+
+
+.block td {
+	background: white;
+}
 
 
 
