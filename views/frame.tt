@@ -13,19 +13,21 @@
 		<% WHILE block_position > 0 %>
 		<tr>
 		  <% FOREACH vertical_position IN [1..frame_info.vertical_count] %>
-		  <% SET block = frame_blocks.$vertical_position.blocks.$block_position %>
+		  <% SET vertical = frame_blocks.$vertical_position %>
+		  <% SET block = vertical.blocks.$block_position %>
 		    <% IF block.id  # -- Block exists -- %>
 		      <% SET id = frame_blocks.$vertical_position.blocks.$block_position.id %>
 		      <% SET url = "$frame_info.id/$id" %>
+		      <% SET title = "$vertical.designation$block.designation" %>
 		      <% IF block.is_free  # -- Block position is unused -- %>
 			<td class="block is_free" id="block_<% id %>">
-				<a href="<% url %>">
+				<a href="<% url %>" title="<% title %>">
 					unused
 				</a>
 			</td>
 		      <% ELSE  # -- Block position is in use -- %>
 			<td class="block" id="block_<% id %>"> 
-				<a href="<% url %>">
+				<a href="<% url %>" title="<% title %>">
 					<% frame_blocks.$vertical_position.blocks.$block_position.name || '&nbsp;' %>
 				</a>
 			</td>
