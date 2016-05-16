@@ -13,8 +13,10 @@
 		<% WHILE block_position > 0 %>
 		<tr>
 			<% FOREACH vertical_position IN [1..frame_info.vertical_count] %>
-			<td> 
-				<% frame_blocks.$vertical_position.blocks.$block_position.name %>
+			<td class="block" id="block_<% frame_blocks.$vertical_position.blocks.$block_position.id %>"> 
+				<a href="<% frame_info.id %>/<% frame_blocks.$vertical_position.blocks.$block_position.id %>" >
+					<% frame_blocks.$vertical_position.blocks.$block_position.name || '&nbsp;' %>
+				</a>
 			</td>
 			<% END %>
 		</tr>

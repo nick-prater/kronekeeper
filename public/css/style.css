@@ -120,5 +120,12 @@ body {
 	border: 1px solid black;
 }
 
+/* Make link cover entire table cell */
+.frame .block a {
+	display: block;
+	width: 100%;
+	text-decoration: none;
+	color: black;
+}
 
 
