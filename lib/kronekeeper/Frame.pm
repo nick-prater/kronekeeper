@@ -37,6 +37,7 @@ prefix '/frame' => sub {
 		my $q = database->prepare("
 			SELECT * FROM frame
 			WHERE account_id = ?
+			AND is_deleted IS FALSE
 			ORDER BY name ASC
 		");
 		$q->execute(
@@ -60,8 +61,13 @@ prefix '/frame' => sub {
 			send_error('forbidden' => 403);
 		};
 
+		my $frame_info = frame_info($frame_id);
+		$frame_info && !$frame_info->{is_deleted} or do {
+			send_error('not found' => 404);
+		};
+
 		template('frame', {
-			frame_info   => frame_info($frame_id),
+			frame_info   => $frame_info,
 			frame_blocks => frame_blocks($frame_id),
 		});
 	}
