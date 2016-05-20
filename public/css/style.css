@@ -134,13 +134,13 @@ body {
 .frame .block.is_free a {
 	color: grey;
 	font-style: italic;
-	font-size: 70%;
+	font-size: 6pt;
 }
 
 .frame td.unavailable {
 	color: gray;
 	font-style: italic;
-	font-size: 70%;
+	font-size: 6pt;
 	border: none;
 	background: inherit;
 }
