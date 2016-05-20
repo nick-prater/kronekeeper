@@ -14,8 +14,8 @@
 
 		<% FOREACH circuit IN block_detail %>
 		<tr>
-			<td><% circuit.designation %></td>
-			<td><% circuit.name %></td>
+			<th class="circuit_designation"><% circuit.designation %></th>
+			<td class="circuit_name"><input type="text" value="<% circuit.name %>" /></td>
 			<td><% circuit.cable_reference %></td>
 			<td></td>
 			<td><% circuit.jumpers.join(' ') %></td>
