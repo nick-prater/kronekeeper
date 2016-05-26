@@ -11,7 +11,7 @@
 		<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 		<script type="text/javascript">/* <![CDATA[ */
 			!window.jQuery && document.write(
-				'<script type="text/javascript" src="<% request.uri_base %>/javascripts/jquery.js"><\/script>'
+				'<script type="text/javascript" src="<% request.uri_base %>/js/jquery.js"><\/script>'
 			);
 		/* ]]> */</script>
 
