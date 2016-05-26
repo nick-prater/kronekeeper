@@ -19,6 +19,7 @@
 			<td><% circuit.cable_reference %></td>
 			<td></td>
 			<td><% circuit.jumpers.join(' ') %></td>
+			<td class="circuit_buttons"><a href="javascript:void(0)" title="Add another jumper field to this circuit">+</a></td>
 		</tr>
 		<% END %>
 

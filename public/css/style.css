@@ -148,10 +148,9 @@ body {
 
 .block table {
 	border-collapse: collapse;
-	background: white;
 }
 
-.block table,
+/* .block table, */
 .block td,
 .block th {
 	border: 1px solid black;
@@ -161,6 +160,11 @@ body {
 	background: #aaaaaa;
 }
 
+.block td {
+	background: white;
+}
+
+
 .block input {
 	width: 100%;
 	height: 100%;
@@ -168,6 +172,24 @@ body {
 	padding: 0px;
 }
 
+.block td.circuit_buttons {
+	background: inherit;
+	border: none;
+	padding-left: 1em;
+}
+
+.block .circuit_buttons a {
+	text-decoration: none;
+	color: black;
+	font-size: 80%;
+	border-radius: 3px;
+}
+
+.block .circuit_buttons a:hover {
+        color: white;
+        background: #aaaaaa;
+	border-color: black;
+}
 
 
 
