@@ -22,7 +22,11 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require.config({
+	baseUrl: '/js',
+
 	paths: {
-		jquery: 'jquery-2.2.4.min.js'
+		jquery: 'jquery-2.2.4.min'
 	}
-});	
+});
+
+console.log("loaded main.js");
