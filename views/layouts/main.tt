@@ -6,15 +6,6 @@
 		<title>kronekeeper</title>
 		<link rel="stylesheet" href="<% request.uri_base %>/css/style.css" />
 		<link rel="shortcut icon" href="/favicon.png" />
-
-		<!-- Grab jQuery from a CDN, fall back to local if necessary -->
-		<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-		<script type="text/javascript">/* <![CDATA[ */
-			!window.jQuery && document.write(
-				'<script type="text/javascript" src="<% request.uri_base %>/js/jquery.js"><\/script>'
-			);
-		/* ]]> */</script>
-
 	</head>
 	<body>
 
