@@ -25,7 +25,19 @@ require.config({
 	baseUrl: '/js',
 
 	paths: {
-		jquery: 'jquery-2.2.4.min'
+		jquery: 'jquery-2.2.4.min',
+		underscore: 'underscore-1.8.3.min',
+		backbone: 'backbone-1.3.3.min'
+	},
+
+	shim: {
+		underscore: {
+			exports: '_'
+		},
+		backbone: {
+			deps: ['underscore', 'jquery'],
+			exports: 'Backbone'
+		}
 	}
 });
 
