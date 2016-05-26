@@ -10,8 +10,6 @@ engines:
             session_dir: '/tmp/kronekeeper'
     template:
         template_toolkit:
-            start_tag: '<%'
-            end_tag: '%>'
 
 plugins:
     Database:

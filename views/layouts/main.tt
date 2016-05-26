@@ -4,9 +4,9 @@
 	<head>
 		<meta http-equiv="Content-type" content="text/html; charset=<% settings.charset %>" />
 		<title>kronekeeper</title>
-		<link rel="stylesheet" href="<% request.uri_base %>/css/style.css" />
+		<link rel="stylesheet" href="[% request.uri_base %]/css/style.css" />
 		<link rel="shortcut icon" href="/favicon.png" />
-		<script src="<% request.uri_base %>/js/require-2.2.0.min.js"></script>
+		<script src="[% request.uri_base %]/js/require-2.2.0.min.js"></script>
 	</head>
 	<body>
 
@@ -16,19 +16,19 @@
 					<img src="/images/logo.png" alt="Kronekeeper logo" />
 				</div>
 				<div class="message">
-				<% IF session.logged_in_user %>
-					<% session.user.name %> : <% session.account.name %>
-				<% ELSE %>
+				[% IF session.logged_in_user %]
+					[% session.user.name %] : [% session.account.name %]
+				[% ELSE %]
 					not logged in
-				<% END %>
+				[% END %]
 				</div>
 			</div>
 		</div>
 
-<% content %>
+[% content %]
 
 		<div class="footer">
-			Powered by <a href="http://perldancer.org/">Dancer2</a> <% dancer_version %>
+			Powered by <a href="http://perldancer.org/">Dancer2</a> [% dancer_version %]
 		</div>
 	</body>
 </html>

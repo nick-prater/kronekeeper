@@ -4,18 +4,18 @@
 		<div class="dialog login">
 			<h1>Login</h1>
 
-			<% IF login_error %>
+			[% IF login_error %]
 			<p class="error">
 				The e-mail address or password you entered were not recognised.
                                 Please try again, or contact us for assistance.
 			</p>
-			<% END %>
+			[% END %]
 
 			<form method="post">
 				<input
 					type="hidden"
 					name="return_url"
-					value="<% params.return_url %>"
+					value="[% params.return_url %]"
 				/>
 				<ul>
 					<li>

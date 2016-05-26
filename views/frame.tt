@@ -1,48 +1,48 @@
 
 <div class="container frame">
-	<h1><% frame_info.name %></h1>
+	<h1>[% frame_info.name %]</h1>
 
 	<table>
 
 		<tr>
-			<% FOREACH vertical_position IN [1..frame_info.vertical_count] %>
-			<th><% frame_blocks.$vertical_position.designation %></th>
-			<% END %>
+			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
+			<th>[% frame_blocks.$vertical_position.designation %]</th>
+			[% END %]
 		</tr>
-		<% block_position = frame_info.block_count %>
-		<% WHILE block_position > 0 %>
+		[% block_position = frame_info.block_count %]
+		[% WHILE block_position > 0 %]
 		<tr>
-		  <% FOREACH vertical_position IN [1..frame_info.vertical_count] %>
-		  <% SET vertical = frame_blocks.$vertical_position %>
-		  <% SET block = vertical.blocks.$block_position %>
-		    <% IF block.id  # -- Block exists -- %>
-		      <% SET id = frame_blocks.$vertical_position.blocks.$block_position.id %>
-		      <% SET url = "$frame_info.id/$id" %>
-		      <% SET title = "$vertical.designation$block.designation" %>
-		      <% IF block.is_free  # -- Block position is unused -- %>
-			<td class="block is_free" id="block_<% id %>">
-				<a href="<% url %>" title="<% title %>">
+		  [% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
+		  [% SET vertical = frame_blocks.$vertical_position %]
+		  [% SET block = vertical.blocks.$block_position %]
+		    [% IF block.id  # -- Block exists -- %]
+		      [% SET id = frame_blocks.$vertical_position.blocks.$block_position.id %]
+		      [% SET url = "$frame_info.id/$id" %]
+		      [% SET title = "$vertical.designation$block.designation" %]
+		      [% IF block.is_free  # -- Block position is unused -- %]
+			<td class="block is_free" id="block_[% id %]">
+				<a href="[% url %]" title="[% title %]">
 					unused
 				</a>
 			</td>
-		      <% ELSE  # -- Block position is in use -- %>
-			<td class="block" id="block_<% id %>"> 
-				<a href="<% url %>" title="<% title %>">
-					<% frame_blocks.$vertical_position.blocks.$block_position.name || '&nbsp;' %>
+		      [% ELSE  # -- Block position is in use -- %]
+			<td class="block" id="block_[% id %]"> 
+				<a href="[% url %]" title="[% title %]">
+					[% frame_blocks.$vertical_position.blocks.$block_position.name || '&nbsp;' %]
 				</a>
 			</td>
-		      <% END %>
-		    <% ELSE %>
+		      [% END %]
+		    [% ELSE %]
 			<td class="block unavailable">unavailable</td>
-		    <% END %>
-		  <% END %>
+		    [% END %]
+		  [% END %]
 		</tr>
-		<%   block_position = block_position - 1 %>
-		<% END %>
+		[%   block_position = block_position - 1 %]
+		[% END %]
 		<tr>
-			<% FOREACH vertical_position IN [1..frame_info.vertical_count] %>
-			<th><% frame_blocks.$vertical_position.designation %></th>
-			<% END %>
+			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
+			<th>[% frame_blocks.$vertical_position.designation %]</th>
+			[% END %]
 		</tr>
 
 	</table>

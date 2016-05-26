@@ -1,7 +1,7 @@
 
 <div class="container block">
-	<h1><% block_info.frame_name %></h1>
-	<h2><% block_info.full_designation %> <% block_info.name %></h2>
+	<h1>[% block_info.frame_name %]</h1>
+	<h2>[% block_info.full_designation %] [% block_info.name %]</h2>
 
 	<table>
 		<tr>
@@ -12,16 +12,16 @@
 			<th>jumpers</th>
 		</tr>
 
-		<% FOREACH circuit IN block_detail %>
+		[% FOREACH circuit IN block_detail %]
 		<tr>
-			<th class="circuit_designation"><% circuit.designation %></th>
-			<td class="circuit_name"><input type="text" value="<% circuit.name %>" /></td>
-			<td><% circuit.cable_reference %></td>
+			<th class="circuit_designation">[% circuit.designation %]</th>
+			<td class="circuit_name"><input type="text" value="[% circuit.name %]" /></td>
+			<td>[% circuit.cable_reference %]</td>
 			<td></td>
-			<td><% circuit.jumpers.join(' ') %></td>
+			<td>[% circuit.jumpers.join(' ') %]</td>
 			<td class="circuit_buttons"><a href="javascript:void(0)" title="Add another jumper field to this circuit">+</a></td>
 		</tr>
-		<% END %>
+		[% END %]
 
 	</table>
 

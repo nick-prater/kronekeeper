@@ -4,11 +4,11 @@
 
 			<table>
 
-				<% FOREACH frame IN frames %>
+				[% FOREACH frame IN frames %]
 				<tr>
-					<td><a href="<% frame.id %>"><% frame.name %></a></td>
+					<td><a href="[% frame.id %]">[% frame.name %]</a></td>
 				</tr>
-				<% END %>
+				[% END %]
 			</table>
 
 </div>
