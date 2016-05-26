@@ -6,6 +6,7 @@
 		<title>kronekeeper</title>
 		<link rel="stylesheet" href="<% request.uri_base %>/css/style.css" />
 		<link rel="shortcut icon" href="/favicon.png" />
+		<script data-main="<% request.uri_base %>/js/main" src="<% request.uri_base %>/js/require-2.2.0.min.js"></script>
 	</head>
 	<body>
 
