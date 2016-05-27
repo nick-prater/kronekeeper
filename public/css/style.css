@@ -164,6 +164,11 @@ body {
 	background: white;
 }
 
+.block caption {
+	text-align: left;
+	font-weight: bold;
+	font-size: 120%;
+}
 
 .block input {
 	width: 100%;

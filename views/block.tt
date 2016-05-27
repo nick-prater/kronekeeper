@@ -1,9 +1,11 @@
 
 <div class="container block">
 	<h1>[% block_info.frame_name %]</h1>
-	<h2>[% block_info.full_designation %] [% block_info.name %]</h2>
+
+
 
 	<table>
+		<caption>[% block_info.full_designation %]&emsp;[% block_info.name %]</caption>
 		<thead>
 			<tr>
 				<th></th>
