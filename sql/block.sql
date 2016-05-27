@@ -70,10 +70,10 @@ JOIN frame ON (frame.id = vertical.frame_id);
 
 
 
-/* Show block detail */
-CREATE OR REPLACE VIEW block_detail AS
+/* Show block circuits */
+CREATE OR REPLACE VIEW block_circuits AS
 SELECT
-	block.id,
+	block.id AS block_id,
 	circuit.id AS circuit_id,
 	circuit.designation,
 	circuit.name,

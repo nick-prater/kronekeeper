@@ -46,13 +46,36 @@ prefix '/block' => sub {
 		};
 
 		template('block', {
-			block_detail => block_detail($id),
+			block_detail => [],
 			block_info   => block_info($id),
 		});
 	};
 
 };
 
+
+
+prefix '/api/block' => sub {
+
+	get '/:block_id' => require_login sub {
+
+		my $id = param('block_id');
+
+		$id && $id =~ m/^\d+$/ or do {
+			send_error('invalid block_id parameter', 400);
+		};
+		block_id_valid_for_account($id) or do {
+			send_error('forbidden' => 403);
+		};
+
+		content_type 'application/json';
+		return to_json {
+			block_detail => block_circuits($id),
+			block_info   => block_info($id),
+		};
+	};
+
+};
 
 
 sub block_id_valid_for_account {
@@ -99,12 +122,12 @@ sub block_info {
 };
 
 
-sub block_detail {
+sub block_circuits {
 	my $block_id = shift;
 	my $q = database->prepare("
 		SELECT *
-		FROM block_detail
-		WHERE id=?
+		FROM block_circuits
+		WHERE block_id=?
 	");
 	$q->execute($block_id);
 	return $q->fetchall_arrayref({});
