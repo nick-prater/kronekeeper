@@ -67,6 +67,10 @@ require([
 		tagName: 'tr',
 		className: 'circuit',
 
+		events: {
+			'click a.add_jumper' : 'add_jumper'
+		},
+
 		initialize: function() {
 			// Event listeners to follow here
 		},
@@ -78,6 +82,11 @@ require([
 			json.jumper_text = json.jumpers.join('; ');
 			this.$el.html(this.template(json));
 			return this;
+		},
+
+		add_jumper: function() {
+			console.log("Add jumper");
+
 		}
 	});
 

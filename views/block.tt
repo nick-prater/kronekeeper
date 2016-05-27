@@ -30,7 +30,7 @@
 				<td><%- cable_reference %></td>
 				<td>--</td>
 				<td><%- jumper_text %></td>
-				<td class="circuit_buttons"><a href="javascript:void(0)" title="Add another jumper field to this circuit">+</a></td>
+				<td class="circuit_buttons"><a class="add_jumper" href="javascript:void(0)" title="Add another jumper field to this circuit">+</a></td>
 </script>
 
 
