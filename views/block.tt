@@ -39,7 +39,7 @@
 	var block_id = [% block_id %];
 </script>
 
-<script type="text/javascript" src="/js/main.js"></script>
-<script type="text/javascript" src="/js/block.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/block.js"></script>
 
 

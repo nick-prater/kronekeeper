@@ -13,7 +13,7 @@
 		<div class="masthead">
 			<div>
 				<div class="masthead_logo">
-					<img src="/images/logo.png" alt="Kronekeeper logo" />
+					<img src="[% request.uri_base %]/images/logo.png" alt="Kronekeeper logo" />
 				</div>
 				<div class="message">
 				[% IF session.logged_in_user %]
