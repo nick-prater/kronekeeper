@@ -33,6 +33,7 @@ require([
 	var Circuit_Model = Backbone.Model.extend({
 
 		idAttribute: 'circuit_id',
+		urlRoot: '/api/circuit',
 
 		defaults: {
 			block_id: null,
@@ -42,6 +43,7 @@ require([
 			cable_reference: null,
 			jumpers: []
 		}
+
 	});
 
 
@@ -92,8 +94,15 @@ require([
 
 		circuit_name_change: function(e) {
 			console.log("Circuit name change");
-			this.model.set({name: e.target.value});
-			this.model.save();
+			this.model.save({name: e.target.value}, {
+				patch: true,
+				success: function(model, response, options) {
+					console.log("circuit data saved");
+				},
+				error: function(model, xhr, options) {
+					console.log("ERROR saving circuit data");
+				}
+			});
 		}
 
 	});
@@ -104,13 +113,13 @@ require([
 		el: '#block_table_body',
 
 		initialize: function() {
-			this.listenTo(this.collection, 'sync', this.render);
-			this.collection.fetch();
+			this.listenTo(this.collection, 'reset', this.render);
 		},
 
 		render: function() {
-
+			console.log("rendering Block_View");
 			this.collection.each(function(model) {
+				//console.log(model);
 				var row = new Circuit_View({model: model});
 				$('#block_table_body').append(row.render().$el);
 
@@ -124,6 +133,16 @@ require([
 
 	var circuit_list = new Circuits_Collection({block_id: window.block_id});
 	var view = new Block_View({collection: circuit_list});
+
+	circuit_list.fetch({
+		reset: true,
+		success: function(collection, response, options) {
+			console.log("fetched circuit list OK");
+		},
+		error: function(collection, response, options) {
+			console.log("ERROR: failed to fetch circuit list");
+		}
+	});
 
 	console.log("loaded block.js");
 
