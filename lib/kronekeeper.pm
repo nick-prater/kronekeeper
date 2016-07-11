@@ -111,6 +111,12 @@ prefix '/' => sub {
 		redirect('/login');
 	};
 
+
+	any '/denied' => sub {
+
+		send_error('forbidden' => 403);
+	};
+
 };
 
 

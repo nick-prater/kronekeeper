@@ -10,6 +10,9 @@ engines:
             session_dir: '/tmp/kronekeeper'
     template:
         template_toolkit:
+    serializer:
+        JSON:
+            pretty: 1
 
 plugins:
     Database:
@@ -34,4 +37,4 @@ plugins:
         no_login_handler: 1
         exit_page: '/login'
         user_home_page: '/frame/'
-
+        denied_page: '/denied'
