@@ -57,7 +57,11 @@ CREATE TABLE activity_log(
 	account_id INTEGER REFERENCES account(id),
 	frame_id INTEGER REFERENCES frame(id),
 	function TEXT,
-	note TEXT
+	note TEXT,
+	block_id_A INTEGER REFERENCES block(id),
+	block_id_B INTEGER REFERENCES block(id),
+	circuit_id_A INTEGER REFERENCES circuit(id),
+	circuit_id_B INTEGER REFERENCES circuit(id)
 );
 
 

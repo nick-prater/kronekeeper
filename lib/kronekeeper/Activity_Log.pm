@@ -28,6 +28,7 @@ use strict;
 use warnings;
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
+use Dancer2::Plugin::Auth::Extensible;
 use Moo;
 
 
@@ -35,8 +36,11 @@ sub record {
 
 	my $self = shift;
 	my $args = shift;
+	my $user = logged_in_user;
 
 	defined $args->{note} or die "notes argument missing";
+	exists $args->{account_id} or $args->{account_id} = $user->{account_id};
+	exists $args->{person_id}  or $args->{person_id}  = $user->{id};
 
 	my $q = database->prepare(
 		"INSERT INTO activity_log (
@@ -44,8 +48,12 @@ sub record {
 			function,
 			account_id,
 			frame_id,
-			note
-		) VALUES (?,?,?,?,?)"
+			note,
+			block_id_a,
+			block_id_b,
+			circuit_id_a,
+			circuit_id_b
+		) VALUES (?,?,?,?,?,?,?,?,?)"
 	);
 
 	$q->execute(
@@ -54,6 +62,10 @@ sub record {
 		$args->{account_id},
 		$args->{frame_id},
 		$args->{note},
+		$args->{block_id_a},
+		$args->{block_id_b},
+		$args->{circuit_id_a},
+		$args->{circuit_id_b},
 	);
 	database->commit;
 		
