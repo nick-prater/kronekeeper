@@ -68,7 +68,8 @@ require([
 		className: 'circuit',
 
 		events: {
-			'click a.add_jumper' : 'add_jumper'
+			'click a.add_jumper' : 'add_jumper',
+			'change input.circuit_name' : 'circuit_name_change'
 		},
 
 		initialize: function() {
@@ -84,10 +85,17 @@ require([
 			return this;
 		},
 
-		add_jumper: function() {
+		add_jumper: function(e) {
 			console.log("Add jumper");
+			console.log(e);
+		},
 
+		circuit_name_change: function(e) {
+			console.log("Circuit name change");
+			this.model.set({name: e.target.value});
+			this.model.save();
 		}
+
 	});
 
 

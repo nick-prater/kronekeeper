@@ -29,6 +29,7 @@ use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
 use kronekeeper::Frame;
 use kronekeeper::Block;
+use kronekeeper::Circuit;
 use kronekeeper::User;
 use kronekeeper::Activity_Log;
 

@@ -75,6 +75,17 @@ prefix '/api/block' => sub {
 		};
 	};
 
+	any qr{/\d+(/\d+.*)} => require_login sub {
+		
+		# To keep a nice hierachy, allow access to 'circuit' routes
+		# responds to routes of the form: /api/block/[block_id]/[circuit_id]/xxx...
+		# forwards them to /api/circuit/[circuit_id]/xxx...
+		my ($route) = splat;
+		my $target =  "/api/circuit" . $route;
+		debug "redirecting to $target";
+		forward $target;
+	};
+
 };
 
 
