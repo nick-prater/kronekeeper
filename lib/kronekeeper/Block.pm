@@ -91,10 +91,10 @@ prefix '/api/block' => sub {
 
 sub block_id_valid_for_account {
 
-	my $frame_id = shift;
+	my $block_id = shift;
 	my $account_id = shift || session('account')->{id};
 
-	$frame_id =~ m/^\d+$/ or do {
+	$block_id =~ m/^\d+$/ or do {
 		error "block_id is not an integer";
 		return undef;
 	};
@@ -113,7 +113,7 @@ sub block_id_valid_for_account {
 	");
 
 	$q->execute(
-		$frame_id,
+		$block_id,
 		$account_id,
 	);
 
