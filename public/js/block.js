@@ -109,7 +109,7 @@ require([
 
 		reset_on_escape_key(e, attribute_name) {
 			if(e.keyCode == 27) {
-				e.target.value = this.model.attributes[attribute_name];
+				e.target.value = this.model.get(attribute_name);
 				e.target.parentNode.classList.remove('change_pending');
 			}
 		},
@@ -124,7 +124,7 @@ require([
 		},
 
 		highlight_change: function(e, attribute_name) {
-			if(e.target.value != this.model.attributes[attribute_name]) {
+			if(e.target.value != this.model.get(attribute_name)) {
 				e.target.parentNode.classList.add('change_pending');
 			}
 			else {
