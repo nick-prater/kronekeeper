@@ -178,12 +178,24 @@ body {
 	font-size: 120%;
 }
 
-.block input {
+.block tbody input {
 	width: 100%;
 	height: 100%;
 	border: none;
 	padding: 0px;
 	background: transparent;
+}
+
+.block caption input {
+	font-size: 120%;
+	color: black;
+	font-weight: bold;
+	background: transparent;
+	border: none;
+}
+
+.block caption input.editing {
+	border: 1px solid gray;
 }
 
 .block td.change_pending {

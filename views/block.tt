@@ -3,7 +3,11 @@
 	<h1><a href="[% request.uri_base %]/frame/[% block_info.frame_id %]" title="frame view">[% block_info.frame_name %]</a></h1>
 
 	<table>
-		<caption>[% block_info.full_designation %]&emsp;[% block_info.name %]</caption>
+		<caption>
+			[% block_info.full_designation %]
+			:
+			<input type="text" value="[% block_info.name %]" />
+		</caption>
 		<thead>
 			<tr>
 				<th></th>
