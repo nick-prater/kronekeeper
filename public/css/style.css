@@ -177,6 +177,11 @@ body {
 	padding: 0px;
 }
 
+.block td.change_pending,
+.block .change_pending input {
+	background: #ffdede;
+}
+
 .block td.circuit_buttons {
 	background: inherit;
 	border: none;

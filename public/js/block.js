@@ -71,7 +71,8 @@ require([
 
 		events: {
 			'click a.add_jumper' : 'add_jumper',
-			'change input.circuit_name' : 'circuit_name_change'
+			'input .circuit_name input' : 'circuit_name_input',
+			'change .circuit_name input' : 'circuit_name_change'
 		},
 
 		initialize: function() {
@@ -90,6 +91,11 @@ require([
 		add_jumper: function(e) {
 			console.log("Add jumper");
 			console.log(e);
+		},
+
+		circuit_name_input: function(e) {
+			console.log("Circuit name input");
+			e.target.parentNode.classList.add('change_pending');
 		},
 
 		circuit_name_change: function(e) {
