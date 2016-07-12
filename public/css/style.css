@@ -173,12 +173,12 @@ body {
 .block input {
 	width: 100%;
 	height: 100%;
-	border: 0px;
+	border: none;
 	padding: 0px;
+	background: transparent;
 }
 
-.block td.change_pending,
-.block .change_pending input {
+.block td.change_pending {
 	background: #ffdede;
 }
 

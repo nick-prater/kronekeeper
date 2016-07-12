@@ -22,7 +22,8 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 require([
 	'backbone',
-        'jquery'
+        'jquery',
+	'jqueryui'
 ], function (
 
 ) {
@@ -117,15 +118,10 @@ require([
 
 		model_synced: function(model, response, options) {
 			if('name' in response) {
+				/* Clear highlighting and flash green to indicate successful save */
 				this.$el.find("td").removeClass('change_pending');
-				console.log("name synced");
+				this.$el.find("td.circuit_name").effect("highlight", {color: "#deffde"}, 500);
 			};
-
-			console.log("synced");
-			console.log(model);
-			console.log(response);
-			console.log(options);
-
 		}
 
 	});
