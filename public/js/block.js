@@ -51,7 +51,6 @@ require([
 	var Circuits_Collection = Backbone.Collection.extend({
 
 		model: Circuit_Model,
-		jumper_count: 2,   // initial template provides 2 cells
 		url: function() {
 			return '/api/block/' + this.block_id;
 		},
@@ -71,12 +70,6 @@ require([
 			 * provided, but delegates their creation to views
 			 * which listen to the provision_jumper_fields event.
 			 */
-			console.log("provisioning ", required_count, " jumper fields");
-			console.log("currently have: ", this.jumper_count);
-			if(this.jumper_count < required_count) {
-				this.jumper_count = required_count;
-				
-			}
 			this.trigger("provision_jumper_fields", this.jumper_count);
 		}
 	});
@@ -126,7 +119,10 @@ require([
 			if(inactive_cell_count < 1) {
 				/* Need to provision another column */
 				var jumper_cell_count = this.$el.find("td.jumper").size();
-				this.model.collection.provision_jumper_fields(jumper_cell_count + 1);
+				this.model.collection.trigger(
+					"provision_jumper_fields",
+					jumper_cell_count + 1
+				);
 			}
 
 			/* Activate an inactive cell */
