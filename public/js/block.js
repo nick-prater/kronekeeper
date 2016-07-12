@@ -74,8 +74,10 @@ require([
 			'click a.add_jumper' : 'add_jumper',
 			'input .circuit_name input' : 'circuit_name_input',
 			'change .circuit_name input' : 'circuit_name_change',
+			'keypress .circuit_name input' : 'circuit_name_keypress',
 			'input .cable_reference input' : 'cable_reference_input',
-			'change .cable_reference input' : 'cable_reference_change'
+			'change .cable_reference input' : 'cable_reference_change',
+			'keypress .cable_reference input' : 'cable_reference_keypress',
 		},
 
 		initialize: function() {
@@ -94,6 +96,22 @@ require([
 		add_jumper: function(e) {
 			console.log("Add jumper");
 			console.log(e);
+		},
+
+
+		circuit_name_keypress: function(e) {
+			this.reset_on_escape_key(e, 'name');
+		},
+
+		cable_reference_keypress: function(e) {
+			this.reset_on_escape_key(e, 'cable_reference');
+		},
+
+		reset_on_escape_key(e, attribute_name) {
+			if(e.keyCode == 27) {
+				e.target.value = this.model.attributes[attribute_name];
+				e.target.parentNode.classList.remove('change_pending');
+			}
 		},
 
 
