@@ -76,7 +76,7 @@ require([
 		},
 
 		initialize: function() {
-			// Event listeners to follow here
+			this.listenTo(this.model, 'sync', this.model_synced);
 		},
 
 		template: _.template( $('#row_template').html() ),
@@ -94,8 +94,12 @@ require([
 		},
 
 		circuit_name_input: function(e) {
-			console.log("Circuit name input");
-			e.target.parentNode.classList.add('change_pending');
+			if(e.target.value != this.model.attributes.name) {
+				e.target.parentNode.classList.add('change_pending');
+			}
+			else {
+				e.target.parentNode.classList.remove('change_pending');
+			}
 		},
 
 		circuit_name_change: function(e) {
@@ -109,6 +113,19 @@ require([
 					console.log("ERROR saving circuit data");
 				}
 			});
+		},
+
+		model_synced: function(model, response, options) {
+			if('name' in response) {
+				this.$el.find("td").removeClass('change_pending');
+				console.log("name synced");
+			};
+
+			console.log("synced");
+			console.log(model);
+			console.log(response);
+			console.log(options);
+
 		}
 
 	});

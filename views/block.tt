@@ -26,7 +26,7 @@
 <!-- Templates for dynamic content -->
 <script type="text/template" id="row_template">
 				<th class="circuit_designation"><%- designation %></th>
-				<td class="circuit_name"><input type="text" class="ccircuit_name" value="<%- name %>" /></td>
+				<td class="circuit_name"><input type="text" value="<%- name %>" /></td>
 				<td><%- cable_reference %></td>
 				<td>--</td>
 				<td><%- jumper_text %></td>

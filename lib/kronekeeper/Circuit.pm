@@ -60,6 +60,7 @@ prefix '/api/circuit' => sub {
 
 		debug request->body;
 		my $data = from_json(request->body);
+		my $changes = {};
 		my $circuit_info = circuit_info($id);
 
 		# We're supplied with a list of changed fields
@@ -72,6 +73,7 @@ prefix '/api/circuit' => sub {
 			given($field) {
 				when('name') {
 					update_name($circuit_info, $data->{name});
+					$changes->{name} = $data->{name};
 				};
 				default {
 					error "failed to update unrecognised circuit field '$field'";
@@ -82,9 +84,7 @@ prefix '/api/circuit' => sub {
 		database->commit;
 
 		content_type 'application/json';
-		return to_json {
-			success => 1
-		}
+		return to_json $changes;
 	};
 
 };
