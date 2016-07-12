@@ -14,7 +14,7 @@
 				<th>circuit</th>
 				<th>cable</th>
 				<th>connection</th>
-				<th>jumpers</th>
+				<th colspan="2" id="jumper_heading">jumpers</th>
 			</tr>
 		</thead>
 		<tbody id="block_table_body">
@@ -31,8 +31,17 @@
 				<td class="circuit_name"><input type="text" value="<%- name %>" /></td>
 				<td class="cable_reference"><input type="text" value="<%- cable_reference %>" /></td>
 				<td class="connection"><input type="text" value="--" /></td>
-				<td><%- jumper_text %></td>
+				<td class="jumper"><%- jumper_text %></td>
+				<td class="jumper"></td>
 				<td class="circuit_buttons"><a class="add_jumper" href="javascript:void(0)" title="Add another jumper field to this circuit">+</a></td>
+</script>
+
+<script type="text/template" id="inactive_jumper_cell_template">
+<td class="jumper inactive"></td>
+</script>
+
+<script type="text/template" id="active_jumper_cell_template">
+<td class="jumper"></td>
 </script>
 
 

@@ -51,6 +51,7 @@ require([
 	var Circuits_Collection = Backbone.Collection.extend({
 
 		model: Circuit_Model,
+		jumper_count: 2,   // initial template provides 2 cells
 		url: function() {
 			return '/api/block/' + this.block_id;
 		},
@@ -61,6 +62,22 @@ require([
 
 		parse: function(data) {
 			return data.circuits;
+		},
+
+		provision_jumper_fields: function(required_count) {
+			/* This routine will ensure at least the specified
+			 * number of jumper field cells are available. This
+			 * collection keeps track of how many should be
+			 * provided, but delegates their creation to views
+			 * which listen to the provision_jumper_fields event.
+			 */
+			console.log("provisioning ", required_count, " jumper fields");
+			console.log("currently have: ", this.jumper_count);
+			if(this.jumper_count < required_count) {
+				this.jumper_count = required_count;
+				
+			}
+			this.trigger("provision_jumper_fields", this.jumper_count);
 		}
 	});
 
@@ -81,7 +98,16 @@ require([
 		},
 
 		initialize: function() {
-			this.listenTo(this.model, 'sync', this.model_synced);
+			this.listenTo(
+				this.model,
+				'sync',
+				this.model_synced
+			);
+			this.listenTo(
+				this.model.collection,
+				"provision_jumper_fields",
+				this.provision_jumper_fields
+			);
 		},
 
 		template: _.template( $('#row_template').html() ),
@@ -94,8 +120,18 @@ require([
 		},
 
 		add_jumper: function(e) {
-			console.log("Add jumper");
-			console.log(e);
+
+			var inactive_cell_count = this.$el.find("td.jumper.inactive").size();
+
+			if(inactive_cell_count < 1) {
+				/* Need to provision another column */
+				var jumper_cell_count = this.$el.find("td.jumper").size();
+				this.model.collection.provision_jumper_fields(jumper_cell_count + 1);
+			}
+
+			/* Activate an inactive cell */
+			var template = $('#active_jumper_cell_template').html();
+			this.$el.find("td.jumper.inactive").first().replaceWith(template);
 		},
 
 
@@ -164,7 +200,19 @@ require([
 				this.$el.find("td.cable_reference").removeClass('change_pending');
 				this.$el.find("td.cable_reference").effect("highlight", {color: "#deffde"}, 500);
 			};
+		},
 
+		provision_jumper_fields: function(required_count) {
+
+			var jumper_cell_count = this.$el.find("td.jumper").size();
+			var td_buttons = this.$el.find("td.circuit_buttons").first();
+			var template = $('#inactive_jumper_cell_template').html();
+
+			while(jumper_cell_count < required_count) {
+				/* Insert new cell in row before the buttons */
+				td_buttons.before(template);
+				jumper_cell_count ++;
+			}
 		}
 
 	});
@@ -175,7 +223,16 @@ require([
 		el: '#block_table_body',
 
 		initialize: function() {
-			this.listenTo(this.collection, 'reset', this.render);
+			this.listenTo(
+				this.collection,
+				'reset',
+				this.render
+			);
+			this.listenTo(
+				this.collection,
+				'provision_jumper_fields',
+				this.set_jumper_columns
+			);
 		},
 
 		render: function() {
@@ -188,6 +245,10 @@ require([
 			}, this);
 
 			return this;
+		},
+
+		set_jumper_columns: function(column_count) {
+			$('#jumper_heading').attr('colspan', column_count);
 		}
 	});
 

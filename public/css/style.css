@@ -172,6 +172,14 @@ body {
 	width: 5em;
 }
 
+.block td.jumper {
+	width: 4em;
+}
+
+.block td.jumper.inactive {
+	background: #aaaaaa;
+}
+
 .block caption {
 	text-align: left;
 	font-weight: bold;
