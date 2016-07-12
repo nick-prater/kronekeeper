@@ -73,7 +73,9 @@ require([
 		events: {
 			'click a.add_jumper' : 'add_jumper',
 			'input .circuit_name input' : 'circuit_name_input',
-			'change .circuit_name input' : 'circuit_name_change'
+			'change .circuit_name input' : 'circuit_name_change',
+			'input .cable_reference input' : 'cable_reference_input',
+			'change .cable_reference input' : 'cable_reference_change'
 		},
 
 		initialize: function() {
@@ -94,8 +96,17 @@ require([
 			console.log(e);
 		},
 
+
 		circuit_name_input: function(e) {
-			if(e.target.value != this.model.attributes.name) {
+			this.highlight_change(e, 'name');
+		},
+
+		cable_reference_input: function(e) {
+			this.highlight_change(e, 'cable_reference');
+		},
+
+		highlight_change: function(e, attribute_name) {
+			if(e.target.value != this.model.attributes[attribute_name]) {
 				e.target.parentNode.classList.add('change_pending');
 			}
 			else {
@@ -103,9 +114,17 @@ require([
 			}
 		},
 
+
 		circuit_name_change: function(e) {
-			console.log("Circuit name change");
-			this.model.save({name: e.target.value}, {
+			this.save_data({name: e.target.value});
+		},
+
+		cable_reference_change: function(e) {
+			this.save_data({cable_reference: e.target.value});
+		},
+
+		save_data: function(data) {
+			this.model.save(data, {
 				patch: true,
 				success: function(model, response, options) {
 					console.log("circuit data saved");
@@ -116,12 +135,18 @@ require([
 			});
 		},
 
+
 		model_synced: function(model, response, options) {
+			/* Clear field highlighting and flash green to indicate successful save */
 			if('name' in response) {
-				/* Clear highlighting and flash green to indicate successful save */
-				this.$el.find("td").removeClass('change_pending');
+				this.$el.find("td.circuit_name").removeClass('change_pending');
 				this.$el.find("td.circuit_name").effect("highlight", {color: "#deffde"}, 500);
 			};
+			if('cable_reference' in response) {
+				this.$el.find("td.cable_reference").removeClass('change_pending');
+				this.$el.find("td.cable_reference").effect("highlight", {color: "#deffde"}, 500);
+			};
+
 		}
 
 	});

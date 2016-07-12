@@ -70,11 +70,17 @@ prefix '/api/circuit' => sub {
 		# at a time, as updates are triggered by change
 		# events on each field in the user interface.
 		foreach my $field(keys %{$data}) {
+			my $value = $data->{$field};
 			given($field) {
 				when('name') {
-					update_name($circuit_info, $data->{name});
-					$changes->{name} = $data->{name};
+					update_name($circuit_info, $value);
+					$changes->{name} = $value;
 				};
+				when('cable_reference') {
+					update_cable_reference($circuit_info, $value);
+					$changes->{cable_reference} = $value;
+				};
+
 				default {
 					error "failed to update unrecognised circuit field '$field'";
 				};					
@@ -158,11 +164,48 @@ sub update_name {
 		'circuit %s renamed "%s" (was "%s")',
 		$info->{full_designation},
 		$name,
-		$info->{name},
+		$info->{name} || '',
 	);
 
 	$al->record({
 		function     => 'kronekeeper::Circuit::update_name',
+		frame_id     => $info->{frame_id},
+		block_id_a   => $info->{block_id},
+		circuit_id_a => $info->{id},
+		note         => $note,
+	});
+}
+
+
+sub update_cable_reference {
+
+	my $info = shift;
+	my $value = shift;
+
+	# Rename circuit
+	my $q = database->prepare("
+		UPDATE circuit SET cable_reference = ?
+		WHERE id = ?
+	");
+
+	$q->execute(
+		$value,
+		$info->{id},
+	) or do {
+		database->rollback;
+		send_error('error updating circuit' => 500);
+	};
+
+	#Update Activity Log
+	my $note = sprintf(
+		'circuit %s cable reference changed to "%s" (was "%s")',
+		$info->{full_designation},
+		$value,
+		$info->{cable_reference} || '',
+	);
+
+	$al->record({
+		function     => 'kronekeeper::Circuit::update_cable_reference',
 		frame_id     => $info->{frame_id},
 		block_id_a   => $info->{block_id},
 		circuit_id_a => $info->{id},

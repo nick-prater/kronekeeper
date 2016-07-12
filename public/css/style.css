@@ -164,6 +164,14 @@ body {
 	background: white;
 }
 
+.block td.cable_reference {
+	width: 5em;
+}
+
+.block td.connection {
+	width: 5em;
+}
+
 .block caption {
 	text-align: left;
 	font-weight: bold;
