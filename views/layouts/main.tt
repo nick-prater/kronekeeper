@@ -4,6 +4,7 @@
 	<head>
 		<meta http-equiv="Content-type" content="text/html; charset=<% settings.charset %>" />
 		<title>kronekeeper</title>
+		<link rel="stylesheet" href="[% request.uri_base %]/css/jquery-ui.min.css" />
 		<link rel="stylesheet" href="[% request.uri_base %]/css/style.css" />
 		<link rel="shortcut icon" href="/favicon.png" />
 		<script src="[% request.uri_base %]/js/require-2.2.0.min.js"></script>

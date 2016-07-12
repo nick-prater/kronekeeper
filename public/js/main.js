@@ -26,6 +26,7 @@ require.config({
 
 	paths: {
 		jquery: 'jquery-2.2.4.min',
+		jqueryui: 'jquery-ui-1.12.0.min',
 		underscore: 'underscore-1.8.3.min',
 		backbone: 'backbone-1.3.3.min'
 	},
@@ -37,6 +38,9 @@ require.config({
 		backbone: {
 			deps: ['underscore', 'jquery'],
 			exports: 'Backbone'
+		},
+		jqueryui: {
+			deps: ['jquery']
 		}
 	}
 });
