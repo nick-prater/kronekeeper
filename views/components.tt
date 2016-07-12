@@ -1,0 +1,30 @@
+
+
+<h1>Components included as part of Kronekeeper</h1>
+
+<h2>Javascript Libraries</h2>
+<dl>
+
+	<dt><a href="http://requirejs.org/">Require.js</a></dt>
+	<dd><a href="https://github.com/requirejs/requirejs">Github Source Code Repository</a> <a href="https://github.com/requirejs/requirejs">MIT Licence</a></dd>
+
+	<dt><a href="http://backbonejs.org/">Backbone.js</a></dt>
+	<dd><a href="http://github.com/jashkenas/backbone">Github Source Code Repository</a> <a href="https://github.com/jashkenas/backbone/blob/master/LICENSE">MIT Licence</a></dd>
+
+	<dt><a href="http://jquery.com/">JQuery</a></dt>
+	<dd><a href="https://github.com/jquery/jquery">Github Source Code Repository</a> <a href="https://jquery.org/license/">MIT Licence</a></dd>
+
+	<dt><a href="http://jqueryui.com/">JQuery UI</a></dt>
+	<dd><a href="https://github.com/jquery/jqueryui.com">Github Source Code Repository</a> <a href="https://jquery.org/license/">MIT Licence</a></dd>
+
+	<dt><a href="http://underscorejs.org/">Underscore.js</a></dt>
+	<dd><a href="https://github.com/jashkenas/underscore">Github Source Code Repository</a> <a href="https://github.com/jashkenas/underscore/blob/master/LICENSE">MIT Licence</a></dd>
+
+
+</dl>
+
+
+
+
+
+
