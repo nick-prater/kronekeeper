@@ -138,11 +138,11 @@ require([
 
 		add_jumper: function(e) {
 
-			var inactive_cell_count = this.$el.find("td.jumper.inactive").size();
+			var inactive_cell_count = this.$el.children("td.jumper.inactive").size();
 
 			if(inactive_cell_count < 1) {
 				/* Need to provision another column */
-				var jumper_cell_count = this.$el.find("td.jumper").size();
+				var jumper_cell_count = this.$el.children("td.jumper").size();
 				this.model.collection.trigger(
 					"provision_jumper_fields",
 					jumper_cell_count + 1
@@ -151,7 +151,7 @@ require([
 
 			/* Activate an inactive cell */
 			var template = $('#active_jumper_cell_template').html();
-			this.$el.find("td.jumper.inactive").first().replaceWith(template);
+			this.$el.children("td.jumper.inactive").first().replaceWith(template);
 		},
 
 
@@ -215,19 +215,19 @@ require([
 			 * Server returns the changed fields to confirm which have been updated
 			 */
 			if('name' in response) {
-				this.$el.find("td.circuit_name").removeClass('change_pending');
-				this.$el.find("td.circuit_name").effect("highlight", {color: "#deffde"}, 500);
+				this.$el.children("td.circuit_name").removeClass('change_pending');
+				this.$el.children("td.circuit_name").effect("highlight", {color: "#deffde"}, 500);
 			};
 			if('cable_reference' in response) {
-				this.$el.find("td.cable_reference").removeClass('change_pending');
-				this.$el.find("td.cable_reference").effect("highlight", {color: "#deffde"}, 500);
+				this.$el.children("td.cable_reference").removeClass('change_pending');
+				this.$el.children("td.cable_reference").effect("highlight", {color: "#deffde"}, 500);
 			};
 		},
 
 		provision_jumper_fields: function(required_count) {
 
-			var jumper_cell_count = this.$el.find("td.jumper").size();
-			var td_buttons = this.$el.find("td.circuit_buttons").first();
+			var jumper_cell_count = this.$el.children("td.jumper").size();
+			var td_buttons = this.$el.children("td.circuit_buttons").first();
 			var template = $('#inactive_jumper_cell_template').html();
 
 			while(jumper_cell_count < required_count) {
