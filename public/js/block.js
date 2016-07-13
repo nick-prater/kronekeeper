@@ -44,7 +44,6 @@ require([
 			cable_reference: null,
 			jumpers: []
 		}
-
 	});
 
 
@@ -98,6 +97,11 @@ require([
 			);
 			this.listenTo(
 				this.model.collection,
+				"table_structure_rendered",
+				this.render_jumpers
+			);
+			this.listenTo(
+				this.model.collection,
 				"provision_jumper_fields",
 				this.provision_jumper_fields
 			);
@@ -106,10 +110,30 @@ require([
 		template: _.template( $('#row_template').html() ),
 
 		render: function() {
+			/* Jumpers are populated once the basic table
+			 * structure is in place so that we can handle
+			 * any requirement for extra columns without
+			 * race conditions.
+			 */
 			var json = this.model.toJSON();
-			json.jumper_text = json.jumpers.join('; ');
 			this.$el.html(this.template(json));
 			return this;
+		},
+
+		render_jumpers: function(jumper_text) {
+
+			var jumpers = this.model.get("jumpers");
+			var jumper_count = jumpers.length;
+
+			/* Ensure we have enough blank cells for all jumpers */
+			while(this.$el.children("td.jumper").not(".inactive").size() < jumper_count) {
+				this.add_jumper();
+			}
+
+			var cells = this.$el.children("td.jumper");
+			jumpers.forEach(function(jumper, index) {
+				$(cells[index]).text(jumper);
+			});
 		},
 
 		add_jumper: function(e) {
@@ -187,7 +211,9 @@ require([
 
 
 		model_synced: function(model, response, options) {
-			/* Clear field highlighting and flash green to indicate successful save */
+			/* Clear field highlighting and flash green to indicate successful save
+			 * Server returns the changed fields to confirm which have been updated
+			 */
 			if('name' in response) {
 				this.$el.find("td.circuit_name").removeClass('change_pending');
 				this.$el.find("td.circuit_name").effect("highlight", {color: "#deffde"}, 500);
@@ -234,12 +260,10 @@ require([
 		render: function() {
 			console.log("rendering Block_View");
 			this.collection.each(function(model) {
-				//console.log(model);
 				var row = new Circuit_View({model: model});
 				$('#block_table_body').append(row.render().$el);
-
 			}, this);
-
+			this.collection.trigger("table_structure_rendered");
 			return this;
 		},
 

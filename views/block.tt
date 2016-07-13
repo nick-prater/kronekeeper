@@ -31,7 +31,7 @@
 				<td class="circuit_name"><input type="text" value="<%- name %>" /></td>
 				<td class="cable_reference"><input type="text" value="<%- cable_reference %>" /></td>
 				<td class="connection"><input type="text" value="--" /></td>
-				<td class="jumper"><%- jumper_text %></td>
+				<td class="jumper"></td>
 				<td class="jumper"></td>
 				<td class="circuit_buttons"><a class="add_jumper" href="javascript:void(0)" title="Add another jumper field to this circuit">+</a></td>
 </script>
