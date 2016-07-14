@@ -30,6 +30,22 @@ require([
         'use strict';
 
 
+	var Jumper_Model = Backbone.Model.extend({
+
+		defaults: {
+			id: null,
+			designation: null
+		},
+		urlRoot: '/api/jumper'
+	});
+
+	var Jumper_View = Backbone.View.extend({
+
+		tagName: 'tr',
+		className: 'jumper',
+
+	});
+
 
 	var Circuit_Model = Backbone.Model.extend({
 
@@ -43,6 +59,19 @@ require([
 			name: null,
 			cable_reference: null,
 			jumpers: []
+		},
+
+		initialize: function(attributes) {
+			/* Build a discrete model for each jumper, so we 
+			 * can delete/patch/create these individually
+			 */
+			this.jumper_models = [];
+			attributes.jumpers.forEach(function(jumper, index) {
+				this.jumper_models.push(new Jumper_Model({
+					designation: jumper.designation,
+					id: index
+				}));
+			}, this);
 		}
 	});
 
@@ -54,8 +83,8 @@ require([
 			return '/api/block/' + this.block_id;
 		},
 
-		initialize: function(args) {
-			this.block_id = args.block_id;
+		initialize: function(models, options) {
+			this.block_id = options.block_id;
 		},
 
 		parse: function(data) {
@@ -122,17 +151,16 @@ require([
 
 		render_jumpers: function(jumper_text) {
 
-			var jumpers = this.model.get("jumpers");
-			var jumper_count = jumpers.length;
+			var jumpers = this.model.jumper_models;
 
 			/* Ensure we have enough blank cells for all jumpers */
-			while(this.$el.children("td.jumper").not(".inactive").size() < jumper_count) {
+			while(this.$el.children("td.jumper").not(".inactive").size() < jumpers.length) {
 				this.add_jumper();
 			}
 
 			var cells = this.$el.children("td.jumper");
 			jumpers.forEach(function(jumper, index) {
-				$(cells[index]).text(jumper);
+				$(cells[index]).text(jumper.get("designation"));
 			});
 		},
 
@@ -261,7 +289,7 @@ require([
 			console.log("rendering Block_View");
 			this.collection.each(function(model) {
 				var row = new Circuit_View({model: model});
-				$('#block_table_body').append(row.render().$el);
+				$(this.el).append(row.render().$el);
 			}, this);
 			this.collection.trigger("table_structure_rendered");
 			return this;
@@ -274,7 +302,7 @@ require([
 
 
 
-	var circuit_list = new Circuits_Collection({block_id: window.block_id});
+	var circuit_list = new Circuits_Collection(null, {block_id: window.block_id});
 	var view = new Block_View({collection: circuit_list});
 
 	circuit_list.fetch({

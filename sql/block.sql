@@ -79,7 +79,15 @@ SELECT
 	circuit.name,
 	circuit.cable_reference,
 	ARRAY(
-		SELECT DISTINCT CONCAT(vertical2.designation, block2.designation, '.', circuit2.designation)
+		/* This is ugly, but allows us to get both jumper_id and destination
+		 * designation to the UI in a single query. The more I think of the
+		 * design here, we should perhaps query and populate jumpers separately
+		 */
+		SELECT DISTINCT CONCAT(
+			jumper_wire.jumper_id, ':',
+			vertical2.designation, block2.designation, '.',
+			circuit2.designation
+		) AS j
 		FROM connection AS connection1
 		JOIN pin AS pin1 ON (pin1.id = connection1.pin_id)
 		JOIN circuit AS circuit1 ON (circuit1.id = pin1.circuit_id)
@@ -91,10 +99,18 @@ SELECT
 		JOIN circuit AS circuit2 ON (circuit2.id = pin2.circuit_id)
 		JOIN block AS block2 ON (block2.id = circuit2.block_id)
 		JOIN vertical AS vertical2 ON (vertical2.id = block2.vertical_id)
+		JOIN jumper_wire ON (jumper_wire.id = connection1.jumper_wire_id)
 		WHERE circuit1.id = circuit.id
+		ORDER BY j ASC
 	) AS jumpers
 FROM block
 JOIN circuit ON (circuit.block_id = block.id)
+WHERE block.id=60
 ORDER BY block_id ASC, block.position ASC, circuit.position ASC;
+
+
+
+
+
 
 

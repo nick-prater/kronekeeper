@@ -141,7 +141,24 @@ sub block_circuits {
 		WHERE block_id=?
 	");
 	$q->execute($block_id);
-	return $q->fetchall_arrayref({});
+	my $result = $q->fetchall_arrayref({}) or return undef;
+
+	# Jumper results are of the form [jumper_id]:[designation]
+	# Split these results into two separate fields
+	foreach my $row(@{$result}) {
+		$row->{jumper_ids} = [];
+		$row->{jumper_designations} = [];
+		foreach my $jumper(@{$row->{jumpers}}) {
+			my ($id, $designation) = split(/:/, $jumper);
+			$jumper = {
+				raw => $jumper,
+				id => $id,
+				designation => $designation,
+			};
+		}
+	}
+
+	return $result;
 }
 
 
