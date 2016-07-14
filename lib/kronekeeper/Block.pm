@@ -146,8 +146,6 @@ sub block_circuits {
 	# Jumper results are of the form [jumper_id]:[designation]
 	# Split these results into two separate fields
 	foreach my $row(@{$result}) {
-		$row->{jumper_ids} = [];
-		$row->{jumper_designations} = [];
 		foreach my $jumper(@{$row->{jumpers}}) {
 			my ($id, $designation) = split(/:/, $jumper);
 			$jumper = {
