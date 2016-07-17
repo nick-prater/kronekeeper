@@ -183,14 +183,14 @@ require([
 				this.add_jumper();
 			}
 
-			var cells = this.$el.children("td.jumper");
-			jumpers.forEach(function(jumper, index) {
+			/* Populate the blank cells */
+			this.$el.children("td.jumper").not(".inactive").each(function(index, cell) {
 
-				var cell = new Jumper_View({
-					model: jumper
-					//el: $(cells[index]).get(0)
+				var model = jumpers[index] || new Jumper_Model;
+				var view = new Jumper_View({
+					model: model
 				});
-				$(cells[index]).replaceWith(cell.render().$el);
+				$(cell).replaceWith(view.render().$el);
 			});
 		},
 
