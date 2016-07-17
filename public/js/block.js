@@ -208,8 +208,10 @@ require([
 			}
 
 			/* Activate an inactive cell */
-			var template = $('#active_jumper_cell_template').html();
-			this.$el.children("td.jumper.inactive").first().replaceWith(template);
+			var view = new Jumper_View({
+				model: new Jumper_Model
+			});
+			this.$el.children("td.jumper.inactive").first().replaceWith(view.render().$el);
 		},
 
 
