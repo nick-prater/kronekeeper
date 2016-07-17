@@ -34,7 +34,6 @@ require([
 
 		urlRoot: '/api/block',
 		defaults: {
-			id: null,
 			name: null
 		}
 	});
@@ -96,19 +95,24 @@ require([
 			 */
 			if('name' in response) {
 				this.$el.children("input.name").removeClass('change_pending');
-				this.$el.children("input.name").effect("highlight", {color: "#deffde"}, 900);
+				this.$el.children("input.name").effect("highlight", {color: "#deffde"}, 1000);
 			};
 		}
 
 	});
 
 
+
 	var Jumper_Model = Backbone.Model.extend({
 
 		defaults: {
-			id: null,
 			designation: null
 		},
+
+		initialize: function(attributes, options) {
+			this.circuit = options.circuit;
+		},
+
 		urlRoot: '/api/jumper'
 	});
 
@@ -120,8 +124,21 @@ require([
 
 		events: {
 			'input' : 'highlight_change',
-			'change' : 'circuit_name_change',
+			'change' : 'jumper_change',
 			'keypress' : 'reset_on_escape_key'
+		},
+
+		initialize: function(attributes) {
+			this.listenTo(
+				this.model.circuit.collection,
+				"jumper_deleted",
+				this.jumper_deleted
+			);
+			this.listenTo(
+				this.model,
+				'sync',
+				this.model_synced
+			);
 		},
 	
 		render: function() {
@@ -144,6 +161,45 @@ require([
 				e.target.value = this.model.get("designation");
 				e.target.parentNode.classList.remove('change_pending');
 			}
+		},
+
+		jumper_change: function(e) {
+			if(e.target.value == this.model.get("designation")) {
+				/* No change - nothing to do */
+				console.log("jumper unchanged");
+			}
+			else if (e.target.value == '') {
+				this.jumper_remove();
+			}
+			else {
+				console.log("jumper changed");
+			}
+		},
+
+		jumper_remove: function() {
+			console.log("jumper removed");
+			this.model.destroy();
+			this.model.circuit.collection.trigger("jumper_deleted", this.model.get("id"));
+		},
+
+		jumper_deleted: function(deleted_jumper_id) {
+
+			/* Responds to another jumper being deleted
+			 * If we are the other end of the deleted jumper, we'll have the
+			 * same id, but the text input field won't have been cleared.
+			 */
+			if(deleted_jumper_id == this.model.get("id") && this.$("input").val() != "") {
+				this.$("input").val('');
+				this.$el.effect("highlight", {}, 1500);
+			}
+		},
+
+		model_synced: function(model, response, options) {
+			/* Clear field highlighting and flash green to indicate successful save
+			 * Server returns the changed fields to confirm which have been updated
+			 */
+			this.$el.removeClass('change_pending');
+			this.$el.effect("highlight", {color: "#deffde"}, 900);
 		}
 
 	});
@@ -172,7 +228,10 @@ require([
 			attributes.jumpers.forEach(function(jumper, index) {
 				this.jumper_models.push(new Jumper_Model({
 					designation: jumper.designation,
-					id: index
+					id: jumper.id
+				},
+				{
+					circuit: this
 				}));
 			}, this);
 		}
@@ -267,7 +326,7 @@ require([
 			/* Populate the blank cells */
 			this.$el.children("td.jumper").not(".inactive").each(function(index, cell) {
 
-				var model = jumpers[index] || new Jumper_Model;
+				var model = jumpers[index] || new Jumper_Model(null, {circuit:this});
 				var view = new Jumper_View({
 					model: model
 				});
@@ -290,7 +349,7 @@ require([
 
 			/* Activate an inactive cell */
 			var view = new Jumper_View({
-				model: new Jumper_Model
+				model: new Jumper_Model(null, {circuit:this})
 			});
 			this.$el.children("td.jumper.inactive").first().replaceWith(view.render().$el);
 		},
