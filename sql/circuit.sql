@@ -27,7 +27,8 @@ SELECT
 	block.name AS block_name,
 	CONCAT(vertical.designation, block.designation, '.', circuit.designation) AS full_designation,
 	frame.id AS frame_id,
-	frame.name AS frame_name
+	frame.name AS frame_name,
+	circuit.connection
 FROM circuit
 JOIN block ON (block.id = circuit.block_id)
 JOIN vertical ON (vertical.id = block.vertical_id)

@@ -103,7 +103,8 @@ CREATE TABLE circuit(
 	position INTEGER NOT NULL CHECK(position > 0),
 	designation TEXT,
 	name TEXT,
-	cable_reference TEXT
+	cable_reference TEXT,
+	connection TEXT
 );
 CREATE UNIQUE INDEX circuit_block_position_idx ON circuit(block_id, position);
 CREATE UNIQUE INDEX circuit_designation_block_idx ON circuit(designation, block_id);

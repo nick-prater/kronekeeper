@@ -78,6 +78,7 @@ SELECT
 	circuit.designation,
 	circuit.name,
 	circuit.cable_reference,
+	circuit.connection,
 	ARRAY(
 		/* This is ugly, but allows us to get both jumper_id and destination
 		 * designation to the UI in a single query. The more I think of the
