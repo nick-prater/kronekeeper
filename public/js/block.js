@@ -46,9 +46,9 @@ require([
 		template: _.template( $('#active_jumper_cell_template').html() ),
 
 		events: {
-			'click a.add_jumper' : 'add_jumper',
 			'input' : 'highlight_change',
-			'change .circuit_name input' : 'circuit_name_change'
+			'change' : 'circuit_name_change',
+			'keypress' : 'reset_on_escape_key'
 		},
 	
 		render: function() {
@@ -64,10 +64,14 @@ require([
 			else {
 				e.target.parentNode.classList.remove('change_pending');
 			}
+		},
+
+		reset_on_escape_key: function(e) {
+			if(e.keyCode == 27) {
+				e.target.value = this.model.get("designation");
+				e.target.parentNode.classList.remove('change_pending');
+			}
 		}
-
-
-
 
 	});
 
@@ -223,7 +227,7 @@ require([
 			this.reset_on_escape_key(e, 'cable_reference');
 		},
 
-		reset_on_escape_key(e, attribute_name) {
+		reset_on_escape_key: function(e, attribute_name) {
 			if(e.keyCode == 27) {
 				e.target.value = this.model.get(attribute_name);
 				e.target.parentNode.classList.remove('change_pending');
