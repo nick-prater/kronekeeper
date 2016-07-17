@@ -41,8 +41,33 @@ require([
 
 	var Jumper_View = Backbone.View.extend({
 
-		tagName: 'tr',
+		tagName: 'td',
 		className: 'jumper',
+		template: _.template( $('#active_jumper_cell_template').html() ),
+
+		events: {
+			'click a.add_jumper' : 'add_jumper',
+			'input' : 'highlight_change',
+			'change .circuit_name input' : 'circuit_name_change'
+		},
+	
+		render: function() {
+			var json = this.model.toJSON();
+			this.$el.html(this.template(json));
+			return this;
+		},
+
+		highlight_change: function(e) {
+			if(e.target.value != this.model.get("designation")) {
+				e.target.parentNode.classList.add('change_pending');
+			}
+			else {
+				e.target.parentNode.classList.remove('change_pending');
+			}
+		}
+
+
+
 
 	});
 
@@ -160,7 +185,12 @@ require([
 
 			var cells = this.$el.children("td.jumper");
 			jumpers.forEach(function(jumper, index) {
-				$(cells[index]).text(jumper.get("designation"));
+
+				var cell = new Jumper_View({
+					model: jumper
+					//el: $(cells[index]).get(0)
+				});
+				$(cells[index]).replaceWith(cell.render().$el);
 			});
 		},
 
@@ -286,7 +316,6 @@ require([
 		},
 
 		render: function() {
-			console.log("rendering Block_View");
 			this.collection.each(function(model) {
 				var row = new Circuit_View({model: model});
 				$(this.el).append(row.render().$el);
