@@ -30,6 +30,43 @@ require([
         'use strict';
 
 
+	var Block_Caption_Model = Backbone.Model.extend({
+
+		defaults: {
+			id: null,
+			name: null
+		}
+	});
+
+
+	var Block_Caption_View = Backbone.View.extend({
+
+		el: '#block_table_caption',
+
+		events: {
+			'input' : 'highlight_change',
+			'change' : 'circuit_name_change',
+			'keypress' : 'reset_on_escape_key'
+		},
+
+		highlight_change: function(e) {
+			if(e.target.value != this.model.get("name")) {
+				e.target.classList.add('change_pending');
+			}
+			else {
+				e.target.classList.remove('change_pending');
+			}
+		},
+
+		reset_on_escape_key: function(e) {
+			if(e.keyCode == 27) {
+				e.target.value = this.model.get("name");
+				e.target.classList.remove('change_pending');
+			}
+		}
+	});
+
+
 	var Jumper_Model = Backbone.Model.extend({
 
 		defaults: {
@@ -337,8 +374,11 @@ require([
 
 
 
-	var circuit_list = new Circuits_Collection(null, {block_id: window.block_id});
-	var view = new Block_View({collection: circuit_list});
+	var caption_view = new Block_Caption_View({
+		model: new Block_Caption_Model(window.block_info)
+	});
+	var circuit_list = new Circuits_Collection(null, {block_id: window.block_info.id});
+	var block_view = new Block_View({collection: circuit_list});
 
 	circuit_list.fetch({
 		reset: true,

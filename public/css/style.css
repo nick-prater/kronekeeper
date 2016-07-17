@@ -198,15 +198,17 @@ body {
 	font-size: 120%;
 	color: black;
 	font-weight: bold;
-	background: transparent;
-	border: none;
+	background: white;
+	border: 1px solid gray;
+	width: 16em;
 }
 
 .block caption input.editing {
 	border: 1px solid gray;
 }
 
-.block td.change_pending {
+.block td.change_pending,
+.block input.change_pending {
 	background: #ffdede;
 }
 
