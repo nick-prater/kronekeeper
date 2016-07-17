@@ -180,6 +180,7 @@ require([
 			console.log("jumper removed");
 			this.model.destroy();
 			this.model.circuit.collection.trigger("jumper_deleted", this.model.get("id"));
+			this.model.set(this.model.defaults);
 		},
 
 		jumper_deleted: function(deleted_jumper_id) {
@@ -191,6 +192,7 @@ require([
 			if(deleted_jumper_id == this.model.get("id") && this.$("input").val() != "") {
 				this.$("input").val('');
 				this.$el.effect("highlight", {}, 1500);
+				this.model.set(this.model.defaults);
 			}
 		},
 
