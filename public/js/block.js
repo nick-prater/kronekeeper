@@ -32,6 +32,7 @@ require([
 
 	var Block_Caption_Model = Backbone.Model.extend({
 
+		urlRoot: '/api/block',
 		defaults: {
 			id: null,
 			name: null
@@ -45,8 +46,16 @@ require([
 
 		events: {
 			'input' : 'highlight_change',
-			'change' : 'circuit_name_change',
+			'change' : 'save_caption',
 			'keypress' : 'reset_on_escape_key'
+		},
+
+		initialize: function() {
+			this.listenTo(
+				this.model,
+				'sync',
+				this.model_synced
+			);
 		},
 
 		highlight_change: function(e) {
@@ -63,7 +72,34 @@ require([
 				e.target.value = this.model.get("name");
 				e.target.classList.remove('change_pending');
 			}
+		},
+
+		save_caption: function(e) {
+			var data = {
+				name: e.target.value
+			};
+
+			this.model.save(data, {
+				patch: true,
+				success: function(model, response, options) {
+					console.log("circuit data saved");
+				},
+				error: function(model, xhr, options) {
+					console.log("ERROR saving circuit data");
+				}
+			});
+		},
+
+		model_synced: function(model, response, options) {
+			/* Clear field highlighting and flash green to indicate successful save
+			 * Server returns the changed fields to confirm which have been updated
+			 */
+			if('name' in response) {
+				this.$el.children("input.name").removeClass('change_pending');
+				this.$el.children("input.name").effect("highlight", {color: "#deffde"}, 900);
+			};
 		}
+
 	});
 
 
@@ -317,11 +353,11 @@ require([
 			 */
 			if('name' in response) {
 				this.$el.children("td.circuit_name").removeClass('change_pending');
-				this.$el.children("td.circuit_name").effect("highlight", {color: "#deffde"}, 500);
+				this.$el.children("td.circuit_name").effect("highlight", {color: "#deffde"}, 900);
 			};
 			if('cable_reference' in response) {
 				this.$el.children("td.cable_reference").removeClass('change_pending');
-				this.$el.children("td.cable_reference").effect("highlight", {color: "#deffde"}, 500);
+				this.$el.children("td.cable_reference").effect("highlight", {color: "#deffde"}, 900);
 			};
 		},
 

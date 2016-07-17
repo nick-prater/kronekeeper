@@ -25,11 +25,13 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
 use warnings;
+use feature 'switch';
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
+use kronekeeper::Activity_Log;
 
-
+my $al = kronekeeper::Activity_Log->new();
 
 
 prefix '/block' => sub {
@@ -73,6 +75,42 @@ prefix '/api/block' => sub {
 			circuits   => block_circuits($id),
 			block_info => block_info($id),
 		};
+	};
+
+	patch '/:block_id' => sub {
+
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $id = param('block_id');
+		block_id_valid_for_account($id) or do {
+			send_error('forbidden' => 403);
+		};
+		debug "updating block: $id";
+
+		debug request->body;
+		my $data = from_json(request->body);
+		my $changes = {};
+		my $block_info = block_info($id);
+
+		foreach my $field(keys %{$data}) {
+			my $value = $data->{$field};
+			given($field) {
+				when('name') {
+					update_name($block_info, $value);
+					$changes->{name} = $value;
+				};
+				default {
+					error "failed to update unrecognised circuit field '$field'";
+				};					
+			};
+		};
+
+		database->commit;
+
+		content_type 'application/json';
+		return to_json $changes;
 	};
 
 	any qr{/\d+(/\d+.*)} => require_login sub {
@@ -157,6 +195,42 @@ sub block_circuits {
 	}
 
 	return $result;
+}
+
+
+sub update_name {
+
+	my $info = shift;
+	my $name = shift;
+
+	# Rename circuit
+	my $q = database->prepare("
+		UPDATE block SET name = ?
+		WHERE id = ?
+	");
+
+	$q->execute(
+		$name,
+		$info->{id},
+	) or do {
+		database->rollback;
+		send_error('error updating block' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'block %s renamed "%s" (was "%s")',
+		$info->{full_designation},
+		$name,
+		$info->{name} || '',
+	);
+
+	$al->record({
+		function     => 'kronekeeper::Block::update_name',
+		frame_id     => $info->{frame_id},
+		block_id_a   => $info->{id},
+		note         => $note,
+	});
 }
 
 
