@@ -160,6 +160,7 @@ require([
 			designation: null,
 			name: null,
 			cable_reference: null,
+			connection: null,
 			jumpers: []
 		},
 
@@ -218,6 +219,9 @@ require([
 			'input .cable_reference input' : 'cable_reference_input',
 			'change .cable_reference input' : 'cable_reference_change',
 			'keypress .cable_reference input' : 'cable_reference_keypress',
+			'input .connection input' : 'connection_input',
+			'change .connection input' : 'connection_change',
+			'keypress .connection input' : 'connection_keypress'
 		},
 
 		initialize: function() {
@@ -300,6 +304,10 @@ require([
 			this.reset_on_escape_key(e, 'cable_reference');
 		},
 
+		connection_keypress: function(e) {
+			this.reset_on_escape_key(e, 'connection');
+		},
+
 		reset_on_escape_key: function(e, attribute_name) {
 			if(e.keyCode == 27) {
 				e.target.value = this.model.get(attribute_name);
@@ -314,6 +322,10 @@ require([
 
 		cable_reference_input: function(e) {
 			this.highlight_change(e, 'cable_reference');
+		},
+
+		connection_input: function(e) {
+			this.highlight_change(e, 'connection');
 		},
 
 		highlight_change: function(e, attribute_name) {
@@ -332,6 +344,10 @@ require([
 
 		cable_reference_change: function(e) {
 			this.save_data({cable_reference: e.target.value});
+		},
+
+		connection_change: function(e) {
+			this.save_data({connection: e.target.value});
 		},
 
 		save_data: function(data) {
@@ -358,6 +374,10 @@ require([
 			if('cable_reference' in response) {
 				this.$el.children("td.cable_reference").removeClass('change_pending');
 				this.$el.children("td.cable_reference").effect("highlight", {color: "#deffde"}, 900);
+			};
+			if('connection' in response) {
+				this.$el.children("td.connection").removeClass('change_pending');
+				this.$el.children("td.connection").effect("highlight", {color: "#deffde"}, 900);
 			};
 		},
 

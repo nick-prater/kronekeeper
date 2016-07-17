@@ -70,17 +70,11 @@ prefix '/api/circuit' => sub {
 		# at a time, as updates are triggered by change
 		# events on each field in the user interface.
 		foreach my $field(keys %{$data}) {
-			my $value = $data->{$field};
 			given($field) {
-				when('name') {
-					update_name($circuit_info, $value);
-					$changes->{name} = $value;
+				when(/^(name|cable_reference|connection)$/) {
+					update_field($circuit_info, $field, $data->{$field});
+					$changes->{$field} = $data->{$field};
 				};
-				when('cable_reference') {
-					update_cable_reference($circuit_info, $value);
-					$changes->{cable_reference} = $value;
-				};
-
 				default {
 					error "failed to update unrecognised circuit field '$field'";
 				};					
@@ -140,51 +134,20 @@ sub circuit_info {
 }
 
 
-sub update_name {
+sub update_field {
 
 	my $info = shift;
-	my $name = shift;
-
-	# Rename circuit
-	my $q = database->prepare("
-		UPDATE circuit SET name = ?
-		WHERE id = ?
-	");
-
-	$q->execute(
-		$name,
-		$info->{id},
-	) or do {
-		database->rollback;
-		send_error('error updating circuit' => 500);
-	};
-
-	#Update Activity Log
-	my $note = sprintf(
-		'circuit %s renamed "%s" (was "%s")',
-		$info->{full_designation},
-		$name,
-		$info->{name} || '',
-	);
-
-	$al->record({
-		function     => 'kronekeeper::Circuit::update_name',
-		frame_id     => $info->{frame_id},
-		block_id_a   => $info->{block_id},
-		circuit_id_a => $info->{id},
-		note         => $note,
-	});
-}
-
-
-sub update_cable_reference {
-
-	my $info = shift;
+	my $field = shift;
 	my $value = shift;
 
-	# Rename circuit
+	# This variable is used to construct sql command, so limit to acceptable values
+	$field =~ m/^(cable_reference|name|connection)$/ or do {
+		database->rollback;
+		send_error("invalid field name");
+	};
+	
 	my $q = database->prepare("
-		UPDATE circuit SET cable_reference = ?
+		UPDATE circuit SET $field = ?
 		WHERE id = ?
 	");
 
@@ -196,16 +159,21 @@ sub update_cable_reference {
 		send_error('error updating circuit' => 500);
 	};
 
-	#Update Activity Log
+	# Make field name user friendly
+	my $field_display_name = $field;
+	$field_display_name =~ s/_/ /g;
+	
+	# Update Activity Log
 	my $note = sprintf(
-		'circuit %s cable reference changed to "%s" (was "%s")',
+		'circuit %s %s changed to "%s" (was "%s")',
 		$info->{full_designation},
+		$field_display_name,
 		$value,
-		$info->{cable_reference} || '',
+		$info->{$field} || '',
 	);
 
 	$al->record({
-		function     => 'kronekeeper::Circuit::update_cable_reference',
+		function     => 'kronekeeper::Circuit::update_field',
 		frame_id     => $info->{frame_id},
 		block_id_a   => $info->{block_id},
 		circuit_id_a => $info->{id},
