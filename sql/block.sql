@@ -106,7 +106,6 @@ SELECT
 	) AS jumpers
 FROM block
 JOIN circuit ON (circuit.block_id = block.id)
-WHERE block.id=60
 ORDER BY block_id ASC, block.position ASC, circuit.position ASC;
 
 
