@@ -47,10 +47,14 @@ prefix '/api/jumper' => sub {
 		jumper_id_valid_for_account($id) or do {
 			send_error('forbidden' => 403);
 		};
-		debug "deleting jumper: $id";
+
+		delete_jumper($id);
+
+		database->commit;
 
 		return to_json {
-			deleted => 1
+			deleted => 1,
+			jumper_id => $id,
 		};
 	};
 
@@ -92,6 +96,78 @@ sub jumper_id_valid_for_account {
 
 	return $q->fetchrow_hashref;
 }
+
+
+sub jumper_wire_connections {
+
+	my $jumper_id = shift;
+	my $q = database->prepare("
+		SELECT *
+		FROM jumper_wire_connections
+		WHERE jumper_id = ?
+	");
+	$q->execute($jumper_id);
+
+	return $q->fetchall_arrayref({});
+}
+
+
+sub describe_jumper_connections {
+
+	my $connections = shift;
+
+	$connections or return "[no connections]";
+
+	if($connections->[0]->{is_simple_jumper}) {
+		my @designations = @{$connections->[0]->{full_circuit_designations}};
+		return join('->', @designations);
+	}
+	else {
+		my @wire_descriptions;
+		foreach my $wire(@{$connections}) {
+			push(
+				@wire_descriptions,
+				join('->', @{$wire->{full_pin_designations}})
+			);
+		}
+		return join(', ', @wire_descriptions);
+	}
+}
+
+
+sub delete_jumper {
+
+	my $id = shift;
+	debug "deleting jumper_id $id";
+
+	my $connections = jumper_wire_connections($id);
+
+	# Remove jumper and it's connections
+	my $q = database->prepare(
+		"SELECT delete_jumper(?)"
+	);
+	$q->execute(
+		$id,
+	) or do {
+		database->rollback;
+		send_error('error deleting jumper' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'jumper removed %s',
+		describe_jumper_connections($connections)
+	);
+
+	# Technically jumpers could span an unlimited number of blocks
+	# and circuits, so we only record activity at the frame level
+	$al->record({
+		function     => 'kronekeeper::Jumper::delete_jumper',
+		frame_id     => $connections->[0]->{frame_id},
+		note         => $note,
+	});
+}
+
 
 
 
