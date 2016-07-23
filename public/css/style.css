@@ -231,7 +231,11 @@ body {
 	border-color: black;
 }
 
-
+/* Override jQueryUI background when a dialog is displayed */
+.ui-widget-overlay {
+	opacity: 0.5;
+	background-color: black;
+}
 
 
 

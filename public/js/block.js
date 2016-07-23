@@ -173,6 +173,7 @@ require([
 			}
 			else {
 				console.log("jumper changed");
+				$("#jumper_connection_dialog").dialog("open");
 			}
 		},
 
@@ -506,6 +507,12 @@ require([
 			console.log("ERROR: failed to fetch circuit list");
 		}
 	});
+
+	$("#jumper_connection_dialog").dialog({
+		autoOpen: false,
+		modal: true
+	});
+
 
 	console.log("loaded block.js");
 

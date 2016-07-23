@@ -25,6 +25,11 @@
 </div>
 
 
+<!-- Dialogs hidden on page load -->
+<div id="jumper_connection_dialog" title="Jumper connection">
+	<p>TODO</p>
+</div>
+
 
 <!-- Templates for dynamic content -->
 <script type="text/template" id="row_template">
