@@ -231,6 +231,13 @@ body {
 	border-color: black;
 }
 
+.designation {
+	background: #eeeeee;
+	border: 1px solid #555555;
+	border-radius: 3px;
+}
+
+
 /* Override jQueryUI background when a dialog is displayed */
 .ui-widget-overlay {
 	opacity: 0.5;

@@ -68,7 +68,10 @@ prefix '/jumper' => sub {
 			error('b_designation parameter is not a valid circuit on this frame');
 			return template(
 				'jumper/invalid',
-				{ message => 'not a valid circuit for this frame' },
+				{
+					error_code => 'INVALID_CIRCUIT',
+					b_designation => prettify_designation(param("b_designation")),
+				},
 				{ layout => undef }
 			);
 		};
@@ -224,6 +227,16 @@ sub delete_jumper {
 }
 
 
+sub prettify_designation {
+
+	my $d = shift;
+
+	# Strip any whitespace
+	$d =~ s/\s//g;
+
+	# Return as uppercase
+	return uc($d);
+}
 
 
 1;

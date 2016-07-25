@@ -139,11 +139,16 @@ sub parse_circuit_designation {
 	my $designation = shift or return undef;
 	debug("parsing designation $designation");
 
-	my ($vertical, $block, $circuit) = $designation =~ m/^\s*(\p{Letter}+)(\d+)\.(\d+)\s*$/ or do {
+	# Strip any whitespace
+	$designation =~ s/\s//g;
+
+	# Make uppercase
+	$designation = uc $designation;
+
+	my ($vertical, $block, $circuit) = $designation =~ m/^(\p{Letter}+)(\d+)\.(\d+)$/ or do {
 		error("Failed to parse circuit designation for $designation");
 		return undef;
 	};
-	$vertical = uc $vertical;
 	
 	debug("extracted vertical:$vertical, block:$block, circuit:$circuit");
 	

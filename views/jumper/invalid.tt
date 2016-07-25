@@ -1,4 +1,7 @@
 <div>
-	<h1>ERROR</h1>
-	<p>[% message %]</p>
+[% IF error_code == 'INVALID_CIRCUIT' %]
+	<p>Cannot connect jumper. Destination <span class="designation">[% b_designation %]</span> is not a valid circuit for this frame.</p>
+[% ELSE %]
+	<p>Sorry... an unexpected error has occurred.</p>
+[% END %]
 </div>
