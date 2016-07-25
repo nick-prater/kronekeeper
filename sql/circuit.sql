@@ -25,10 +25,14 @@ SELECT
 	circuit.cable_reference,
 	block.id AS block_id,
 	block.name AS block_name,
+	vertical.designation AS vertical_designation,
+	block.designation AS block_designation,
+	circuit.designation AS circuit_designation,
 	CONCAT(vertical.designation, block.designation, '.', circuit.designation) AS full_designation,
 	frame.id AS frame_id,
 	frame.name AS frame_name,
-	circuit.connection
+	circuit.connection,
+	count_pins_for_circuit_id(circuit.id) AS pin_count
 FROM circuit
 JOIN block ON (block.id = circuit.block_id)
 JOIN vertical ON (vertical.id = block.vertical_id)

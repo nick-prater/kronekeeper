@@ -134,6 +134,76 @@ sub circuit_info {
 }
 
 
+sub parse_circuit_designation {
+
+	my $designation = shift or return undef;
+	debug("parsing designation $designation");
+
+	my ($vertical, $block, $circuit) = $designation =~ m/^\s*(\p{Letter}+)(\d+)\.(\d+)\s*$/ or do {
+		error("Failed to parse circuit designation for $designation");
+		return undef;
+	};
+	$vertical = uc $vertical;
+	
+	debug("extracted vertical:$vertical, block:$block, circuit:$circuit");
+	
+	return {
+		vertical_designation => $vertical,
+		block_designation => $block,
+		circuit_designation => $circuit,
+	};
+}
+
+
+sub circuit_info_from_designation {
+
+	my $designation = shift;
+	my $frame_id = shift;
+
+	my $d = parse_circuit_designation($designation) or return undef;
+
+	# Try an exact match
+	my $q = database->prepare("
+		SELECT * FROM circuit_info
+		WHERE frame_id = ?
+		AND vertical_designation = ?
+		AND block_designation = ?
+		AND circuit_designation = ?
+	");
+	$q->execute(
+		$frame_id,
+		$d->{vertical_designation},
+		$d->{block_designation},
+		$d->{circuit_designation},
+	);
+	my $result = $q->fetchrow_hashref;
+	if($result) {
+		debug("found exact match for circuit designation");
+		return $result;
+	}
+
+	# Otherwise try a search stripping leading zeros from the block designation
+	# So a user entered designation of A3.2 will find a circuit with full
+	# designation A03.2
+	debug("didn't find exact match for circuit designation - trying to match without leading zeros");
+	my $q = database->prepare("
+		SELECT * FROM circuit_info
+		WHERE frame_id = ?
+		AND vertical_designation = ?
+		AND TRIM(LEADING '0' FROM block_designation) = TRIM(LEADING '0' FROM ?)
+		AND circuit_designation = ?
+	");
+	$q->execute(
+		$frame_id,
+		$d->{vertical_designation},
+		$d->{block_designation},
+		$d->{circuit_designation},
+	);
+	my $result = $q->fetchrow_hashref;
+	return $result;
+}
+
+
 sub update_field {
 
 	my $info = shift;

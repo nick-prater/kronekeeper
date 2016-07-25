@@ -55,14 +55,25 @@ prefix '/jumper' => sub {
 		unless(kronekeeper::Circuit::circuit_id_valid_for_account(param("a_circuit_id"))) {
 			send_error('Bad circuit_id. Forbidden' => 403);
 		}
+		my $a_circuit_info = kronekeeper::Circuit::circuit_info(param("a_circuit_id"));
 		
 		# b_designation is the human readable destination circuit - required parameter
 		unless(defined param("b_designation")) {
 			send_error('Missing b_designation parameter.' => 400);
 		}
 
-
 		# Does b_designation exist?
+		my $b_circuit_info = kronekeeper::Circuit::circuit_info_from_designation(
+			param("b_designation"),
+			$a_circuit_info->{frame_id},
+		) or do {
+			error('b_designation parameter is not a valid circuit on this frame');
+			return template(
+				'jumper/invalid',
+				{ message => 'not a valid circuit for this frame' },
+				{ layout => undef }
+			);
+		};
 
 		# Is there already a simple jumper between starting point and destination?
 		# If so, we cannot add any more connections
@@ -71,12 +82,11 @@ prefix '/jumper' => sub {
 		# If so, we cannot show the simple-jumper connection option
 
 		debug("before render");
-sleep 2;
-		template('jumper/invalid', {
-		},
-		{
-			layout => undef
-		});
+		template(
+			'jumper/invalid',
+			{ message => 'still more work to do here...' },
+			{ layout => undef }
+		);
 	};
 };
 

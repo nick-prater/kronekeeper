@@ -1,3 +1,4 @@
 <div>
 	<h1>ERROR</h1>
+	<p>[% message %]</p>
 </div>
