@@ -34,6 +34,53 @@ use kronekeeper::Activity_Log;
 my $al = kronekeeper::Activity_Log->new();
 
 
+prefix '/jumper' => sub {
+
+	post '/connection_choice' => require_login sub {
+
+		debug("connection_choice");
+		debug( request->body);
+
+		# jumper_id is an optional parameter giving
+		# the id of a jumper we might be replacing, so
+		# we can exclude it from collision checks.
+		if(param("jumper_id") && !jumper_id_valid_for_account(param("jumper_id"))) {
+			send_error('Access to requested jumper_id is forbidden.' => 403);
+		}
+
+		# a_circuit_id is the starting point for this jumper - required parameter
+		unless(defined param("a_circuit_id")) {
+			send_error('Missing a_circuit_id parameter.' => 400);
+		}
+		unless(kronekeeper::Circuit::circuit_id_valid_for_account(param("a_circuit_id"))) {
+			send_error('Bad circuit_id. Forbidden' => 403);
+		}
+		
+		# b_designation is the human readable destination circuit - required parameter
+		unless(defined param("b_designation")) {
+			send_error('Missing b_designation parameter.' => 400);
+		}
+
+
+		# Does b_designation exist?
+
+		# Is there already a simple jumper between starting point and destination?
+		# If so, we cannot add any more connections
+
+		# Are there any other jumpers linking starting point and destination
+		# If so, we cannot show the simple-jumper connection option
+
+		debug("before render");
+sleep 2;
+		template('jumper/invalid', {
+		},
+		{
+			layout => undef
+		});
+	};
+};
+
+
 
 prefix '/api/jumper' => sub {
 
@@ -66,11 +113,11 @@ sub jumper_id_valid_for_account {
 	my $jumper_id = shift;
 	my $account_id = shift || session('account')->{id};
 
-	$jumper_id =~ m/^\d+$/ or do {
+	$jumper_id && $jumper_id =~ m/^\d+$/ or do {
 		error "id is not an integer";
 		return undef;
 	};
-	$account_id =~ m/^\d+$/ or do {
+	$account_id && $account_id =~ m/^\d+$/ or do {
 		error "account_id is not an integer";
 		return undef;
 	};

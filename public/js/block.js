@@ -21,11 +21,12 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 require([
+	'block/jumper_select',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
-
+	jumper_select
 ) {
         'use strict';
 
@@ -173,7 +174,12 @@ require([
 			}
 			else {
 				console.log("jumper changed");
-				$("#jumper_connection_dialog").dialog("open");
+				console.log(this.model.circuit);
+				jumper_select.display({
+					connection_id: this.model.circuit.id,
+					jumper_id: this.model.get("id"),
+					destination_designation: e.target.value
+				});
 			}
 		},
 
@@ -327,11 +333,11 @@ require([
 			}
 
 			/* Populate the blank cells */
+			var circuit_model = this.model;
 			this.$el.children("td.jumper").not(".inactive").each(function(index, cell) {
-
-				var model = jumpers[index] || new Jumper_Model(null, {circuit:this});
+				var jumper_model = jumpers[index] || new Jumper_Model(null, {circuit:circuit_model});
 				var view = new Jumper_View({
-					model: model
+					model: jumper_model
 				});
 				$(cell).replaceWith(view.render().$el);
 			});
@@ -352,7 +358,7 @@ require([
 
 			/* Activate an inactive cell */
 			var view = new Jumper_View({
-				model: new Jumper_Model(null, {circuit:this})
+				model: new Jumper_Model(null, {circuit:this.model})
 			});
 			this.$el.children("td.jumper.inactive").first().replaceWith(view.render().$el);
 		},
@@ -508,14 +514,7 @@ require([
 		}
 	});
 
-	$("#jumper_connection_dialog").dialog({
-		autoOpen: false,
-		modal: true
-	});
-
-
 	console.log("loaded block.js");
-
 });
 
 

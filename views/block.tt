@@ -27,7 +27,6 @@
 
 <!-- Dialogs hidden on page load -->
 <div id="jumper_connection_dialog" title="Jumper connection">
-	<p>TODO</p>
 </div>
 
 
@@ -48,6 +47,10 @@
 
 <script type="text/template" id="active_jumper_cell_template">
 <input type="text" value="<%- designation %>" />
+</script>
+
+<script type="text/template" id="loading_message_template">
+	<p>loading...</p>
 </script>
 
 

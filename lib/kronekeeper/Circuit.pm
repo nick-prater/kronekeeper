@@ -95,11 +95,11 @@ sub circuit_id_valid_for_account {
 	my $circuit_id = shift;
 	my $account_id = shift || session('account')->{id};
 
-	$circuit_id =~ m/^\d+$/ or do {
+	$circuit_id && $circuit_id =~ m/^\d+$/ or do {
 		error "block_id is not an integer";
 		return undef;
 	};
-	$account_id =~ m/^\d+$/ or do {
+	$account_id && $account_id =~ m/^\d+$/ or do {
 		error "account_id is not an integer";
 		return undef;
 	};

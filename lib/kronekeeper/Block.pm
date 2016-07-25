@@ -132,11 +132,11 @@ sub block_id_valid_for_account {
 	my $block_id = shift;
 	my $account_id = shift || session('account')->{id};
 
-	$block_id =~ m/^\d+$/ or do {
+	$block_id && $block_id =~ m/^\d+$/ or do {
 		error "block_id is not an integer";
 		return undef;
 	};
-	$account_id =~ m/^\d+$/ or do {
+	$account_id && $account_id =~ m/^\d+$/ or do {
 		error "account_id is not an integer";
 		return undef;
 	};

@@ -93,11 +93,11 @@ sub frame_id_valid_for_account {
 	my $frame_id = shift;
 	my $account_id = shift || session('account')->{id};
 
-	$frame_id =~ m/^\d+$/ or do {
+	$frame_id && $frame_id =~ m/^\d+$/ or do {
 		error "frame_id is not an integer";
 		return undef;
 	};
-	$account_id =~ m/^\d+$/ or do {
+	$account_id && $account_id =~ m/^\d+$/ or do {
 		error "account_id is not an integer";
 		return undef;
 	};
