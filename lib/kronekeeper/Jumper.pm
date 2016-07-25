@@ -61,8 +61,6 @@ prefix '/jumper' => sub {
 		unless(defined param("b_designation")) {
 			send_error('Missing b_designation parameter.' => 400);
 		}
-
-		# Does b_designation exist?
 		my $b_circuit_info = kronekeeper::Circuit::circuit_info_from_designation(
 			param("b_designation"),
 			$a_circuit_info->{frame_id},

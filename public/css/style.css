@@ -237,6 +237,13 @@ body {
 	background-color: black;
 }
 
+/* Override jQueryUI to centre buttons on a dialog */
+.ui-dialog .ui-dialog-buttonpane { 
+    text-align: center;
+}
+.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset { 
+    float: none;
+}
 
 
 

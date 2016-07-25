@@ -174,11 +174,17 @@ require([
 			}
 			else {
 				console.log("jumper changed");
-				console.log(this.model.circuit);
+				var jumper_view = this;
 				jumper_select.display({
 					connection_id: this.model.circuit.id,
 					jumper_id: this.model.get("id"),
-					destination_designation: e.target.value
+					destination_designation: e.target.value,
+					cancel_action: function() {
+						console.log("cancel action");
+						e.target.value = jumper_view.model.get("designation");
+						e.target.parentNode.classList.remove('change_pending');
+						jumper_view.$el.effect("highlight", {}, 900);
+					}
 				});
 			}
 		},

@@ -27,13 +27,28 @@ define([
 ], function (
 ) {
 
+
+	/* Action to take when dialog is cancelled */
+	var cancel_action = null;
+
+
 	$("#jumper_connection_dialog").dialog({
 		autoOpen: false,
-		modal: true
+		modal: true,
+		buttons: {
+			Cancel: function(event) {
+				$(this).dialog("close");
+			}
+		},
+		close: function(event) {
+			cancel_action()
+		}
 	});
 
 
 	function display(args) {
+
+		cancel_action = args.cancel_action;
 
 		/* Reset dialog to show 'loading' message before loading new content */
 		$("#jumper_connection_dialog").html($("#loading_message_template").html());
@@ -52,6 +67,7 @@ define([
 			request_data,
 			function(response, status_text, xhr) {
 				console.log("ajax response: ", status_text);
+				
 			}
 		);
 	
