@@ -191,7 +191,7 @@ sub circuit_info_from_designation {
 	# So a user entered designation of A3.2 will find a circuit with full
 	# designation A03.2
 	debug("didn't find exact match for circuit designation - trying to match without leading zeros");
-	my $q = database->prepare("
+	$q = database->prepare("
 		SELECT * FROM circuit_info
 		WHERE frame_id = ?
 		AND vertical_designation = ?
@@ -204,7 +204,7 @@ sub circuit_info_from_designation {
 		$d->{block_designation},
 		$d->{circuit_designation},
 	);
-	my $result = $q->fetchrow_hashref;
+	$result = $q->fetchrow_hashref;
 	return $result;
 }
 
