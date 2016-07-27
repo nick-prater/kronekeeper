@@ -76,11 +76,33 @@ prefix '/jumper' => sub {
 			);
 		};
 
+		debug("considering jumper linking circuit_id $a_circuit_info->{id} -> $b_circuit_info->{id}");
+		my $connection_count = get_connection_count(
+			$a_circuit_info->{id},
+			$b_circuit_info->{id},
+			param("jumper_id"),
+		);
+
 		# Is there already a simple jumper between starting point and destination?
 		# If so, we cannot add any more connections
+		if($connection_count->{simple}) {
+			debug("cannot add more jumpers between these circuits - a simple jumper already links them");
+			return template(
+				'jumper/invalid',
+				{
+					error_code => 'HAS_SIMPLE_JUMPER',
+					a_designation => $a_circuit_info->{full_designation},
+					b_designation => $b_circuit_info->{full_designation},
+				},
+				{ layout => undef }
+			);
+		}
 
-		# Are there any other jumpers linking starting point and destination
-		# If so, we cannot show the simple-jumper connection option
+
+		# Are there any other jumpers linking starting point and destination?
+		# Do the pin counts of starting point and destination differ?
+		# Are the starting and destination jumpers identical?
+		# If any of these, we cannot show the simple-jumper connection option
 
 		debug("before render");
 		template(
@@ -191,6 +213,43 @@ sub describe_jumper_connections {
 		return join(', ', @wire_descriptions);
 	}
 }
+
+
+
+sub get_connection_count {
+
+	my $a_circuit_id = shift;
+	my $b_circuit_id = shift;
+	my $exclude_jumper_id = shift || 0;
+
+	my $q = database->prepare("
+		SELECT 
+			CASE WHEN is_simple_jumper IS TRUE THEN 'simple' ELSE 'complex' END AS jumper_type,
+			COUNT(*) as connection_count 
+		FROM jumper_circuits
+		WHERE a_circuit_id = ?
+		AND b_circuit_id = ?
+		AND jumper_id != ?
+		GROUP BY jumper_type
+	");
+	$q->execute(
+		$a_circuit_id,
+		$b_circuit_id,
+		$exclude_jumper_id,
+	);
+	my $connection_count = $q->fetchall_hashref("jumper_type");
+
+	debug(sprintf(
+		"circuits %s and %s are connected by %d simple jumpers and %d custom jumpers",
+		$a_circuit_id,
+		$b_circuit_id,
+		$connection_count->{simple}->{connection_count},
+		$connection_count->{complex}->{connection_count},
+	));
+
+	return $connection_count;
+}
+
 
 
 sub delete_jumper {

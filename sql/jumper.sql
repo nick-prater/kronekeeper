@@ -93,6 +93,24 @@ $$ LANGUAGE plpgsql;
 
 
 
+/* Extract jumpers and which circuits they connect */
+CREATE OR REPLACE VIEW jumper_circuits AS
+SELECT DISTINCT 
+	jumper_wire.jumper_id,
+	is_simple_jumper(jumper_wire.jumper_id),
+	pin1.circuit_id AS a_circuit_id,
+	pin2.circuit_id AS b_circuit_id
+FROM jumper_wire
+JOIN connection AS connection1 ON (connection1.jumper_wire_id = jumper_wire.id)
+JOIN pin AS pin1 ON (pin1.id = connection1.pin_id)
+JOIN connection AS connection2 ON (
+	connection2.jumper_wire_id = connection1.jumper_wire_id
+	AND connection2.id != connection1.id
+)
+JOIN pin AS pin2 ON (pin2.id = connection2.pin_id);
+
+
+
 /* Shows every node connected by a jumper wire
  * with designations
  */

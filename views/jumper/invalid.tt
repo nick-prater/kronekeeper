@@ -1,7 +1,12 @@
 <div class="ui-state-error ui-corner-all"> 
-[% IF error_code == 'INVALID_CIRCUIT' %]
 	<h3>Cannot connect jumper.</h3>
+[% IF error_code == 'INVALID_CIRCUIT' %]
 	<p>Destination <span class="designation">[% b_designation %]</span> is not a valid circuit for this frame.</p>
+[% ELSIF error_code == 'HAS_SIMPLE_JUMPER' %]
+	<p>Circuits <span class="designation">[% a_designation %]</span> and 
+	   <span class="designation">[% b_designation %]</span>
+	   are already fully connected by a simple jumper. Cannot add more jumpers between these circuits.
+	</p>
 [% ELSE %]
 	<p>Sorry... an unexpected error has occurred.</p>
 [% END %]
