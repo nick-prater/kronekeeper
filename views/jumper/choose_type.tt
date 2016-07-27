@@ -1,0 +1,38 @@
+
+<div class="choose_jumper_type">
+	<h2>Jumpering <span class="designation">[% a_designation %]</span>
+	    &rarr; <span class="designation">[% b_designation %]</span>
+	</h2>
+
+	<div class="option_group">
+		<div class="option_item">
+			<h1>Simple Jumper</h1>
+			<table>
+				[% FOREACH index IN [0 .. max_pin_index] %]
+				<tr>
+					<td>[% a_pins.$index.designation %]</td>
+					<td>&rarr;</td>
+					<td>[% b_pins.$index.designation %]</td>
+				</tr>
+				[% END %]
+			</table>
+		</div>
+
+		<div class="option_item">
+			<h1>Custom Jumper</h1>
+			<table>
+				[% FOREACH index IN [0 .. max_pin_index] %]
+				<tr>
+					<td>[% a_pins.$index.designation %]</td>
+				    [% IF index == 0 %]
+					<td rowspan="0">??</td>
+				    [% END %]
+					<td>[% b_pins.$index.designation %]</td>
+				</tr>
+				[% END %]
+			</table>
+		</div>
+	</div>
+
+	<div class="message">Select jumper type</div>
+</div>

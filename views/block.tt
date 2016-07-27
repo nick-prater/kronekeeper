@@ -26,7 +26,7 @@
 
 
 <!-- Dialogs hidden on page load -->
-<div id="jumper_connection_dialog" title="Jumper connection">
+<div id="jumper_connection_dialog" title="Jumper connection" class="dialog">
 </div>
 
 

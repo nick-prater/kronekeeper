@@ -209,6 +209,22 @@ sub circuit_info_from_designation {
 }
 
 
+sub circuit_pins {
+
+	my $circuit_id = shift;
+
+	my $q = database->prepare("
+		SELECT *
+		FROM pin
+		WHERE pin.circuit_id = ?
+		ORDER BY position
+	");
+	$q->execute($circuit_id);
+	return $q->fetchall_arrayref({});
+}
+
+
+
 sub update_field {
 
 	my $info = shift;
