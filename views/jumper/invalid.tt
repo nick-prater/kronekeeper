@@ -7,6 +7,11 @@
 	   <span class="designation">[% b_designation %]</span>
 	   are already fully connected by a simple jumper. Cannot add more jumpers between these circuits.
 	</p>
+[% ELSIF error_code == 'NO_PINS' %]
+	<p>Cannot connect circuits <span class="designation">[% a_designation %]</span> and 
+	   <span class="designation">[% b_designation %]</span> as at least one of them
+	   has no pins to connect.
+	</p>
 [% ELSE %]
 	<p>Sorry... an unexpected error has occurred.</p>
 [% END %]

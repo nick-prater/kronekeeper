@@ -98,18 +98,42 @@ prefix '/jumper' => sub {
 			);
 		}
 
+		# Both circuits must have some pins to link with the jumper
+		unless($a_circuit_info->{pin_count} && $b_circuit_info->{pin_count}) {
+			debug("cannot a jumper between these circuits - at least one of them has no pins");
+			return template(
+				'jumper/invalid',
+				{
+					error_code => 'NO PINS',
+					a_designation => $a_circuit_info->{full_designation},
+					b_designation => $b_circuit_info->{full_designation},
+				},
+				{ layout => undef }
+			);
+		}
 
-		# Are there any other jumpers linking starting point and destination?
-		# Do the pin counts of starting point and destination differ?
-		# Are the starting and destination jumpers identical?
-		# If any of these, we cannot show the simple-jumper connection option
-
-		debug("before render");
-		template(
-			'jumper/invalid',
-			{ message => 'still more work to do here...' },
-			{ layout => undef }
-		);
+		# Cannot offer simple jumper connection if:
+		#   - there any other jumpers linking starting point and destination
+		#   - starting and destination circuits are identical
+		#   - starting and destination pin counts differ
+		if(
+			$connection_count->{complex} ||
+			$a_circuit_info->{id} == $b_circuit_info->{id} ||
+			$a_circuit_info->{pin_count} != $b_circuit_info->{pin_count}
+		) {	
+			debug("cannot offer simple jumper - forward to custom jumper selection");
+		}
+		else {
+			debug("offering choice of simple or custom jumper connection");
+			template(
+				'jumper/choose_type',
+				{
+					a_designation => $a_circuit_info->{full_designation},
+					b_designation => $b_circuit_info->{full_designation},
+				},
+				{ layout => undef }
+			);
+		}
 	};
 };
 
@@ -243,8 +267,8 @@ sub get_connection_count {
 		"circuits %s and %s are connected by %d simple jumpers and %d custom jumpers",
 		$a_circuit_id,
 		$b_circuit_id,
-		$connection_count->{simple}->{connection_count},
-		$connection_count->{complex}->{connection_count},
+		$connection_count->{simple}->{connection_count}  || 0,
+		$connection_count->{complex}->{connection_count} || 0,
 	));
 
 	return $connection_count;
