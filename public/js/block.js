@@ -176,7 +176,7 @@ require([
 				console.log("jumper changed");
 				var jumper_view = this;
 				jumper_select.display({
-					connection_id: this.model.circuit.id,
+					circuit_id: this.model.circuit.id,
 					jumper_id: this.model.get("id"),
 					destination_designation: e.target.value,
 					cancel_action: function() {

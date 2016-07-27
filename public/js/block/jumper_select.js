@@ -55,7 +55,7 @@ define([
 		$("#jumper_connection_dialog").dialog("open");
 
 		var request_data = {
-			a_circuit_id: args.connection_id,
+			a_circuit_id: args.circuit_id,
 			b_designation: args.destination_designation,
 			jumper_id: args.jumper_id  // null unless we're replacing an existing jumper
 		};
