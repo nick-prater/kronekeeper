@@ -8,7 +8,7 @@
 
 	<div class="option_group">
 		<div class="option_item" id="simple_jumper_button">
-			<h1>Simple Jumper</h1>
+			<h1>Standard Jumper</h1>
 			<table>
 				[% FOREACH index IN [0 .. max_pin_index] %]
 				<tr>
