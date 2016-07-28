@@ -138,38 +138,13 @@ prefix '/jumper' => sub {
 					a_pins => $a_pins,
 					b_pins => $b_pins,
 					max_pin_index => ($max_pin_count - 1),
-					pin_table_data => build_jumper_choice_table($a_circuit_info->{id}, $b_circuit_info->{id}),
 				},
 				{ layout => undef }
 			);
 		}
 	};
+
 };
-
-
-sub build_jumper_choice_table {
-
-	# Find an array of pins for two circuits. They may differ in the
-	# number of elements
-
-
-	my $a_circuit_id = shift;
-	my $b_circuit_id = shift;
-	my $a_pins = kronekeeper::Circuit::circuit_pins($a_circuit_id);
-	my $b_pins = kronekeeper::Circuit::circuit_pins($b_circuit_id);
-	my @rv = ();
-
-	while(scalar(@{$a_pins}) || scalar(@{$b_pins})) {
-		my $a = shift(@{$a_pins});
-		my $b = shift(@{$b_pins});
-		push(@rv, {
-			a => $a,
-			b => $b,
-		});
-	}
-
-	return \@rv;
-}
 
 
 
