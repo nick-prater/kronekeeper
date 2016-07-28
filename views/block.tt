@@ -53,6 +53,11 @@
 	<p>loading...</p>
 </script>
 
+<script type="text/template" id="loading_error_template">
+	<p>failed to load data</p>
+	<p><%- error_code %></p>
+</script>
+
 
 <!-- Global state variables -->
 <script type="text/javascript">

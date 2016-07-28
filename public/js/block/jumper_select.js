@@ -27,6 +27,7 @@ define([
 ], function (
 ) {
 
+	/* TODO: On dialog close, should we cancel any pending xhr requests? */
 
 	/* Action to take when dialog is cancelled */
 	var cancel_action = null;
@@ -65,13 +66,30 @@ define([
 		$("#jumper_connection_dialog").load(
 			'/jumper/connection_choice',
 			request_data,
-			function(response, status_text, xhr) {
-				console.log("ajax response: ", status_text);
-				
+			function(response, status, xhr) {
+				if(status=="success") {
+					console.log("loaded connection choices OK");
+				}
+				else {
+					var error_code = xhr.status + " " + xhr.statusText;
+					display_load_error(error_code);
+				}
 			}
 		);
-	
 	};
+
+
+	function display_load_error(error_code) {
+
+		/* Displays a loading failed message in the dialog */
+		var template = _.template( $('#loading_error_template').html() );
+		$("#jumper_connection_dialog").html(
+			template({
+				error_code: error_code
+			})
+		);
+	}
+
 
 	console.log("jumper_select module loaded");
 
