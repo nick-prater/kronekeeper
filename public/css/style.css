@@ -251,7 +251,16 @@ body {
 	margin: 5px;
 }
 
+.choose_jumper_type .option_group div:hover.option_item {
+	background: #999;
+}
+
+.choose_jumper_type .option_group div:hover.option_item table {
+	border: 1px solid black;
+}
+
 .choose_jumper_type .option_item table {
+	border: 1px solid white;
 	border-radius: 5px;
 	margin-left: auto;
 	margin-right: auto;
