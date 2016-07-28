@@ -163,7 +163,8 @@ INSERT INTO colour(name, short_name, html_code) VALUES
 CREATE TABLE jumper_template(
 	id SERIAL NOT NULL PRIMARY KEY,
 	name TEXT,
-	designation TEXT
+	designation TEXT,
+	account_id INTEGER NOT NULL REFERENCES account(id)
 );
 CREATE UNIQUE INDEX jumper_template_designation_idx ON jumper_template(designation);
 
@@ -184,6 +185,7 @@ CREATE TABLE jumper_template_wire(
  * however many short color names are provided
  */
 CREATE OR REPLACE FUNCTION create_jumper_template(
+	p_account_id INTEGER,
 	p_template_name TEXT,
 	p_template_designation TEXT,
 	p_wire_colours TEXT[]
@@ -195,8 +197,8 @@ DECLARE p_wire_colour_name TEXT;
 DECLARE p_wire_colour_id INTEGER;
 BEGIN
 
-	INSERT INTO jumper_template(name, designation)
-	VALUES(p_template_name, p_template_designation)
+	INSERT INTO jumper_template(name, designation, account_id)
+	VALUES(p_template_name, p_template_designation, p_account_id)
 	RETURNING id INTO p_jumper_template_id;
 
 	FOREACH p_wire_colour_name IN ARRAY p_wire_colours LOOP
@@ -223,12 +225,14 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-/* Insert Basic Jumper Templates */
+/* Insert Basic Jumper Templates 
+ * This needs re-work now that we've made the templates per-account
 SELECT create_jumper_template('Analogue Right', 'R', ARRAY['blu','y']);
 SELECT create_jumper_template('Analogue Left',  'L', ARRAY['blu','red']);
 SELECT create_jumper_template('Analogue Mono',  'M', ARRAY['red','white']);
 SELECT create_jumper_template('DC', 'DC', ARRAY['green','yellow']);
 SELECT create_jumper_template('AES/EBU', 'AES', ARRAY['blue','white']);
+ */
 
 
 /*--------------------------------------------------------------------------*/
