@@ -172,6 +172,20 @@ JOIN colour ON (colour.id = jumper_wire.colour_id)
 ORDER BY jumper_id, jumper_wire_id;
   
 
+/* Returns the number of wires contained within a jumper template */
+CREATE OR REPLACE FUNCTION jumper_template_wire_count(
+	p_jumper_template_id INTEGER
+)
+RETURNS INTEGER AS $$
+BEGIN
+
+	RETURN COUNT(*)
+	FROM jumper_template_wire
+	WHERE jumper_template_id = p_jumper_template_id;
+END
+$$ LANGUAGE plpgsql;
+
+
 
 /* Deletes the given jumper_id and it's linked records */
 CREATE OR REPLACE FUNCTION delete_jumper(

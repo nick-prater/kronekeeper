@@ -144,6 +144,31 @@ prefix '/jumper' => sub {
 		}
 	};
 
+
+	post '/wire_choice' => require_login sub {
+
+		debug("wire_choice");
+		debug( request->body);
+
+		# Use the specified wire_count to determine which jumper
+		# templates to present.
+		my $wire_count = param("wire_count");
+		$wire_count && $wire_count =~ m/^\d+$/ or do {
+			error "wire_count is missing or not an integer";
+			send_error('wire_count parameter is missing or not an integer.' => 400);
+		};
+
+		my $jumper_templates = get_jumper_templates($wire_count);
+
+		use Data::Dumper;
+		debug Dumper $jumper_templates;
+
+		return to_json {
+			jumper_templates => $jumper_templates,
+		};
+
+	}
+
 };
 
 
@@ -320,6 +345,7 @@ sub delete_jumper {
 }
 
 
+
 sub prettify_designation {
 
 	my $d = shift;
@@ -330,6 +356,47 @@ sub prettify_designation {
 	# Return as uppercase
 	return uc($d);
 }
+
+
+
+sub get_jumper_templates {
+
+	my $wire_count = shift;
+	my $account_id = session('account')->{id};
+
+	# Get the templates
+	my $q = database->prepare("
+		SELECT *
+		FROM jumper_template
+		WHERE jumper_template_wire_count(id) = ?
+		AND account_id = ?
+	");
+	$q->execute($wire_count, $account_id);
+	my $templates = $q->fetchall_arrayref({});
+
+	# Add the wires for each template
+	$q = database->prepare("
+		SELECT
+			jumper_template_wire.position AS position,
+			colour.id AS colour_id,
+			colour.name AS colour_name,
+			colour.short_name AS colour_short_name,
+			CONCAT('#', ENCODE(colour.html_code, 'hex')) AS html_colour
+		FROM jumper_template_wire
+		JOIN colour ON (colour.id = jumper_template_wire.colour_id)
+		WHERE jumper_template_id = ?
+		ORDER BY position ASC
+	");
+
+	foreach my $template(@{$templates}) {
+		$q->execute($template->{id});
+		$template->{wires} = $q->fetchall_arrayref({});
+	}
+
+	return $templates;
+}
+
+
 
 
 1;

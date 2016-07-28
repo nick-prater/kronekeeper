@@ -26,6 +26,7 @@ define([
 	'jqueryui'
 ], function (
 ) {
+        'use strict';
 
 	/* TODO: On dialog close, should we cancel any pending xhr requests? */
 
@@ -48,6 +49,13 @@ define([
 		close: function(event) {
 			cancel_action()
 		}
+	});
+
+
+	/* Added while testing so that dialog appears immediately */
+	display({
+		circuit_id: 51,
+		destination_designation: 'a08.4'
 	});
 
 
@@ -117,8 +125,33 @@ define([
 
 	function handle_simple_jumper_click(event) {
 
+		/* Load jumper selection */
 		console.log("simple jumper selected");
 
+		/* Reset buttons and show 'loading' message */
+		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button]);
+		$("#jumper_connection_dialog").html($("#loading_message_template").html());
+
+		var request_data = {
+			wire_count: window.jumper_state.a_pins.length
+		};
+
+		console.log("displaying jumper wire choices for:", request_data);
+
+		$("#jumper_connection_dialog").load(
+			'/jumper/wire_choice',
+			request_data,
+			function(response, status, xhr) {
+				if(status=="success") {
+					console.log("loaded wire choices OK");
+					//handle_load_success();
+				}
+				else {
+					var error_code = xhr.status + " " + xhr.statusText;
+					display_load_error(error_code);
+				}
+			}
+		);
 	}
 
 

@@ -1,3 +1,4 @@
+[% USE JSON %]
 
 <!-- Step 1 -->
 <div class="choose_jumper_type" id="choose_jumper_type_div">
@@ -65,5 +66,14 @@
 
 	<div class="message">Select pin connections</div>
 </div>
+
+
+<!-- Global state variables -->
+<script type="text/javascript">
+window.jumper_state = {
+	a_pins: [% a_pins.json %],
+	b_pins: [% b_pins.json %]
+};
+</script>
 
 
