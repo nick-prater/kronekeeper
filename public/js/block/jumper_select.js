@@ -29,27 +29,35 @@ define([
 
 	/* TODO: On dialog close, should we cancel any pending xhr requests? */
 
-	/* Action to take when dialog is cancelled */
-	var cancel_action = null;
+	/* Default action to take when dialog is cancelled */
+	var cancel_action;
 
+	/* Initialise dialog */
+	var cancel_button = {
+		text: "Cancel",
+		icon: "ui-icon-close",
+		click: function(e) {
+			$(this).dialog("close");
+		}
+	};
 
 	$("#jumper_connection_dialog").dialog({
 		autoOpen: false,
 		modal: true,
-		buttons: {
-			Cancel: function(event) {
-				$(this).dialog("close");
-			}
-		},
+		buttons: [cancel_button],
 		close: function(event) {
 			cancel_action()
 		}
 	});
 
 
+
 	function display(args) {
 
 		cancel_action = args.cancel_action;
+
+		/* Reset buttons to initial state */
+		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button]);
 
 		/* Reset dialog to show 'loading' message before loading new content */
 		$("#jumper_connection_dialog").html($("#loading_message_template").html());
@@ -69,6 +77,7 @@ define([
 			function(response, status, xhr) {
 				if(status=="success") {
 					console.log("loaded connection choices OK");
+					handle_load_success();
 				}
 				else {
 					var error_code = xhr.status + " " + xhr.statusText;
@@ -77,6 +86,7 @@ define([
 			}
 		);
 	};
+
 
 
 	function display_load_error(error_code) {
@@ -88,6 +98,73 @@ define([
 				error_code: error_code
 			})
 		);
+	}
+
+
+
+	function handle_load_success() {
+
+		/* Set buttons - as a side-effect this re-centres the dialog */
+		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button]);
+
+		/* Set up events on dynamically loaded content */
+		$("#simple_jumper_button").on("click", handle_simple_jumper_click);
+		$("#custom_jumper_button").on("click", handle_custom_jumper_click);
+		$(".choose_jumper_connections select").on("change", jumper_connection_change);
+
+	}
+
+
+	function handle_simple_jumper_click(event) {
+
+		console.log("simple jumper selected");
+
+	}
+
+
+	function handle_custom_jumper_click(event) {
+
+		console.log("custom jumper selected");
+
+		$("#choose_jumper_type_div").hide();
+		$("#choose_jumper_connections_div").show();
+
+		/* Add a next button, but leave it disabled until at least one connection is made */
+		/* This has a side-effect of re-centering the dialog on the page */
+		var next_button = {
+			text: "Next",
+			icon: "ui-icon-check",
+			click: function(e) {
+				console.log("next");
+			}
+		};
+		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button, next_button]);
+		$("#jumper_connection_dialog").parent().find('button:contains("Next")').button("disable");
+	}
+
+
+
+	function hide_next_button_when_no_connections () {
+
+		var not_connected = true;
+		$(".choose_jumper_connections select").each(function() {
+			if($(this).val()) {
+				not_connected = false;
+			}
+		});
+
+		if(not_connected) {
+			$("#jumper_connection_dialog").parent().find('button:contains("Next")').button("disable");
+		}
+		else {
+			$("#jumper_connection_dialog").parent().find('button:contains("Next")').button("enable");
+		}
+	}
+
+
+
+	function jumper_connection_change(e) {
+		hide_next_button_when_no_connections();
 	}
 
 

@@ -244,6 +244,11 @@ body {
 	font-size: 65%;
 }
 
+.choose_jumper_type table {
+	margin-left: auto;
+	margin-right: auto;
+}
+
 .choose_jumper_type .option_group div.option_item {
 	background: #ddd;
 	border: 1px solid black;
@@ -262,8 +267,6 @@ body {
 .choose_jumper_type .option_item table {
 	border: 1px solid white;
 	border-radius: 5px;
-	margin-left: auto;
-	margin-right: auto;
 	margin-bottom: 1em;
 	background: white;
 }
@@ -285,10 +288,10 @@ body {
 
 /* Override jQueryUI to centre buttons on a dialog */
 .ui-dialog .ui-dialog-buttonpane { 
-    text-align: center;
+	text-align: center; 
 }
 .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset { 
-    float: none;
+	float: none;
 }
 
 
