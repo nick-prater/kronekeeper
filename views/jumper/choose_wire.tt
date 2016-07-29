@@ -1,0 +1,34 @@
+[% USE JSON %]
+
+<div class="choose_jumper_type" id="choose_jumper_template_div">
+	<h2>Jumpering <span class="designation">[% a_designation %]</span>
+	    &rarr; <span class="designation">[% b_designation %]</span>
+	</h2>
+
+	<div class="option_group">
+	    [% FOREACH template IN jumper_templates %]
+		<div class="option_item">
+			<h1>[%- template.name %]</h1>
+			<table>
+				<tr>
+				    [% FOREACH wire in template.wires %]
+					<td style="background: [%- wire.html_colour %]">
+						[%- wire.colour_name %]
+					</td>
+				    [% END %]
+				</tr>
+			</table>
+		</div>
+	    [% END %]
+	</div>
+
+	<div class="message">Select jumper wire</div>
+</div>
+
+
+
+<!-- Global state variables -->
+<script type="text/javascript">
+</script>
+
+

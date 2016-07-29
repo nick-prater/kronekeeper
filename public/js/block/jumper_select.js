@@ -133,7 +133,9 @@ define([
 		$("#jumper_connection_dialog").html($("#loading_message_template").html());
 
 		var request_data = {
-			wire_count: window.jumper_state.a_pins.length
+			wire_count: window.jumper_state.a_pins.length,
+			a_designation: window.jumper_state.a_circuit.full_designation,
+			b_designation: window.jumper_state.b_circuit.full_designation,
 		};
 
 		console.log("displaying jumper wire choices for:", request_data);

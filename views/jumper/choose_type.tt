@@ -2,8 +2,8 @@
 
 <!-- Step 1 -->
 <div class="choose_jumper_type" id="choose_jumper_type_div">
-	<h2>Jumpering <span class="designation">[% a_designation %]</span>
-	    &rarr; <span class="designation">[% b_designation %]</span>
+	<h2>Jumpering <span class="designation">[% a_circuit.full_designation %]</span>
+	    &rarr; <span class="designation">[% b_circuit.full_designation %]</span>
 	</h2>
 
 	<div class="option_group">
@@ -43,8 +43,8 @@
 <!-- Step 2 if the Custom Jumper option is selected -->
 <div class="choose_jumper_type choose_jumper_connections" id="choose_jumper_connections_div" hidden="hidden">
 
-	<h2>Jumpering <span class="designation">[% a_designation %]</span>
-	    &rarr; <span class="designation">[% b_designation %]</span>
+	<h2>Jumpering <span class="designation">[% a_circuit.full_designation %]</span>
+	    &rarr; <span class="designation">[% b_circuit.full_designation %]</span>
 	</h2>
 
 	<table>
@@ -71,6 +71,8 @@
 <!-- Global state variables -->
 <script type="text/javascript">
 window.jumper_state = {
+	a_circuit: [% a_circuit.json %],
+	b_circuit: [% b_circuit.json %],
 	a_pins: [% a_pins.json %],
 	b_pins: [% b_pins.json %]
 };

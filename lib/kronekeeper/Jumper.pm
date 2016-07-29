@@ -133,8 +133,8 @@ prefix '/jumper' => sub {
 			template(
 				'jumper/choose_type',
 				{
-					a_designation => $a_circuit_info->{full_designation},
-					b_designation => $b_circuit_info->{full_designation},
+					a_circuit => $a_circuit_info,
+					b_circuit => $b_circuit_info,
 					a_pins => $a_pins,
 					b_pins => $b_pins,
 					max_pin_index => ($max_pin_count - 1),
@@ -163,10 +163,15 @@ prefix '/jumper' => sub {
 		use Data::Dumper;
 		debug Dumper $jumper_templates;
 
-		return to_json {
-			jumper_templates => $jumper_templates,
-		};
-
+		template(
+			'jumper/choose_wire',
+			{
+				jumper_templates => $jumper_templates,
+				a_designation => param("a_designation"),
+				b_designation => param("b_designation"),
+			},
+			{ layout => undef }
+		);
 	}
 
 };
