@@ -1,13 +1,13 @@
 [% USE JSON %]
 
-<div class="choose_jumper_type" id="choose_jumper_template_div">
+<div class="choose_jumper_type choose_jumper_template" id="choose_jumper_template_div">
 	<h2>Jumpering <span class="designation">[% a_designation %]</span>
 	    &rarr; <span class="designation">[% b_designation %]</span>
 	</h2>
 
 	<div class="option_group">
 	    [% FOREACH template IN jumper_templates %]
-		<div class="option_item" data-jumper-template_id="[% template.id %]">
+		<div class="option_item" data-jumper_template_id="[% template.id %]">
 			<h1>[%- template.name %]</h1>
 			<table class="wire_colours">
 				<tr>

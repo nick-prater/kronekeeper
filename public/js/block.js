@@ -184,6 +184,16 @@ require([
 						e.target.value = jumper_view.model.get("designation");
 						e.target.parentNode.classList.remove('change_pending');
 						jumper_view.$el.effect("highlight", {}, 900);
+					},
+					success_action: function(data) {
+						console.log("success action");
+						jumper_view.model.set({
+							id: data.jumper_id,
+							designation: data.b_circuit_info.full_designation
+						});
+						e.target.value = data.b_circuit_info.full_designation;
+						e.target.parentNode.classList.remove('change_pending');
+						jumper_view.$el.effect("highlight", {color: "#00ff00"}, 900);
 					}
 				});
 			}

@@ -74,7 +74,8 @@ window.jumper_state = {
 	a_circuit: [% a_circuit.json %],
 	b_circuit: [% b_circuit.json %],
 	a_pins: [% a_pins.json %],
-	b_pins: [% b_pins.json %]
+	b_pins: [% b_pins.json %],
+	replacing_jumper_id: [% replacing_jumper_id %]
 };
 </script>
 

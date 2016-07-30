@@ -45,7 +45,7 @@ prefix '/jumper' => sub {
 		# jumper_id is an optional parameter giving
 		# the id of a jumper we might be replacing, so
 		# we can exclude it from collision checks.
-		if(param("jumper_id") && !jumper_id_valid_for_account(param("jumper_id"))) {
+		if(param("replacing_jumper_id") && !jumper_id_valid_for_account(param("replacing_jumper_id"))) {
 			send_error('Access to requested jumper_id is forbidden.' => 403);
 		}
 
@@ -81,7 +81,7 @@ prefix '/jumper' => sub {
 		my $connections = get_connection_count(
 			$a_circuit_info->{id},
 			$b_circuit_info->{id},
-			param("jumper_id"),
+			param("replacing_jumper_id"),
 		);
 
 		# Is there already a simple jumper between starting point and destination?
@@ -138,6 +138,7 @@ prefix '/jumper' => sub {
 					a_pins => $a_pins,
 					b_pins => $b_pins,
 					max_pin_index => ($max_pin_count - 1),
+					replacing_jumper_id => param("replacing_jumper_id"),
 				},
 				{ layout => undef }
 			);
@@ -159,9 +160,6 @@ prefix '/jumper' => sub {
 		};
 
 		my $jumper_templates = get_jumper_templates($wire_count);
-
-		use Data::Dumper;
-		debug Dumper $jumper_templates;
 
 		template(
 			'jumper/choose_wire',
@@ -202,6 +200,54 @@ prefix '/api/jumper' => sub {
 		};
 	};
 
+
+	post '/add_simple_jumper' => sub {
+
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug "add_simple_jumper()";
+		debug request->body;
+
+		# a_circuit_id is the starting point for this jumper - required parameter
+		unless(defined param("a_circuit_id")) {
+			send_error('Missing a_circuit_id parameter.' => 400);
+		}
+		unless(kronekeeper::Circuit::circuit_id_valid_for_account(param("a_circuit_id"))) {
+			send_error('Bad a_circuit_id. Forbidden' => 403);
+		}
+
+		# b_circuit_id is the ending point for this jumper - required parameter
+		unless(defined param("b_circuit_id")) {
+			send_error('Missing b_circuit_id parameter.' => 400);
+		}
+		unless(kronekeeper::Circuit::circuit_id_valid_for_account(param("b_circuit_id"))) {
+			send_error('Bad b_circuit_id. Forbidden' => 403);
+		}
+
+		# jumper_template_id to be used for this jumper - required parameter
+		unless(defined param("jumper_template_id")) {
+			send_error('Missing jumper_template_id parameter.' => 400);
+		}
+		unless(jumper_template_id_valid_for_account(param("jumper_template_id"))) {
+			send_error('Bad jumper_template_id. Forbidden' => 403);
+		}
+
+		# replacing_jumper_id will be removed before inserting the new jumper - optional parameter
+		if(defined param("replacing_jumper_id")) {
+			jumper_id_valid_for_account(param("replacing_jumper_id")) or do {
+				send_error('Bad replacing_jumper_id parameter. Forbidden' => 403);
+			};
+		}
+
+
+		return to_json {
+			b_circuit_info => kronekeeper::Circuit::circuit_info(param("b_circuit_id")),
+			jumper_id => 9999,
+		};
+	};
+
 };
 
 
@@ -211,7 +257,7 @@ sub jumper_id_valid_for_account {
 	my $account_id = shift || session('account')->{id};
 
 	$jumper_id && $jumper_id =~ m/^\d+$/ or do {
-		error "id is not an integer";
+		error "jumper_id is not an integer";
 		return undef;
 	};
 	$account_id && $account_id =~ m/^\d+$/ or do {
@@ -239,6 +285,34 @@ sub jumper_id_valid_for_account {
 	);
 
 	return $q->fetchrow_hashref;
+}
+
+
+sub jumper_template_id_valid_for_account {
+
+	my $id = shift;
+	my $account_id = shift || session('account')->{id};
+
+	$id && $id =~ m/^\d+$/ or do {
+		error "jumper_template_id is not an integer";
+		return undef;
+	};
+	$account_id && $account_id =~ m/^\d+$/ or do {
+		error "account_id is not an integer";
+		return undef;
+	};
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM jumper_template
+		WHERE id = ?
+		AND account_id = ?
+	");
+
+	return $q->execute(
+		$id,
+		$account_id,
+	);
 }
 
 
