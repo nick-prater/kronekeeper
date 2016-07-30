@@ -7,13 +7,13 @@
 
 	<div class="option_group">
 	    [% FOREACH template IN jumper_templates %]
-		<div class="option_item">
+		<div class="option_item" data-jumper-template_id="[% template.id %]">
 			<h1>[%- template.name %]</h1>
-			<table>
+			<table class="wire_colours">
 				<tr>
 				    [% FOREACH wire in template.wires %]
 					<td style="background: [%- wire.html_colour %]">
-						[%- wire.colour_name %]
+						<span class="legend" style="color: [% wire.contrasting_html_colour %]">[%- wire.colour_name %]</span>
 					</td>
 				    [% END %]
 				</tr>

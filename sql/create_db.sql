@@ -142,23 +142,24 @@ CREATE TABLE colour(
 	id SERIAL NOT NULL PRIMARY KEY,
 	html_code BYTEA NOT NULL,
 	name TEXT NOT NULL,
-	short_name TEXT NOT NULL
+	short_name TEXT NOT NULL,
+	contrasting_html_code BYTEA NOT NULL DEFAULT E'\\x000000'
 );
 CREATE UNIQUE INDEX colour_name_idx ON colour(name);
 CREATE UNIQUE INDEX colour_short_name_idx ON colour(short_name);
 
 /* Insert basic cable colours */
-INSERT INTO colour(name, short_name, html_code) VALUES 
-	('blue',  'blu', E'\\x0000FF'),
-	('orange', 'or', E'\\xFFA500'),
-	('green',  'gn', E'\\x008000'),
-	('brown',  'bn', E'\\x8b4513'),
-	('slate',  's',  E'\\x808080'),
-	('white',  'w',  E'\\xffffff'),
-	('red',    'r',  E'\\xff0000'),
-	('black', 'blk', E'\\x000000'),
-	('yellow', 'y',  E'\\xffd700'),
-	('violet', 'v',  E'\\x800080');
+INSERT INTO colour(name, short_name, html_code, contrasting_html_code) VALUES 
+	('blue',  'blu', E'\\x0000FF', E'\\xffffff'),
+	('orange', 'or', E'\\xFFA500', E'\\xffffff'),
+	('green',  'gn', E'\\x008000', E'\\xffffff'),
+	('brown',  'bn', E'\\x8b4513', E'\\xffffff'),
+	('slate',  's',  E'\\x808080', E'\\xffffff'),
+	('white',  'w',  E'\\xffffff', E'\\x000000'),
+	('red',    'r',  E'\\xff0000', E'\\xffffff'),
+	('black', 'blk', E'\\x000000', E'\\xffffff'),
+	('yellow', 'y',  E'\\xffd700', E'\\x000000'),
+	('violet', 'v',  E'\\x800080', E'\\xffffff');
 
 CREATE TABLE jumper_template(
 	id SERIAL NOT NULL PRIMARY KEY,

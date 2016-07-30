@@ -278,6 +278,12 @@ body {
 	margin-top: 1em;
 }
 
+.wire_colours td {
+	width: 4em;
+	height: 12pt;
+}
+
+
 
 
 /* Override jQueryUI background when a dialog is displayed */

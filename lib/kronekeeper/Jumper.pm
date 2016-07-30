@@ -386,7 +386,8 @@ sub get_jumper_templates {
 			colour.id AS colour_id,
 			colour.name AS colour_name,
 			colour.short_name AS colour_short_name,
-			CONCAT('#', ENCODE(colour.html_code, 'hex')) AS html_colour
+			CONCAT('#', ENCODE(colour.html_code, 'hex')) AS html_colour,
+			CONCAT('#', ENCODE(colour.contrasting_html_code, 'hex')) AS contrasting_html_colour
 		FROM jumper_template_wire
 		JOIN colour ON (colour.id = jumper_template_wire.colour_id)
 		WHERE jumper_template_id = ?
