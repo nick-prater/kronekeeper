@@ -75,7 +75,11 @@ window.jumper_state = {
 	b_circuit: [% b_circuit.json %],
 	a_pins: [% a_pins.json %],
 	b_pins: [% b_pins.json %],
+    [%- IF replacing_jumper_id %]
 	replacing_jumper_id: [% replacing_jumper_id %]
+    [%- ELSE %]
+	replacing_jumper_id: null
+    [%- END %]
 };
 </script>
 

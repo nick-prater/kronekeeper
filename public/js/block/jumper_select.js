@@ -92,7 +92,6 @@ define([
 			function(response, status, xhr) {
 				if(status=="success") {
 					console.log("loaded connection choices OK");
-					console.log(response);
 					handle_connection_choice_load_success();
 				}
 				else {

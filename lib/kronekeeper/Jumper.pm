@@ -235,7 +235,7 @@ prefix '/api/jumper' => sub {
 		}
 
 		# replacing_jumper_id will be removed before inserting the new jumper - optional parameter
-		if(defined param("replacing_jumper_id")) {
+		if(param("replacing_jumper_id")) {
 			jumper_id_valid_for_account(param("replacing_jumper_id")) or do {
 				send_error('Bad replacing_jumper_id parameter. Forbidden' => 403);
 			};
