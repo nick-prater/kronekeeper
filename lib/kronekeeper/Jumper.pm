@@ -131,7 +131,7 @@ prefix '/jumper' => sub {
 			my $max_pin_count = max(scalar(@{$a_pins}), scalar(@{$b_pins}));
 
 			template(
-				'jumper/choose_type',
+				'jumper/choose_connection',
 				{
 					a_circuit => $a_circuit_info,
 					b_circuit => $b_circuit_info,
