@@ -239,12 +239,24 @@ prefix '/api/jumper' => sub {
 			jumper_id_valid_for_account(param("replacing_jumper_id")) or do {
 				send_error('Bad replacing_jumper_id parameter. Forbidden' => 403);
 			};
+			delete_jumper(param("replacing_jumper_id"));
 		}
 
+		my $new_jumper_id = add_simple_jumper(
+			param("a_circuit_id"),
+			param("b_circuit_id"),
+			param("jumper_template_id"),
+		) or do {
+			database->rollback;
+			debug("add_simple_jumper didn't return a new jumper_id");
+			send_error("failed to add jumper");
+		};
+
+		database->commit;
 
 		return to_json {
 			b_circuit_info => kronekeeper::Circuit::circuit_info(param("b_circuit_id")),
-			jumper_id => 9999,
+			jumper_id => $new_jumper_id,
 		};
 	};
 
@@ -476,6 +488,36 @@ sub get_jumper_templates {
 	return $templates;
 }
 
+
+sub add_simple_jumper {
+
+	my $a_circuit_id = shift;
+	my $b_circuit_id = shift;
+	my $jumper_template_id = shift;
+
+	debug(sprintf(
+		"inserting jumper between circuits %s and %s with jumper_template %s",
+		$a_circuit_id,
+		$b_circuit_id,
+		$jumper_template_id,
+	));
+
+	my $q = database->prepare("SELECT add_simple_jumper(?,?,?) AS jumper_id");
+	$q->execute(
+		$a_circuit_id,
+		$b_circuit_id,
+		$jumper_template_id,
+	) or do {
+		database->rollback;
+		send_error("failed to add simple jumper");
+	};
+
+	my $result = $q->fetchrow_hashref;
+
+	#TODO Update activity log
+
+	return $result->{jumper_id};
+}
 
 
 

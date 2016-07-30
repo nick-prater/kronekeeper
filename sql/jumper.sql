@@ -209,5 +209,87 @@ $$ LANGUAGE plpgsql;
 
 
 
+CREATE OR REPLACE FUNCTION add_simple_jumper(
+	p_circuit_id_1 INTEGER,
+	p_circuit_id_2 INTEGER,
+	p_jumper_template_id INTEGER
+)
+RETURNS INTEGER AS $$
+DECLARE p_jumper_wire_count INTEGER;
+DECLARE p_pin_position INTEGER;
+DECLARE p_colour_id INTEGER;
+DECLARE p_jumper_id INTEGER;
+DECLARE p_jumper_wire_id INTEGER;
+BEGIN
+
+	/* This function connects two circuits, each having an identical
+	 * number of pins, with a jumper template having a corresponding
+	 * number of wires. Pins are connected with a 1:1 mapping, so
+	 * a->a, b->b, s->s for example. Most jumpers are like this.
+	 * This does not handle split pairs or phase reversals.
+	 * A check is made to make sure the circuits belong to the same 
+	 * frame and are not already connected.
+	 * A warning is issued if this action results in more than two wires
+	 * being connected to a single jumper pin.
+	 *
+	 * Returns the jumper_id of the new jumper
+	 */
+
+	/* Check circuits belong to the same frame */
+	IF frame_id_for_circuit_id(p_circuit_id_1) != frame_id_for_circuit_id(p_circuit_id_2) THEN
+		RAISE EXCEPTION 'Cannot add jumper between % and %: circuits are not on same frame',
+			p_circuit_id_1,
+			p_circuit_id_2;
+	END IF;
+
+	/* Check pin count matches on both ends of jumper */
+	IF count_pins_for_circuit_id(p_circuit_id_1) != count_pins_for_circuit_id(p_circuit_id_2) THEN
+		RAISE EXCEPTION 'Cannot add simple jumper between % and %: number of pins is different on each end',
+			p_circuit_id_1,
+			p_circuit_id_2;
+	END IF;
+
+	/* Get jumper details */
+	p_jumper_wire_count := count_wires_for_jumper_template_id(p_jumper_template_id);
+
+	/* Check number of wires for the jumper corresponds to the circuit pins */
+	IF p_jumper_wire_count != count_pins_for_circuit_id(p_circuit_id_1) THEN
+		RAISE EXCEPTION 'Cannot connect simple jumper: jumper template has different number of wires to connection pins';
+	END IF;
+
+	/* Check pins aren't already connected */
+	IF circuit_ids_are_connected(p_circuit_id_1, p_circuit_id_2) THEN
+		RAISE EXCEPTION 'A jumper already exists between these circuits';
+	END IF;
+
+	/* Create parent jumper */
+	INSERT INTO jumper(id)
+	VALUES(DEFAULT)
+	RETURNING id INTO p_jumper_id;
+
+	FOR p_pin_position IN 1..p_jumper_wire_count LOOP
+
+		p_colour_id := wire_colour_id_for_jumper_template_position(
+			p_jumper_template_id,
+			p_pin_position
+		);
+
+		INSERT INTO jumper_wire(jumper_id, colour_id)
+		VALUES(p_jumper_id, p_colour_id)
+		RETURNING id INTO p_jumper_wire_id;
+
+		/* Now connect a wire between the corresponding pin of each circuit */
+		INSERT INTO connection (jumper_wire_id, pin_id)
+		SELECT p_jumper_wire_id, pin.id
+		FROM pin
+		WHERE pin.position = p_pin_position
+		AND pin.circuit_id IN (p_circuit_id_1, p_circuit_id_2);
+
+	END LOOP;
+
+	RETURN p_jumper_id;
+END
+$$ LANGUAGE plpgsql;
+
 
 

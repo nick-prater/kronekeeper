@@ -33,6 +33,7 @@ define([
 	/* Default action to take when dialog is cancelled or jumper is successfully installed */
 	var cancel_action;
 	var success_action;
+	var close_success_flag;
 
 	/* Initialise dialog */
 	var cancel_button = {
@@ -48,7 +49,14 @@ define([
 		modal: true,
 		buttons: [cancel_button],
 		close: function(event) {
-			cancel_action()
+			if(close_success_flag = true) {
+				console.log("close dialog - success");
+				close_success_flag = false;
+			}
+			else {
+				console.log("close dialog - cancel");
+				cancel_action();
+			}
 		}
 	});
 
@@ -84,6 +92,7 @@ define([
 			function(response, status, xhr) {
 				if(status=="success") {
 					console.log("loaded connection choices OK");
+					console.log(response);
 					handle_connection_choice_load_success();
 				}
 				else {
@@ -233,6 +242,7 @@ define([
 			dataType: "json",
 			success: function(json) {
 				console.log("updated jumper OK");
+				close_success_flag = true;
 				$("#jumper_connection_dialog").dialog("close");
 				success_action(json);
 			},

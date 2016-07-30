@@ -39,3 +39,19 @@ JOIN vertical ON (vertical.id = block.vertical_id)
 JOIN frame ON (frame.id = vertical.frame_id);
 
 
+CREATE OR REPLACE FUNCTION frame_id_for_circuit_id(
+	p_circuit_id INTEGER
+)
+RETURNS INTEGER AS $$
+BEGIN
+
+	RETURN vertical.frame_id
+	FROM circuit
+	JOIN block ON (block.id = circuit.block_id)
+	JOIN vertical ON (vertical.id = block.vertical_id)
+	WHERE circuit.id = p_circuit_id;
+END
+$$ LANGUAGE plpgsql;
+
+
+
