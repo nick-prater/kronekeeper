@@ -47,16 +47,26 @@
 	    &rarr; <span class="designation">[% b_circuit.full_designation %]</span>
 	</h2>
 
-	<table>
+	<table class="pin_connections">
 		[% FOREACH a_pin IN a_pins %]
-		<tr>
+		<tr data-a_pin_id="[% a_pin.id %]">
 			<td>[% a_pin.designation %]</td>
 			<td>&rarr;</td>
 			<td>
-				<select>
+				<select class="b_pin_picker">
 					<option value="">no connection</option>
 				    [% FOREACH b_pin IN b_pins %]
 					<option value="[% b_pin.id %]">[% b_pin.designation %]</option>
+				    [% END %]
+				</select>
+			</td>
+			<td>
+				<select class="wire_colour_picker">
+					<option value="">pick wire colour</option>
+				    [% FOREACH colour IN colours %]
+					<option value="[% colour.id %]" style="background: [% colour.html_colour %]; color: [% colour.contrasting_html_colour %]">
+						[% colour.name %]
+					</option>
 				    [% END %]
 				</select>
 			</td>
@@ -64,7 +74,7 @@
 		[% END %]
 	</table>
 
-	<div class="message">Select pin connections</div>
+	<div class="message">Select pin connections and wire colour</div>
 </div>
 
 

@@ -49,7 +49,7 @@ define([
 		modal: true,
 		buttons: [cancel_button],
 		close: function(event) {
-			if(close_success_flag = true) {
+			if(close_success_flag) {
 				console.log("close dialog - success");
 				close_success_flag = false;
 			}
@@ -128,6 +128,12 @@ define([
 		$("#simple_jumper_button").on("click", handle_simple_jumper_click);
 		$("#custom_jumper_button").on("click", handle_custom_jumper_click);
 		$(".choose_jumper_connections select").on("change", jumper_connection_change);
+		$("select.wire_colour_picker").on("change", handle_wire_colour_change);
+	}
+
+
+	function handle_wire_colour_change(event) {
+		disable_next_button_when_invalid();
 	}
 
 
@@ -188,7 +194,7 @@ define([
 			text: "Next",
 			icon: "ui-icon-check",
 			click: function(e) {
-				console.log("next");
+				add_custom_jumper(e);
 			}
 		};
 		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button, next_button]);
@@ -196,26 +202,52 @@ define([
 	}
 
 
-	function hide_next_button_when_no_connections () {
+	function disable_next_button_when_invalid () {
 
-		var not_connected = true;
-		$(".choose_jumper_connections select").each(function() {
-			if($(this).val()) {
-				not_connected = false;
+		/* We need at least one selected b_pin
+		 * All selected b_pins must have a colour selected
+		 */
+
+		console.log("checking if connection/colour configuration");
+		var state = "disable";
+		$(".choose_jumper_connections select.b_pin_picker").each(function() {
+			var b_pin_id = $(this).val();
+			var colour_id = $(this).parent().parent().find("select.wire_colour_picker").first().val();
+
+			console.log("");
+			console.log("b_pin_id:" + b_pin_id);
+			console.log("b_colour_id:" + colour_id);
+
+			if(b_pin_id && colour_id) {
+				state = "enable";
+			}
+			else if(b_pin_id && !colour_id) {
+				state = "disable";
+				return false;
 			}
 		});
 
-		if(not_connected) {
-			$("#jumper_connection_dialog").parent().find('button:contains("Next")').button("disable");
-		}
-		else {
-			$("#jumper_connection_dialog").parent().find('button:contains("Next")').button("enable");
-		}
+		$("#jumper_connection_dialog").parent().find('button:contains("Next")').button(state);
 	}
 
 
 	function jumper_connection_change(e) {
-		hide_next_button_when_no_connections();
+		disable_next_button_when_invalid();
+	}
+
+
+	function add_custom_jumper(event) {
+
+
+
+
+
+		var data = {
+			a_circuit_id: window.jumper_state.a_circuit.id, 
+			b_circuit_id: window.jumper_state.b_circuit.id,
+			replacing_jumper_id: window.jumper_state.replacing_jumper_id
+		};
+
 	}
 
 

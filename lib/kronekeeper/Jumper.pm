@@ -139,6 +139,7 @@ prefix '/jumper' => sub {
 					b_pins => $b_pins,
 					max_pin_index => ($max_pin_count - 1),
 					replacing_jumper_id => param("replacing_jumper_id"),
+					colours => get_colours()
 				},
 				{ layout => undef }
 			);
@@ -486,6 +487,24 @@ sub get_jumper_templates {
 	}
 
 	return $templates;
+}
+
+
+sub get_colours {
+
+	# Get possible wire colours
+	my $q = database->prepare("
+		SELECT
+			id,
+			name,
+			short_name,
+			CONCAT('#', ENCODE(colour.html_code, 'hex')) AS html_colour,
+			CONCAT('#', ENCODE(colour.contrasting_html_code, 'hex')) AS contrasting_html_colour
+		FROM colour
+		ORDER BY name
+	");
+	$q->execute();
+	return $q->fetchall_arrayref({});
 }
 
 
