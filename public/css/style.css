@@ -110,14 +110,15 @@ body {
 }
 
 .frame th {
-	width: 10em;
+	width: 2em;
 }
 
 .frame td {
 	width: 17em;
-	height: 16pt;
+	height: 18pt;
 	background: white;
 	border: 1px solid black;
+	font-size: 12pt;
 }
 
 

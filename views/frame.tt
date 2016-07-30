@@ -5,13 +5,31 @@
 	<table>
 
 		<tr>
+			<th></th>
 			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
 			<th>[% frame_blocks.$vertical_position.designation %]</th>
 			[% END %]
+			<th></th>
 		</tr>
 		[% block_position = frame_info.block_count %]
 		[% WHILE block_position > 0 %]
 		<tr>
+
+		  [%# -- work out 'row' designation from first occupied block
+		      -- note that the schema currently allows a different sequence of
+		      -- of designations for every vertical, but in practice that would
+		      -- be very confusing
+		   %]
+		  [% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
+		    [% SET row_designation= frame_blocks.$vertical_position.blocks.$block_position.designation %]
+		    [% LAST IF row_designation %]
+		  [% END %]
+
+		  [% UNLESS row_designation %]
+		    [% row_designation = '--' %]
+		  [% END %]
+
+			<th>[% row_designation %]</th>
 		  [% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
 		  [% SET vertical = frame_blocks.$vertical_position %]
 		  [% SET block = vertical.blocks.$block_position %]
@@ -36,13 +54,16 @@
 			<td class="block unavailable">unavailable</td>
 		    [% END %]
 		  [% END %]
+			<th>[% row_designation %]</th>
 		</tr>
 		[%   block_position = block_position - 1 %]
 		[% END %]
 		<tr>
+			<th></th>
 			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
 			<th>[% frame_blocks.$vertical_position.designation %]</th>
 			[% END %]
+			<th></th>
 		</tr>
 
 	</table>
