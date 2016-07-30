@@ -208,15 +208,10 @@ define([
 		 * All selected b_pins must have a colour selected
 		 */
 
-		console.log("checking if connection/colour configuration");
 		var state = "disable";
 		$(".choose_jumper_connections select.b_pin_picker").each(function() {
 			var b_pin_id = $(this).val();
 			var colour_id = $(this).parent().parent().find("select.wire_colour_picker").first().val();
-
-			console.log("");
-			console.log("b_pin_id:" + b_pin_id);
-			console.log("b_colour_id:" + colour_id);
 
 			if(b_pin_id && colour_id) {
 				state = "enable";
@@ -238,16 +233,48 @@ define([
 
 	function add_custom_jumper(event) {
 
+		var connections = [];
+		$(".choose_jumper_connections select.b_pin_picker").each(function() {
+			var a_pin_id = $(this).parent().parent().attr("data-a_pin_id");
+			var b_pin_id = $(this).val();
+			var colour_id = $(this).parent().parent().find("select.wire_colour_picker").first().val();
 
-
-
+			if(b_pin_id && colour_id) {
+				var connection = {
+					a_pin_id: a_pin_id,
+					b_pin_id: b_pin_id,
+					wire_colour_id: colour_id
+				};
+				console.log(connection);
+				connections.push(connection);
+			}
+		});
 
 		var data = {
 			a_circuit_id: window.jumper_state.a_circuit.id, 
 			b_circuit_id: window.jumper_state.b_circuit.id,
-			replacing_jumper_id: window.jumper_state.replacing_jumper_id
+			replacing_jumper_id: window.jumper_state.replacing_jumper_id,
+			connections: connections
 		};
+		console.log(data);
 
+		/* Send request to server */
+		$.ajax({
+			url: "/api/jumper/add_custom_jumper",
+			data: data,
+			type: "POST",
+			dataType: "json",
+			success: function(json) {
+				console.log("updated jumper OK");
+				close_success_flag = true;
+				$("#jumper_connection_dialog").dialog("close");
+				success_action(json);
+			},
+			error: function(xhr, status) {
+				var error_code = xhr.status + " " + xhr.statusText;
+				display_load_error(error_code);
+			}
+		});
 	}
 
 
