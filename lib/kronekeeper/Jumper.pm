@@ -56,12 +56,7 @@ prefix '/jumper' => sub {
 		}
 
 		# a_circuit_id is the starting point for this jumper - required parameter
-		unless(defined param("a_circuit_id")) {
-			send_error('Missing a_circuit_id parameter.' => 400);
-		}
-		unless(circuit_id_valid_for_account(param("a_circuit_id"))) {
-			send_error('Bad circuit_id. Forbidden' => 403);
-		}
+		validate_parameter("circuit_id", "a_circuit_id");
 		my $a_circuit_info = circuit_info(param("a_circuit_id"));
 		
 		# b_designation is the human readable destination circuit - required parameter
@@ -217,35 +212,14 @@ prefix '/api/jumper' => sub {
 		debug "add_simple_jumper()";
 		debug request->body;
 
-		# a_circuit_id is the starting point for this jumper - required parameter
-		unless(defined param("a_circuit_id")) {
-			send_error('Missing a_circuit_id parameter.' => 400);
-		}
-		unless(circuit_id_valid_for_account(param("a_circuit_id"))) {
-			send_error('Bad a_circuit_id. Forbidden' => 403);
-		}
-
-		# b_circuit_id is the ending point for this jumper - required parameter
-		unless(defined param("b_circuit_id")) {
-			send_error('Missing b_circuit_id parameter.' => 400);
-		}
-		unless(circuit_id_valid_for_account(param("b_circuit_id"))) {
-			send_error('Bad b_circuit_id. Forbidden' => 403);
-		}
-
-		# jumper_template_id to be used for this jumper - required parameter
-		unless(defined param("jumper_template_id")) {
-			send_error('Missing jumper_template_id parameter.' => 400);
-		}
-		unless(jumper_template_id_valid_for_account(param("jumper_template_id"))) {
-			send_error('Bad jumper_template_id. Forbidden' => 403);
-		}
+		# required parameters
+		validate_parameter("circuit_id", "a_circuit_id");
+		validate_parameter("circuit_id", "b_circuit_id");
+		validate_parameter("jumper_template_id", "jumper_template_id");
 
 		# replacing_jumper_id will be removed before inserting the new jumper - optional parameter
 		if(param("replacing_jumper_id")) {
-			jumper_id_valid_for_account(param("replacing_jumper_id")) or do {
-				send_error('Bad replacing_jumper_id parameter. Forbidden' => 403);
-			};
+			validate_parameter("jumper_id", "replacing_jumper_id");
 			delete_jumper(param("replacing_jumper_id"));
 		}
 
@@ -304,6 +278,34 @@ sub jumper_id_valid_for_account {
 	);
 
 	return $q->fetchrow_hashref;
+}
+
+
+sub validate_parameter {
+
+	my $type = shift;
+	my $parameter_name = shift;
+
+	# Define the available validation routines according to the parameter type
+	my %test_functions = (
+		'circuit_id'         => \&circuit_id_valid_for_account,
+		'jumper_template_id' => \&jumper_template_id_valid_for_account,
+		'jumper_id'          => \&jumper_id_valid_for_account,
+	);
+	my $test_function = $test_functions{$type} or do {
+		error("validate_parameter called with unknown type $type");
+		die;
+	};
+
+	# Do the validation 
+	unless(defined param($parameter_name)) {
+		send_error("Missing $parameter_name parameter." => 400);
+	}
+	unless(&$test_function(param($parameter_name))) {
+		send_error("Bad $parameter_name. Forbidden" => 403);
+	}
+
+	return param($parameter_name);
 }
 
 
@@ -530,9 +532,6 @@ sub get_jumper_template_colour_names {
 		$_->{colour_name},
 		@{ $q->fetchall_arrayref({}) }
 	);
-
-	use Data::Dumper;
-	debug Dumper \@colour_names;
 
 	return \@colour_names;
 }
