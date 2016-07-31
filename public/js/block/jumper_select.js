@@ -286,13 +286,12 @@ define([
 		var data = {
 			a_circuit_id: window.jumper_state.a_circuit.id, 
 			b_circuit_id: window.jumper_state.b_circuit.id,
-			jumper_template_id: event.target.getAttribute("data-jumper_template_id"),
+			jumper_template_id: event.currentTarget.getAttribute("data-jumper_template_id"),
 			replacing_jumper_id: window.jumper_state.replacing_jumper_id
 		};
 
-		console.log(data);
-
 		/* Send request to server */
+		console.log(data);
 		$.ajax({
 			url: "/api/jumper/add_simple_jumper",
 			data: data,
@@ -313,13 +312,6 @@ define([
 
 
 	console.log("jumper_select module loaded");
-
-	/* Added while testing so that dialog appears immediately */
-/*	display({
-		circuit_id: 51,
-		destination_designation: 'a08.4'
-	});
-*/
 
 	/* Export public methods */
 	return {
