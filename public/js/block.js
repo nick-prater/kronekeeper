@@ -21,14 +21,27 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 require([
-	'block/jumper_select',
+	'block/jumper',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
-	jumper_select
+	jumper
 ) {
         'use strict';
+
+	/* Highlight effect options */
+	var highlight_green = {
+		color: '#00ff00'
+	};
+	var highlight_duration = 1000;
+
+	function highlight_element_change_applied(jq_context, selector) {
+		var element = jq_context.children(selector);
+		element.removeClass('change_pending');
+		element.effect("highlight", highlight_green, highlight_duration);
+	}
+
 
 
 	var Block_Caption_Model = Backbone.Model.extend({
@@ -95,139 +108,12 @@ require([
 			 * Server returns the changed fields to confirm which have been updated
 			 */
 			if('name' in response) {
-				this.$el.children("input.name").removeClass('change_pending');
-				this.$el.children("input.name").effect("highlight", {color: "#deffde"}, 1000);
+				highlight_element_change_applied(this.$el, "input.name");
 			};
 		}
 
 	});
 
-
-
-	var Jumper_Model = Backbone.Model.extend({
-
-		defaults: {
-			designation: null
-		},
-
-		initialize: function(attributes, options) {
-			this.circuit = options.circuit;
-		},
-
-		urlRoot: '/api/jumper'
-	});
-
-	var Jumper_View = Backbone.View.extend({
-
-		tagName: 'td',
-		className: 'jumper',
-		template: _.template( $('#active_jumper_cell_template').html() ),
-
-		events: {
-			'input' : 'highlight_change',
-			'change' : 'jumper_change',
-			'keypress' : 'reset_on_escape_key'
-		},
-
-		initialize: function(attributes) {
-			this.listenTo(
-				this.model.circuit.collection,
-				"jumper_deleted",
-				this.jumper_deleted
-			);
-			this.listenTo(
-				this.model,
-				'sync',
-				this.model_synced
-			);
-		},
-	
-		render: function() {
-			var json = this.model.toJSON();
-			this.$el.html(this.template(json));
-			return this;
-		},
-
-		highlight_change: function(e) {
-			if(e.target.value != this.model.get("designation")) {
-				e.target.parentNode.classList.add('change_pending');
-			}
-			else {
-				e.target.parentNode.classList.remove('change_pending');
-			}
-		},
-
-		reset_on_escape_key: function(e) {
-			if(e.keyCode == 27) {
-				e.target.value = this.model.get("designation");
-				e.target.parentNode.classList.remove('change_pending');
-			}
-		},
-
-		jumper_change: function(e) {
-			if(e.target.value == this.model.get("designation")) {
-				/* No change - nothing to do */
-				console.log("jumper unchanged");
-			}
-			else if (e.target.value == '') {
-				this.jumper_remove();
-			}
-			else {
-				console.log("jumper changed");
-				var jumper_view = this;
-				jumper_select.display({
-					circuit_id: this.model.circuit.id,
-					jumper_id: this.model.get("id"),
-					destination_designation: e.target.value,
-					cancel_action: function() {
-						console.log("cancel action");
-						e.target.value = jumper_view.model.get("designation");
-						e.target.parentNode.classList.remove('change_pending');
-						jumper_view.$el.effect("highlight", {}, 900);
-					},
-					success_action: function(data) {
-						console.log("success action");
-						jumper_view.model.set({
-							id: data.jumper_id,
-							designation: data.b_circuit_info.full_designation
-						});
-						e.target.value = data.b_circuit_info.full_designation;
-						e.target.parentNode.classList.remove('change_pending');
-						jumper_view.$el.effect("highlight", {color: "#00ff00"}, 900);
-					}
-				});
-			}
-		},
-
-		jumper_remove: function() {
-			console.log("jumper removed");
-			this.model.destroy();
-			this.model.circuit.collection.trigger("jumper_deleted", this.model.get("id"));
-			this.model.set(this.model.defaults);
-		},
-
-		jumper_deleted: function(deleted_jumper_id) {
-
-			/* Responds to another jumper being deleted
-			 * If we are the other end of the deleted jumper, we'll have the
-			 * same id, but the text input field won't have been cleared.
-			 */
-			if(deleted_jumper_id == this.model.get("id") && this.$("input").val() != "") {
-				this.$("input").val('');
-				this.$el.effect("highlight", {}, 1500);
-				this.model.set(this.model.defaults);
-			}
-		},
-
-		model_synced: function(model, response, options) {
-			/* Clear field highlighting and flash green to indicate successful save
-			 * Server returns the changed fields to confirm which have been updated
-			 */
-			this.$el.removeClass('change_pending');
-			this.$el.effect("highlight", {color: "#deffde"}, 900);
-		}
-
-	});
 
 
 	var Circuit_Model = Backbone.Model.extend({
@@ -250,10 +136,10 @@ require([
 			 * can delete/patch/create these individually
 			 */
 			this.jumper_models = [];
-			attributes.jumpers.forEach(function(jumper, index) {
-				this.jumper_models.push(new Jumper_Model({
-					designation: jumper.designation,
-					id: jumper.id
+			attributes.jumpers.forEach(function(jumper_data, index) {
+				this.jumper_models.push(new jumper.model({
+					designation: jumper_data.designation,
+					id: jumper_data.id
 				},
 				{
 					circuit: this
@@ -351,8 +237,8 @@ require([
 			/* Populate the blank cells */
 			var circuit_model = this.model;
 			this.$el.children("td.jumper").not(".inactive").each(function(index, cell) {
-				var jumper_model = jumpers[index] || new Jumper_Model(null, {circuit:circuit_model});
-				var view = new Jumper_View({
+				var jumper_model = jumpers[index] || new jumper.model(null, {circuit:circuit_model});
+				var view = new jumper.view({
 					model: jumper_model
 				});
 				$(cell).replaceWith(view.render().$el);
@@ -373,8 +259,8 @@ require([
 			}
 
 			/* Activate an inactive cell */
-			var view = new Jumper_View({
-				model: new Jumper_Model(null, {circuit:this.model})
+			var view = new jumper.view({
+				model: new jumper.model(null, {circuit:this.model})
 			});
 			this.$el.children("td.jumper.inactive").first().replaceWith(view.render().$el);
 		},
@@ -452,17 +338,14 @@ require([
 			 * Server returns the changed fields to confirm which have been updated
 			 */
 			if('name' in response) {
-				this.$el.children("td.circuit_name").removeClass('change_pending');
-				this.$el.children("td.circuit_name").effect("highlight", {color: "#deffde"}, 900);
-			};
+				highlight_element_change_applied(this.$el, "td.circuit_name");
+			}
 			if('cable_reference' in response) {
-				this.$el.children("td.cable_reference").removeClass('change_pending');
-				this.$el.children("td.cable_reference").effect("highlight", {color: "#deffde"}, 900);
-			};
+				highlight_element_change_applied(this.$el, "td.cable_reference");
+			}
 			if('connection' in response) {
-				this.$el.children("td.connection").removeClass('change_pending');
-				this.$el.children("td.connection").effect("highlight", {color: "#deffde"}, 900);
-			};
+				highlight_element_change_applied(this.$el, "td.connection");
+			}
 		},
 
 		provision_jumper_fields: function(required_count) {
