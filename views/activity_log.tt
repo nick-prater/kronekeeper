@@ -1,0 +1,22 @@
+
+<div class="container frame">
+	<h1>
+		<a href="[% request.uri_base %]/frame/[% frame_info.id %]">[% frame_info.name %]</a>
+	</h1>
+
+	<table>
+		<tr>
+			<th>timestamp</th>
+			<th>by user</th>
+			<th>activity</th>
+		</tr>
+		[% FOREACH entry IN activity_log %]
+		<tr>
+			<td>[% entry.log_timestamp %]</td>
+			<td>[% entry.by_person_name %]</td>
+			<td>[% entry.note %]</td>
+		</tr>
+		[% END %]
+	</table>
+</div>
+

@@ -28,6 +28,13 @@ use warnings;
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
+use Exporter qw(import);
+our $VERSION = '0.01';
+our @EXPORT_OK = qw(
+	frame_id_valid_for_account
+	frame_info
+);
+
 
 
 prefix '/frame' => sub {

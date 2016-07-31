@@ -30,6 +30,41 @@ use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
 use Moo;
+use kronekeeper::Frame qw(
+	frame_id_valid_for_account
+	frame_info
+);
+our $VERSION = '0.01';
+
+
+
+prefix '/activity_log' => sub {
+
+	get '/:frame_id' => sub {
+
+		user_has_role('view_activity_log') or do {
+			send_error('forbidden' => 403);
+		};
+		frame_id_valid_for_account(param("frame_id")) or do {
+			send_error('forbidden' => 403);
+		};
+
+
+		my $activity_log = get_activity_log(
+			frame_id => param("frame_id"),
+		);
+
+		template(
+			'activity_log',
+			{
+				activity_log => $activity_log,
+				frame_info => frame_info(param("frame_id")),
+			}
+		);
+	};	
+};
+
+
 
 
 sub record {
@@ -76,6 +111,43 @@ sub record {
 		$args->{note},
 	);
 
+}
+
+
+sub get_activity_log {
+
+	my %args = @_;;
+	$args{items_per_page} ||= 500;
+	$args{page} ||= 1;
+	$args{frame_id} or die "missing frame_id argument";
+	$args{timezone} ||= 'UTC';
+
+	my $skip_records = $args{items_per_page} * ($args{page} - 1);
+
+	my $q = database->prepare("
+		SELECT 
+			log_timestamp AT TIME ZONE ? AS log_timestamp,
+			by_person_id,
+			person.name AS by_person_name,
+			frame_id,
+			function,
+			note
+		FROM activity_log
+		JOIN person ON (person.id = activity_log.by_person_id)
+		WHERE frame_id = ?
+		ORDER BY log_timestamp DESC
+		LIMIT ?
+		OFFSET ?
+	");
+	$q->execute(
+		$args{timezone},
+		$args{frame_id},
+		$args{items_per_page},
+		$skip_records,
+	);
+		
+	my $result = $q->fetchall_arrayref({});
+	return $result;
 }
 
 

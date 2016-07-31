@@ -1,6 +1,7 @@
 
 <div class="container frame">
 	<h1>[% frame_info.name %]</h1>
+	<a href="[% request.uri_base %]/activity_log/[% frame_info.id %]">activity_log</a>
 
 	<table>
 
