@@ -270,10 +270,10 @@ prefix '/api/jumper' => sub {
 		my @connections = @{$data->{connections}};
 
 		foreach my $connection(@connections) {
-			add_jumper_wire($connection);
+			add_jumper_wire($new_jumper_id, $connection);
 			$connection->{a_pin_info} = get_pin_info($connection->{a_pin_id});
 			$connection->{b_pin_info} = get_pin_info($connection->{b_pin_id});
-			$connection->{colour_info} = get_colour_info($connection->{colour_id});
+			$connection->{colour_info} = get_colour_info($connection->{wire_colour_id});
 			push(@connection_notes, sprintf(
 				"%s->%s [%s]",
 				$connection->{a_pin_info}->{full_designation},
@@ -282,7 +282,7 @@ prefix '/api/jumper' => sub {
 			));
 		}
 
-		# Work out our activity log
+		# Record in activity log
 		my $note = "custom jumper added " . join('; ', @connection_notes);
 		$al->record({
 			function     => 'kronekeeper::Jumper::add_custom_jumper',
@@ -290,7 +290,7 @@ prefix '/api/jumper' => sub {
 			note         => $note,
 		});
 
-		database->rollback;  # DEBUG - change to commit when happy
+		database->commit;  # DEBUG - change to commit when happy
 
 		return to_json {
 			jumper_id => $new_jumper_id,
@@ -778,11 +778,20 @@ sub add_jumper_wire {
 	my $jumper_id = shift;
 	my $connection = shift;
 	my $q = database->prepare("SELECT add_jumper_wire(?,?,?,?) AS new_jumper_wire_id");
+
+	use Data::Dumper;
+	debug Dumper (
+		$jumper_id,
+		$connection->{a_pin_id},
+		$connection->{b_pin_id},
+	);	$connection->{wire_colour_id},
+
+
 	$q->execute(
 		$jumper_id,
 		$connection->{a_pin_id},
 		$connection->{b_pin_id},
-		$connection->{colour_id},
+		$connection->{wire_colour_id},
 	) or do {
 		database->rollback;
 		error("ERROR inserting jumper wire between $connection->{a_pin_id} and $connection->{b_pin_id}");

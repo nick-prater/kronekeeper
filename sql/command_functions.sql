@@ -297,33 +297,6 @@ SELECT circuit_id INTO circuit_id_1 FROM c_designation_to_circuit_id(p_frame_id,
 
 
 
-/* This checks if there is already a single jumper between two circuits, regardless
- * of whether pins are mapped 1:1 or crossed/phase-reversed. It does not follow multiple
- * jumpers to see if circuits are linked using two or more jumpers via intermediate pins
- */
-CREATE OR REPLACE FUNCTION circuit_ids_are_connected(
-	p_circuit_id_1 INTEGER,
-	p_circuit_id_2 INTEGER
-)
-RETURNS BOOLEAN AS $$
-BEGIN
-	
-	RETURN EXISTS (
-		SELECT 1
-		FROM connection AS connection1
-		JOIN pin AS pin1 ON (pin1.id = connection1.pin_id)
-		JOIN circuit AS circuit1 ON (circuit1.id = pin1.circuit_id)
-		JOIN jumper_wire AS jumper_wire1 ON (jumper_wire1.id = connection1.jumper_wire_id)
-		JOIN connection AS connection2 ON (connection2.jumper_wire_id = connection1.jumper_wire_id)
-		JOIN pin AS pin2 ON (pin2.id = connection2.pin_id)
-		JOIN circuit AS circuit2 ON (circuit2.id = pin2.circuit_id)
-		WHERE circuit1.id = p_circuit_id_1
-		AND circuit2.id = p_circuit_id_2
-	);
-END
-$$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION c_add_simple_jumper(
 	p_frame_id INTEGER,
 	c_designation_1 TEXT,

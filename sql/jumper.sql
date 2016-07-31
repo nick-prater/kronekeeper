@@ -310,3 +310,57 @@ $$ LANGUAGE plpgsql;
 
 
 
+CREATE OR REPLACE FUNCTION add_jumper_wire(
+	p_jumper_id INTEGER,
+	p_pin_id_1 INTEGER,
+	p_pin_id_2 INTEGER,
+	p_colour_id INTEGER
+)
+RETURNS INTEGER AS $$
+DECLARE p_jumper_wire_id INTEGER;
+BEGIN
+
+	/* Check pins belong to the same frame */
+	IF frame_id_for_pin_id(p_pin_id_1) != frame_id_for_pin_id(p_pin_id_2) THEN
+		RAISE EXCEPTION 'Cannot add jumper between pins % and %: pins are not on same frame',
+			p_pin_id_1,
+			p_pin_id_2;
+	END IF;
+
+	/* Check any existing wires on this jumper belong to the same frame */
+	IF EXISTS (
+		SELECT 1
+		FROM jumper_wire
+		JOIN connection ON (connection.jumper_wire_id = jumper_wire.id)
+		WHERE jumper_wire.jumper_id = p_jumper_id
+		AND frame_id_for_pin_id(connection.pin_id) != frame_id_for_pin_id(p_pin_id_1)
+	) THEN 
+		RAISE EXCEPTION 'Cannot add jumper between pins % and %: pins are not on same frame as jumper %',
+			p_pin_id_1,
+			p_pin_id_2,
+			p_jumper_id;
+	END IF;
+
+	/* Check pins aren't already connected */
+	IF pin_ids_are_connected(p_pin_id_1, p_pin_id_2) THEN
+		RAISE EXCEPTION 'Cannot add jumper between pins % and %: pins are already connected',
+			p_pin_id_1,
+			p_pin_id_2;
+	END IF;
+
+	/* Create the jumper wire */
+	INSERT INTO jumper_wire(jumper_id, colour_id)
+	VALUES(p_jumper_id, p_colour_id)
+	RETURNING id INTO p_jumper_wire_id;
+
+	/* Connect each end of the wire */
+	INSERT INTO connection (jumper_wire_id, pin_id)
+	VALUES 
+	(p_jumper_wire_id, p_pin_id_1),
+	(p_jumper_wire_id, p_pin_id_2);
+
+	RETURN p_jumper_wire_id;
+END
+$$ LANGUAGE plpgsql;
+
+
