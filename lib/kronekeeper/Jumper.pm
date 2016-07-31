@@ -56,7 +56,7 @@ prefix '/jumper' => sub {
 		}
 
 		# a_circuit_id is the starting point for this jumper - required parameter
-		validate_parameter("circuit_id", "a_circuit_id");
+		validate_parameter("circuit_id", param("a_circuit_id"), "a_circuit_id");
 		my $a_circuit_info = circuit_info(param("a_circuit_id"));
 		
 		# b_designation is the human readable destination circuit - required parameter
@@ -211,22 +211,25 @@ prefix '/api/jumper' => sub {
 
 		debug "add_simple_jumper()";
 		debug request->body;
+		my $data = from_json(request->body);
 
 		# required parameters
-		validate_parameter("circuit_id", "a_circuit_id");
-		validate_parameter("circuit_id", "b_circuit_id");
-		validate_parameter("jumper_template_id", "jumper_template_id");
+		validate_parameter("circuit_id", $data->{a_circuit_id}, "a_circuit_id");
+		validate_parameter("circuit_id", $data->{a_circuit_id}, "b_circuit_id");
+		validate_parameter("jumper_template_id", $data->{jumper_template_id}, "jumper_template_id");
 
 		# replacing_jumper_id will be removed before inserting the new jumper - optional parameter
-		if(param("replacing_jumper_id")) {
-			validate_parameter("jumper_id", "replacing_jumper_id");
-			delete_jumper(param("replacing_jumper_id"));
+		if($data->{replacing_jumper_id}) {
+			validate_parameter("jumper_id", $data->{replacing_jumper_id}, "replacing_jumper_id");
+			delete_jumper(
+				$data->{replacing_jumper_id}
+			);
 		}
 
 		my $new_jumper_id = add_simple_jumper(
-			param("a_circuit_id"),
-			param("b_circuit_id"),
-			param("jumper_template_id"),
+			$data->{a_circuit_id},
+			$data->{b_circuit_id},
+			$data->{jumper_template_id},
 		) or do {
 			database->rollback;
 			debug("add_simple_jumper didn't return a new jumper_id");
@@ -236,8 +239,62 @@ prefix '/api/jumper' => sub {
 		database->commit;
 
 		return to_json {
-			b_circuit_info => circuit_info(param("b_circuit_id")),
+			b_circuit_info => circuit_info($data->{b_circuit_id}),
 			jumper_id => $new_jumper_id,
+		};
+	};
+
+
+	post '/add_custom_jumper' => sub {
+
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug "add_custom_jumper()";
+		debug request->body;
+		my $data = from_json(request->body);
+
+		# required parameters
+		validate_custom_connections($data->{connections});
+
+		# replacing_jumper_id will be removed before inserting the new jumper - optional parameter
+		if($data->{"replacing_jumper_id"}) {
+			validate_parameter("jumper_id", $data->{replacing_jumper_id}, "replacing_jumper_id");
+			delete_jumper($data->{replacing_jumper_id});
+		}
+
+		# Add jumper
+		my $new_jumper_id = add_empty_jumper();
+		my @connection_notes = ();
+		my @connections = @{$data->{connections}};
+
+		foreach my $connection(@connections) {
+			add_jumper_wire($connection);
+			$connection->{a_pin_info} = get_pin_info($connection->{a_pin_id});
+			$connection->{b_pin_info} = get_pin_info($connection->{b_pin_id});
+			$connection->{colour_info} = get_colour_info($connection->{colour_id});
+			push(@connection_notes, sprintf(
+				"%s->%s [%s]",
+				$connection->{a_pin_info}->{full_designation},
+				$connection->{b_pin_info}->{full_designation},
+				$connection->{colour_info}->{name},
+			));
+		}
+
+		# Work out our activity log
+		my $note = "custom jumper added " . join('; ', @connection_notes);
+		$al->record({
+			function     => 'kronekeeper::Jumper::add_custom_jumper',
+			frame_id     => $connections[0]->{a_pin_info}->{frame_id},
+			note         => $note,
+		});
+
+		database->rollback;  # DEBUG - change to commit when happy
+
+		return to_json {
+			jumper_id => $new_jumper_id,
+			connections => \@connections,
 		};
 	};
 
@@ -284,6 +341,7 @@ sub jumper_id_valid_for_account {
 sub validate_parameter {
 
 	my $type = shift;
+	my $value = shift;
 	my $parameter_name = shift;
 
 	# Define the available validation routines according to the parameter type
@@ -291,6 +349,8 @@ sub validate_parameter {
 		'circuit_id'         => \&circuit_id_valid_for_account,
 		'jumper_template_id' => \&jumper_template_id_valid_for_account,
 		'jumper_id'          => \&jumper_id_valid_for_account,
+		'pin_id'             => \&pin_id_valid_for_account,
+		'colour_id'          => \&colour_id_valid,
 	);
 	my $test_function = $test_functions{$type} or do {
 		error("validate_parameter called with unknown type $type");
@@ -298,14 +358,41 @@ sub validate_parameter {
 	};
 
 	# Do the validation 
-	unless(defined param($parameter_name)) {
+	unless(defined $value) {
 		send_error("Missing $parameter_name parameter." => 400);
 	}
-	unless(&$test_function(param($parameter_name))) {
+	unless(&$test_function($value)) {
 		send_error("Bad $parameter_name. Forbidden" => 403);
 	}
 
-	return param($parameter_name);
+	return $value;
+}
+
+
+sub validate_custom_connections {
+
+	my $connections = shift;
+
+	unless($connections) {
+		error("cannot connect custom jumper - missing connections parameter");
+		send_error("Missing connections parameter" => 400);
+	}
+
+	# Connections array must contain at least one element
+	unless(scalar(@{$connections}) > 0) {
+		error("cannot connect custom jumper - connections parameter is empty");
+		send_error("Connections parameter is empty" => 400);
+	}
+
+	# Check each connection pair in turn
+	foreach my $connection(@{$connections}) {
+		validate_parameter("pin_id", $connection->{a_pin_id}, 'a_pin_id');
+		validate_parameter("pin_id", $connection->{b_pin_id}, 'b_pin_id');
+		validate_parameter("colour_id", $connection->{wire_colour_id}, 'wire_colour_id');
+		# Let database throw error if pins are not on same frame
+	}
+
+	return $connections;
 }
 
 
@@ -330,10 +417,66 @@ sub jumper_template_id_valid_for_account {
 		AND account_id = ?
 	");
 
-	return $q->execute(
+	$q->execute(
 		$id,
 		$account_id,
 	);
+
+	return $q->fetchrow_hashref;
+}
+
+
+sub pin_id_valid_for_account {
+
+	my $id = shift;
+	my $account_id = shift || session('account')->{id};
+
+	$id && $id =~ m/^\d+$/ or do {
+		error "pin_id is not an integer";
+		return undef;
+	};
+	$account_id && $account_id =~ m/^\d+$/ or do {
+		error "account_id is not an integer";
+		return undef;
+	};
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM pin
+		JOIN circuit ON (circuit.id = pin.circuit_id)
+		JOIN block ON (block.id = circuit.block_id)
+		JOIN vertical ON (vertical.id = block.vertical_id)
+		JOIN frame ON (frame.id = vertical.frame_id) 
+		WHERE pin.id = ?
+		AND frame.account_id = ?
+	");
+
+	$q->execute(
+		$id,
+		$account_id,
+	);
+
+	return $q->fetchrow_hashref;
+}
+
+
+sub colour_id_valid {
+
+	my $id = shift;
+
+	$id && $id =~ m/^\d+$/ or do {
+		error "colour_id is not an integer";
+		return undef;
+	};
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM colour
+		WHERE id = ?
+	");
+
+	$q->execute($id);
+	return $q->fetchrow_hashref;
 }
 
 
@@ -445,7 +588,6 @@ sub delete_jumper {
 }
 
 
-
 sub prettify_designation {
 
 	my $d = shift;
@@ -456,7 +598,6 @@ sub prettify_designation {
 	# Return as uppercase
 	return uc($d);
 }
-
 
 
 sub get_jumper_templates {
@@ -516,6 +657,24 @@ sub get_colours {
 }
 
 
+sub get_colour_info {
+	
+	my $id = shift;
+	my $q = database->prepare("
+		SELECT
+			id,
+			name,
+			short_name,
+			CONCAT('#', ENCODE(colour.html_code, 'hex')) AS html_colour,
+			CONCAT('#', ENCODE(colour.contrasting_html_code, 'hex')) AS contrasting_html_colour
+		FROM colour
+		WHERE id = ?
+	");
+	$q->execute($id);
+	return $q->fetchrow_hashref;
+}
+
+
 sub get_jumper_template_colour_names {
 
 	my $jumper_template_id = shift;
@@ -534,6 +693,18 @@ sub get_jumper_template_colour_names {
 	);
 
 	return \@colour_names;
+}
+
+
+sub get_pin_info {
+
+	my $id = shift;
+	my $q = database->prepare("
+		SELECT * FROM pin_info
+		WHERE id = ?
+	");
+	$q->execute($id);
+	return $q->fetchrow_hashref;
 }
 
 
@@ -585,6 +756,42 @@ sub add_simple_jumper {
 	return $result->{jumper_id};
 }
 
+
+sub add_empty_jumper {
+
+	my $q = database->prepare("SELECT add_empty_jumper() AS new_jumper_id");
+	$q->execute;
+
+	my $result = $q->fetchrow_hashref;
+	$result && $result->{new_jumper_id} or do {
+		database->rollback;
+		error("failed to insert empty jumper");
+		send_error("failed to insert new empty jumper" => 500);
+	};
+
+	return $result->{new_jumper_id};
+}
+
+
+sub add_jumper_wire {
+
+	my $jumper_id = shift;
+	my $connection = shift;
+	my $q = database->prepare("SELECT add_jumper_wire(?,?,?,?) AS new_jumper_wire_id");
+	$q->execute(
+		$jumper_id,
+		$connection->{a_pin_id},
+		$connection->{b_pin_id},
+		$connection->{colour_id},
+	) or do {
+		database->rollback;
+		error("ERROR inserting jumper wire between $connection->{a_pin_id} and $connection->{b_pin_id}");
+		send_error("ERROR inserting jumper wire between $connection->{a_pin_id} and $connection->{b_pin_id}" => 500);
+	};
+
+	my $result = $q->fetchrow_hashref;
+	return $result->{new_jumper_wire_id};
+}
 
 
 1;

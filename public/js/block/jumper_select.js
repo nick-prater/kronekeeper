@@ -261,7 +261,8 @@ define([
 		/* Send request to server */
 		$.ajax({
 			url: "/api/jumper/add_custom_jumper",
-			data: data,
+			contentType: 'application/json; charset=utf-8',
+			data: JSON.stringify(data),
 			type: "POST",
 			dataType: "json",
 			success: function(json) {
@@ -294,8 +295,9 @@ define([
 		console.log(data);
 		$.ajax({
 			url: "/api/jumper/add_simple_jumper",
-			data: data,
 			type: "POST",
+			contentType: 'application/json; charset=utf-8',
+			data: JSON.stringify(data),
 			dataType: "json",
 			success: function(json) {
 				console.log("updated jumper OK");

@@ -187,6 +187,23 @@ $$ LANGUAGE plpgsql;
 
 
 
+/* Inserts a new, empty jumper and returns its id */
+CREATE OR REPLACE FUNCTION add_empty_jumper(
+)
+RETURNS INTEGER AS $$
+DECLARE rv INTEGER;
+BEGIN
+
+	INSERT INTO jumper(id)
+	VALUES(DEFAULT)
+	RETURNING id INTO rv;
+
+	RETURN rv;
+END
+$$ LANGUAGE plpgsql;
+
+
+
 /* Deletes the given jumper_id and it's linked records */
 CREATE OR REPLACE FUNCTION delete_jumper(
 	p_jumper_id INTEGER
