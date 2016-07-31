@@ -30,17 +30,16 @@ use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
 use kronekeeper::Activity_Log;
+use Exporter qw(import);
+our $VERSION = '0.01';
+our @EXPORT_OK = qw(
+	circuit_info
+	circuit_pins
+	circuit_id_valid_for_account
+	circuit_info_from_designation
+);
 
 my $al = kronekeeper::Activity_Log->new();
-
-
-
-
-
-prefix '/circuit' => sub {
-
-
-};
 
 
 

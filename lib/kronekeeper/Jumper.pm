@@ -30,6 +30,12 @@ use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
 use kronekeeper::Activity_Log;
+use kronekeeper::Circuit qw(
+	circuit_info
+	circuit_info_from_designation
+	circuit_pins
+	circuit_id_valid_for_account
+);
 use List::Util qw(max);
 
 my $al = kronekeeper::Activity_Log->new();
@@ -53,16 +59,16 @@ prefix '/jumper' => sub {
 		unless(defined param("a_circuit_id")) {
 			send_error('Missing a_circuit_id parameter.' => 400);
 		}
-		unless(kronekeeper::Circuit::circuit_id_valid_for_account(param("a_circuit_id"))) {
+		unless(circuit_id_valid_for_account(param("a_circuit_id"))) {
 			send_error('Bad circuit_id. Forbidden' => 403);
 		}
-		my $a_circuit_info = kronekeeper::Circuit::circuit_info(param("a_circuit_id"));
+		my $a_circuit_info = circuit_info(param("a_circuit_id"));
 		
 		# b_designation is the human readable destination circuit - required parameter
 		unless(defined param("b_designation")) {
 			send_error('Missing b_designation parameter.' => 400);
 		}
-		my $b_circuit_info = kronekeeper::Circuit::circuit_info_from_designation(
+		my $b_circuit_info = circuit_info_from_designation(
 			param("b_designation"),
 			$a_circuit_info->{frame_id},
 		) or do {
@@ -126,8 +132,8 @@ prefix '/jumper' => sub {
 		}
 		else {
 			debug("offering choice of simple or custom jumper connection");
-			my $a_pins = kronekeeper::Circuit::circuit_pins($a_circuit_info->{id});
-			my $b_pins = kronekeeper::Circuit::circuit_pins($b_circuit_info->{id});
+			my $a_pins = circuit_pins($a_circuit_info->{id});
+			my $b_pins = circuit_pins($b_circuit_info->{id});
 			my $max_pin_count = max(scalar(@{$a_pins}), scalar(@{$b_pins}));
 
 			template(
@@ -215,7 +221,7 @@ prefix '/api/jumper' => sub {
 		unless(defined param("a_circuit_id")) {
 			send_error('Missing a_circuit_id parameter.' => 400);
 		}
-		unless(kronekeeper::Circuit::circuit_id_valid_for_account(param("a_circuit_id"))) {
+		unless(circuit_id_valid_for_account(param("a_circuit_id"))) {
 			send_error('Bad a_circuit_id. Forbidden' => 403);
 		}
 
@@ -223,7 +229,7 @@ prefix '/api/jumper' => sub {
 		unless(defined param("b_circuit_id")) {
 			send_error('Missing b_circuit_id parameter.' => 400);
 		}
-		unless(kronekeeper::Circuit::circuit_id_valid_for_account(param("b_circuit_id"))) {
+		unless(circuit_id_valid_for_account(param("b_circuit_id"))) {
 			send_error('Bad b_circuit_id. Forbidden' => 403);
 		}
 
@@ -256,7 +262,7 @@ prefix '/api/jumper' => sub {
 		database->commit;
 
 		return to_json {
-			b_circuit_info => kronekeeper::Circuit::circuit_info(param("b_circuit_id")),
+			b_circuit_info => circuit_info(param("b_circuit_id")),
 			jumper_id => $new_jumper_id,
 		};
 	};
@@ -508,6 +514,30 @@ sub get_colours {
 }
 
 
+sub get_jumper_template_colour_names {
+
+	my $jumper_template_id = shift;
+	my $q = database->prepare("
+		SELECT colour.name AS colour_name
+		FROM jumper_template_wire
+		JOIN colour ON (colour.id = jumper_template_wire.colour_id)
+		WHERE jumper_template_wire.jumper_template_id = ?
+		ORDER BY jumper_template_wire.position ASC
+	");
+	$q->execute($jumper_template_id);
+	
+	my @colour_names = map(
+		$_->{colour_name},
+		@{ $q->fetchall_arrayref({}) }
+	);
+
+	use Data::Dumper;
+	debug Dumper \@colour_names;
+
+	return \@colour_names;
+}
+
+
 sub add_simple_jumper {
 
 	my $a_circuit_id = shift;
@@ -533,7 +563,25 @@ sub add_simple_jumper {
 
 	my $result = $q->fetchrow_hashref;
 
-	#TODO Update activity log
+
+	# Update activity log
+	my $a_circuit_info = circuit_info($a_circuit_id);
+	my $b_circuit_info = circuit_info($b_circuit_id);
+	my $jumper_wire_colours = get_jumper_template_colour_names($jumper_template_id);
+
+	my $note = sprintf(
+		"standard jumper added %s->%s [%s]",
+		$a_circuit_info->{full_designation},
+		$b_circuit_info->{full_designation},
+		join('/', @{$jumper_wire_colours}),
+	);
+
+	$al->record({
+		function     => 'kronekeeper::Jumper::add_simple_jumper',
+		frame_id     => $a_circuit_info->{frame_id},
+		note         => $note,
+	});
+
 
 	return $result->{jumper_id};
 }
