@@ -70,8 +70,6 @@ sub create_user {
 		'',  # can't use null password, so use empty string, which disallows logins
 	) or die "failed to insert new user record";
 
-	$db->commit;
-
 	my $user_id = $db->last_insert_id(undef, 'public', 'person', 'id');
 	return $user_id;
 }
@@ -101,8 +99,6 @@ sub set_user_password {
 		$encrypted_password,
 		$username,
 	) or die "failed to update password";
-
-	$db->commit;
 
 	return 1;
 }

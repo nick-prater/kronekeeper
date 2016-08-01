@@ -63,6 +63,8 @@ prefix '/api/user' => sub {
 			note       => sprintf("added new user '%s'", param('email'))
 		});
 
+		database->commit;
+
 		return to_json {
 			user_id => $user_id
 		};
@@ -86,6 +88,8 @@ prefix '/api/user' => sub {
 			account_id => param('account_id'),
 			note       => sprintf("changed password for user '%s'", param('email'))
 		});
+
+		database->commit;
 
 		return to_json {
 			success => 1,

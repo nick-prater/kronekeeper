@@ -205,6 +205,12 @@ prefix '/api/jumper' => sub {
 
 	post '/add_simple_jumper' => sub {
 
+		my $db = database;
+		my $ac = $db->{AutoCommit};
+		debug "AutoCommit: [$ac]";
+		debug "Driver: " . $db->{Driver}->{Name};
+		debug "---------------------";
+
 		user_has_role('edit') or do {
 			send_error('forbidden' => 403);
 		};
@@ -290,7 +296,7 @@ prefix '/api/jumper' => sub {
 			note         => $note,
 		});
 
-		database->commit;  # DEBUG - change to commit when happy
+		database->commit;
 
 		return to_json {
 			jumper_id => $new_jumper_id,

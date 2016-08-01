@@ -102,7 +102,6 @@ sub record {
 		$args->{circuit_id_a},
 		$args->{circuit_id_b},
 	);
-	database->commit;
 		
 	debug sprintf(
 		"activity_log: %s  by_person_id:%s  %s",
