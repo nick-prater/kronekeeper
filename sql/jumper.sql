@@ -30,59 +30,47 @@ CREATE OR REPLACE FUNCTION is_simple_jumper(
 	p_jumper_id INTEGER
 )
 RETURNS BOOLEAN AS $$
-DECLARE circuit_count INTEGER;
 DECLARE row_count INTEGER;
+DECLARE max_pin_count INTEGER;
+DECLARE min_pin_count INTEGER;
 BEGIN
-	/* Do all circuits have the same number of pins?
-	 * If this is a simple jumper, all circuits connected by it
-	 * will have the same number of pins. In that case, this 
-	 * will return a row count of 1
-	 */
-	SELECT COUNT(*) INTO row_count
-	FROM (
-	    SELECT DISTINCT count_pins_for_circuit_id(pin.circuit_id)
-	    FROM jumper_wire
-	    JOIN connection ON (connection.jumper_wire_id = jumper_wire.id)
-	    JOIN pin ON (pin.id = connection.pin_id)
-	    WHERE jumper_wire.jumper_id = p_jumper_id
-	) AS t;
 
-	IF row_count != 1 THEN
-		RETURN FALSE;
-	END IF;
-
-
-	/* How many circuits are connected by this jumper?
-	 * Usually just 2 - the user interface doesn't support a jumper
-	 * with 'mid-point' connections, although this function handles
-	 * that possiblity.
-	 */
-	SELECT count(*) INTO circuit_count
+	/* How many pins do the circuits connected by this jumper have? */
+	SELECT
+		MIN(count_pins_for_circuit_id(pin.circuit_id)) AS min_pin_count,
+		MAX(count_pins_for_circuit_id(pin.circuit_id)) AS max_pin_count 
+	INTO max_pin_count, min_pin_count
 	FROM jumper_wire
 	JOIN connection ON (connection.jumper_wire_id = jumper_wire.id)
 	JOIN pin ON (pin.id = connection.pin_id)
-	WHERE jumper_wire.jumper_id = p_jumper_id
-	GROUP BY pin.circuit_id;
+	WHERE jumper_wire.jumper_id = p_jumper_id;
 
+	/* Do all circuits have the same number of pins?
+	 * If this is a simple jumper, all circuits connected by it
+	 * will have the same number of pins. In that case, this 
+	 * max_pin_count and min_pin_count will be identical.
+	 */
+	IF max_pin_count != min_pin_count THEN
+		RETURN FALSE;
+	END IF;
 
 	/* Counting the number of connections for each jumper wire,
-	 * grouped by pin position should yield a count 
-	 * matching the number of circuits connected. Here we return
-	 * only rows not matching this criteria. A simple jumper should
-	 * therefore return 0
+	 * linking pin positions 1:1 should yield a count 
+	 * matching the pin count of each circuit.
 	 */
 	SELECT COUNT(*) INTO row_count
 	FROM (
-		SELECT 1
-		    FROM jumper_wire
-		    JOIN connection ON (connection.jumper_wire_id = jumper_wire.id)
-		    JOIN pin ON (pin.id = connection.pin_id)
-		    WHERE jumper_wire.jumper_id = p_jumper_id
-		GROUP BY pin.position, jumper_wire.id
-		HAVING count(*) != circuit_count
+		SELECT DISTINCT jumper_wire.id
+		FROM jumper_wire
+		JOIN connection AS connection1 ON (connection1.jumper_wire_id = jumper_wire.id)
+		JOIN pin AS pin1 ON (pin1.id = connection1.pin_id)
+		JOIN connection AS connection2 ON (connection2.jumper_wire_id = jumper_wire.id AND connection2.id != connection1.id)
+		JOIN pin AS pin2 ON (pin2.id = connection2.pin_id)
+		WHERE pin1.position = pin2.position
+		AND jumper_wire.jumper_id = p_jumper_id
 	) AS t;
 
-	IF row_count != 0 THEN
+	IF row_count != max_pin_count THEN
 		RETURN FALSE;
 	END IF;
 
