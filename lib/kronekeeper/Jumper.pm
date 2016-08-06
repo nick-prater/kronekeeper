@@ -146,11 +146,6 @@ prefix '/jumper' => sub {
 			},
 			{ layout => undef }
 		);
-
-
-
-
-
 	};
 
 
@@ -211,12 +206,6 @@ prefix '/api/jumper' => sub {
 
 	post '/add_simple_jumper' => sub {
 
-		my $db = database;
-		my $ac = $db->{AutoCommit};
-		debug "AutoCommit: [$ac]";
-		debug "Driver: " . $db->{Driver}->{Name};
-		debug "---------------------";
-
 		user_has_role('edit') or do {
 			send_error('forbidden' => 403);
 		};
@@ -251,8 +240,8 @@ prefix '/api/jumper' => sub {
 		database->commit;
 
 		return to_json {
-			b_circuit_info => circuit_info($data->{b_circuit_id}),
-			jumper_id => $new_jumper_id,
+			jumper_info => get_jumper_info($new_jumper_id, $data->{a_circuit_id}),
+			deleted_jumper_id => $data->{"replacing_jumper_id"},
 		};
 	};
 
@@ -305,8 +294,8 @@ prefix '/api/jumper' => sub {
 		database->commit;
 
 		return to_json {
-			jumper_id => $new_jumper_id,
-			connections => \@connections,
+			jumper_info => get_jumper_info($new_jumper_id, $data->{a_circuit_id}),
+			deleted_jumper_id => $data->{"replacing_jumper_id"},
 		};
 	};
 
@@ -528,6 +517,22 @@ sub describe_jumper_connections {
 	}
 }
 
+
+sub get_jumper_info {
+
+	my $jumper_id = shift;
+	my $a_circuit_id = shift;
+	my $q = database->prepare("
+		SELECT * FROM json_jumper_info(?,?) AS json_data
+	");
+	$q->execute(
+		$jumper_id,
+		$a_circuit_id
+	);
+	my $json = $q->fetchrow_hashref->{json_data} or return undef;
+	my @result = @{from_json($json)};  # database returns a json array
+	return $result[0];                 # we only want first element
+}
 
 
 sub get_connection_count {

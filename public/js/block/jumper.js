@@ -156,14 +156,29 @@ define([
 						jumper_view.$el.effect("highlight", {}, highlight_duration);
 					},
 					success_action: function(data) {
-						console.log("success action");
-						jumper_view.model.set({
-							id: data.jumper_id,
-							designation: data.b_circuit_info.full_designation
-						});
-						e.target.value = data.b_circuit_info.full_designation;
+						console.log("success action: ", data);
+
+						if(data.deleted_jumper_id) {
+							/* Propagate deletion to other jumpers displayed on this block */
+							jumper_view.model.circuit.collection.trigger("jumper_deleted", data.deleted_jumper_id);
+						}
+
+						jumper_view.model.set(
+							jumper_view.model.parse({
+								data: data.jumper_info
+							})
+						);
 						e.target.parentNode.classList.remove('change_pending');
+						jumper_view.render();
 						jumper_view.$el.effect("highlight", highlight_green, highlight_duration);
+
+						/* Propagate change to any circuits affected by the new jumper */
+						data.jumper_info.wires.forEach(function(wire) {
+							if(wire.b_circuit_id != wire.a_circuit_id) {
+								console.log("propagating jumper change for circuit_id " + wire.b_circuit_id);
+								jumper_view.model.circuit.collection.trigger("circuit_jumper_change", wire.b_circuit_id);
+							}
+						});
 					}
 				});
 			}

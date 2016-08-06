@@ -75,13 +75,10 @@ define([
 		$("#jumper_connection_dialog").html($("#loading_message_template").html());
 		$("#jumper_connection_dialog").dialog("open");
 
-		/* Are we replacing an existing jumper? */
-		var replacing_jumper_id = args.jumper_id;
-
 		var request_data = {
 			a_circuit_id: args.circuit_id,
 			b_designation: args.destination_designation,
-			replacing_jumper_id: replacing_jumper_id
+			replacing_jumper_id: args.jumper_id
 		};
 
 		console.log("displaying jumper connection choices for:", request_data);
@@ -266,26 +263,8 @@ define([
 			replacing_jumper_id: window.jumper_state.replacing_jumper_id,
 			connections: connections
 		};
-		console.log(data);
-
-		/* Send request to server */
-		$.ajax({
-			url: "/api/jumper/add_custom_jumper",
-			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify(data),
-			type: "POST",
-			dataType: "json",
-			success: function(json) {
-				console.log("updated jumper OK");
-				close_success_flag = true;
-				$("#jumper_connection_dialog").dialog("close");
-				success_action(json);
-			},
-			error: function(xhr, status) {
-				var error_code = xhr.status + " " + xhr.statusText;
-				display_load_error(error_code);
-			}
-		});
+		
+		add_jumper("/api/jumper/add_custom_jumper", data);
 	}
 
 
@@ -301,10 +280,15 @@ define([
 			replacing_jumper_id: window.jumper_state.replacing_jumper_id
 		};
 
-		/* Send request to server */
-		console.log(data);
+		add_jumper("/api/jumper/add_simple_jumper", data);
+	}
+
+
+	function add_jumper(url, data) {
+		
+		console.log("adding jumper: ", data);
 		$.ajax({
-			url: "/api/jumper/add_simple_jumper",
+			url: url,
 			type: "POST",
 			contentType: 'application/json; charset=utf-8',
 			data: JSON.stringify(data),

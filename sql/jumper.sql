@@ -215,6 +215,39 @@ ORDER BY (
 
 
 
+/* Returns a nested json array describing a jumper and it's wires
+ * from the point-of-view of the given circuit_id
+ */
+CREATE OR REPLACE FUNCTION json_jumper_info(
+	p_jumper_id INTEGER,
+	p_a_circuit_id INTEGER
+)
+RETURNS TABLE(json_data JSON) AS $$
+BEGIN
+
+	RETURN QUERY
+	SELECT json_agg(u) FROM (
+		SELECT
+			jumper_circuits.jumper_id AS jumper_id,
+			is_simple_jumper(jumper_circuits.jumper_id),
+			(SELECT json_agg(t) FROM (
+				SELECT *
+				FROM jumper_wire_info 
+				WHERE jumper_wire_info.jumper_id = jumper_circuits.jumper_id
+				AND jumper_wire_info.a_circuit_id = jumper_circuits.a_circuit_id
+			) AS t) AS wires
+		FROM jumper_circuits
+		WHERE jumper_circuits.jumper_id = p_jumper_id
+		AND jumper_circuits.a_circuit_id = p_a_circuit_id
+		ORDER BY jumper_circuits.jumper_id
+	) AS u;
+
+END
+$$ LANGUAGE plpgsql;
+
+
+
+
 /* Returns the number of wires contained within a jumper template */
 CREATE OR REPLACE FUNCTION jumper_template_wire_count(
 	p_jumper_template_id INTEGER
