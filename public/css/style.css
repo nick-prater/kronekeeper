@@ -181,6 +181,20 @@ body {
 	background: #aaaaaa;
 }
 
+.block .jumper div.wires {
+}
+
+.block .jumper div.wire {
+	border: 1px solid black;
+	float: left;
+	width: 45%;
+	margin-left: auto;
+	margin-right: auto;
+	font-size: 50%;
+	text-align: center;
+}
+
+
 .block caption {
 	text-align: left;
 	font-weight: bold;

@@ -47,6 +47,19 @@
 
 <script type="text/template" id="active_jumper_cell_template">
 <input type="text" value="<%- designation %>" />
+  <div class="wires">
+  <% wires.forEach(function(wire) { %>
+	<div class="wire" style="background: <%- wire.html_colour %>; color: <%- wire.contrasting_html_colour %>;">
+	    <% if(is_simple_jumper) { %>
+		&nbsp;
+	    <% } else { %>
+		<%- wire.a_pin_designation %>
+		&rarr;
+		<%- wire.b_pin_designation %>
+	    <% } %>
+	</div>
+  <% }) %>
+  </div>
 </script>
 
 <script type="text/template" id="loading_message_template">
