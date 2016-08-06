@@ -190,7 +190,7 @@ define([
 						/* Trigger an event for each one, apart from ourselves */
 						changed_circuits.forEach(function(changed, circuit_id) {
 							console.log("propagating jumper change for circuit_id ", circuit_id);
-							jumper_view.model.circuit.trigger("circuit_jumper_change",circuit_id);
+							jumper_view.model.circuit.collection.trigger("circuit_jumper_change",circuit_id);
 						});
 				}
 			}

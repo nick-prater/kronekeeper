@@ -147,7 +147,7 @@ require([
 			}, this);
 
 			this.listenTo(
-				this,
+				this.collection,
 				"circuit_jumper_change",
 				this.jumper_changed
 			);
@@ -156,13 +156,32 @@ require([
 
 		jumper_changed: function(changed_circuit_id) {
 
-			console.log("reacting to event changed_circuit_id ", changed_circuit_id);
-
-			if(changed_circuit_id = this.get("id")) {
-				console.log("jumper_changed on circuit_id " + changed_circuit_id);
+			if(changed_circuit_id == this.get("circuit_id")) {
+				this.reload_jumpers();
 			}
-		}
+		},
 
+		reload_jumpers: function() {
+
+			var circuit_id = this.get("circuit_id");
+			var url = '/api/circuit/' + circuit_id + '/jumpers';
+			var data = {
+				circuit_id: this.get("circuit_id")
+			};
+
+			$.ajax({
+				url: url,
+				type: "GET",
+				dataType: "json",
+				success: function(json) {
+					console.log("loaded jumper data OK");
+				},
+				error: function(xhr, status) {
+					var error_code = xhr.status + " " + xhr.statusText;
+					console.log("failed to reload jumper data:", error_code);
+				}
+			});
+		}
 	});
 
 
@@ -281,7 +300,6 @@ require([
 			});
 			this.$el.children("td.jumper.inactive").first().replaceWith(view.render().$el);
 		},
-
 
 		circuit_name_keypress: function(e) {
 			this.reset_on_escape_key(e, 'name');

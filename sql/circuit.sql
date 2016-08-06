@@ -54,4 +54,31 @@ END
 $$ LANGUAGE plpgsql;
 
 
+/* This function returns a table with a single row, containing a nested json array 
+ * structure representing the jumpers for the given circuit, along with the
+ * wires making up those jumpers...
+ */
+CREATE OR REPLACE FUNCTION json_circuit_jumpers(
+	p_circuit_id INTEGER
+)
+RETURNS TABLE(json_data JSON) AS $$
+BEGIN
+
+	RETURN QUERY
+	SELECT json_agg(u) FROM (
+		SELECT
+		jumper_circuits.jumper_id AS jumper_id,
+		is_simple_jumper(jumper_circuits.jumper_id),
+		(SELECT json_agg(t) FROM (
+			SELECT *
+			FROM jumper_wire_info
+			WHERE jumper_wire_info.jumper_id = jumper_circuits.jumper_id
+			AND jumper_wire_info.a_circuit_id = jumper_circuits.a_circuit_id
+		) AS t) AS wires
+		FROM jumper_circuits
+		WHERE jumper_circuits.a_circuit_id = p_circuit_id
+		ORDER BY jumper_circuits.jumper_id
+	) AS u;
+END
+$$ LANGUAGE plpgsql;
 

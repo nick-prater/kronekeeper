@@ -86,6 +86,21 @@ prefix '/api/circuit' => sub {
 		return to_json $changes;
 	};
 
+
+	get '/:circuit_id/jumpers' => require_login sub {
+
+		my $circuit_id = param('circuit_id');
+		circuit_id_valid_for_account($circuit_id) or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug "getting jumpers for circcuit_id $circuit_id";
+
+		return to_json {
+			jumpers => get_circuit_jumpers($circuit_id),
+		};
+	};
+
 };
 
 
@@ -222,6 +237,18 @@ sub circuit_pins {
 	return $q->fetchall_arrayref({});
 }
 
+
+sub get_circuit_jumpers {
+
+	my $circuit_id = shift;
+	my $q = database->prepare("
+		SELECT * FROM json_circuit_jumpers(?) AS json_data
+	");
+	$q->execute($circuit_id);
+	my $result = from_json($q->fetchrow_hashref->{json_data});
+
+	return $result;
+}
 
 
 sub update_field {
