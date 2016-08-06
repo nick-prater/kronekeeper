@@ -171,10 +171,12 @@ define([
 
 		jumper_remove: function() {
 			var jq_element = this.$el;
+			var view = this;
 			this.model.destroy({
 				success: function(model, response, options) {
 					console.log("jumper removed OK");
 					jq_element.removeClass('change_pending');
+					view.render();
 					jq_element.effect("highlight", highlight_green, highlight_duration);
 				},
 				error: function(model, response, options) {
@@ -193,9 +195,9 @@ define([
 			 * same id, but the text input field won't have been cleared.
 			 */
 			if(deleted_jumper_id == this.model.get("id") && this.$("input").val() != "") {
-				this.$("input").val('');
-				this.$el.effect("highlight", {}, highlight_duration);
 				this.model.set(this.model.defaults);
+				this.render();
+				this.$el.effect("highlight", highlight_green, highlight_duration);
 			}
 		},
 
