@@ -174,27 +174,17 @@ sub block_info {
 sub block_circuits {
 	my $block_id = shift;
 	my $q = database->prepare("
-		SELECT *
-		FROM block_circuits
-		WHERE block_id=?
+		SELECT json_data 
+		FROM json_block_circuits(?)
 	");
 	$q->execute($block_id);
-	my $result = $q->fetchall_arrayref({}) or return undef;
+	my $result = $q->fetchrow_hashref or return undef;
+	my $rv = from_json($result->{json_data});
 
-	# Jumper results are of the form [jumper_id]:[designation]
-	# Split these results into two separate fields
-	foreach my $row(@{$result}) {
-		foreach my $jumper(@{$row->{jumpers}}) {
-			my ($id, $designation) = split(/:/, $jumper);
-			$jumper = {
-				raw => $jumper,
-				id => $id,
-				designation => $designation,
-			};
-		}
-	}
+	use Data::Dumper;
+	debug Dumper $rv;
 
-	return $result;
+	return $rv;
 }
 
 

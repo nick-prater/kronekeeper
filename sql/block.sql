@@ -70,46 +70,56 @@ JOIN frame ON (frame.id = vertical.frame_id);
 
 
 
-/* Show block circuits */
-CREATE OR REPLACE VIEW block_circuits AS
-SELECT
-	block.id AS block_id,
-	circuit.id AS circuit_id,
-	circuit.designation,
-	circuit.name,
-	circuit.cable_reference,
-	circuit.connection,
-	ARRAY(
-		/* This is ugly, but allows us to get both jumper_id and destination
-		 * designation to the UI in a single query. The more I think of the
-		 * design here, we should perhaps query and populate jumpers separately
-		 */
-		SELECT DISTINCT CONCAT(
-			jumper_wire.jumper_id, ':',
-			vertical2.designation, block2.designation, '.',
-			circuit2.designation
-		) AS j
-		FROM connection AS connection1
-		JOIN pin AS pin1 ON (pin1.id = connection1.pin_id)
-		JOIN circuit AS circuit1 ON (circuit1.id = pin1.circuit_id)
-		JOIN connection AS connection2 ON (
-			connection2.jumper_wire_id = connection1.jumper_wire_id
-			AND connection2.id != connection1.id
-		)
-		JOIN pin AS pin2 ON (pin2.id = connection2.pin_id)
-		JOIN circuit AS circuit2 ON (circuit2.id = pin2.circuit_id)
-		JOIN block AS block2 ON (block2.id = circuit2.block_id)
-		JOIN vertical AS vertical2 ON (vertical2.id = block2.vertical_id)
-		JOIN jumper_wire ON (jumper_wire.id = connection1.jumper_wire_id)
-		WHERE circuit1.id = circuit.id
-		ORDER BY j ASC
-	) AS jumpers
-FROM block
-JOIN circuit ON (circuit.block_id = block.id)
-ORDER BY block_id ASC, block.position ASC, circuit.position ASC;
 
+/* This function returns a table with a single row, containing a nested json array 
+ * structure representing the circuits on the given block, along with their
+ * jumpers and the wires making up those jumpers...
+ *
+ * In other words, nested array of circuits->jumpers->wires
+ *
+ * This combines everything into a single query, the result of which can be returned
+ * straight to the browser. Otherwise, we'd be using middleware to individually
+ * query jumpers and wires to build a data structure. On the minus side, this required
+ * at least postgresql 9.4 and is possibly harder to read?
+ */
+CREATE OR REPLACE FUNCTION json_block_circuits(
+	p_block_id INTEGER
+)
+RETURNS TABLE(json_data JSON) AS $$
+BEGIN
 
-
+	RETURN QUERY
+	SELECT json_agg(v) FROM (
+		SELECT
+			block.id AS block_id,
+			circuit.id AS circuit_id,
+			circuit.designation,
+			circuit.name,
+			circuit.cable_reference,
+			circuit.connection,
+			(
+				SELECT json_agg(u) FROM (
+					SELECT
+						jumper_circuits.jumper_id AS jumper_id,
+						is_simple_jumper(jumper_circuits.jumper_id),
+						(SELECT json_agg(t) FROM (
+							SELECT *
+							FROM jumper_wire_info 
+							WHERE jumper_wire_info.jumper_id = jumper_circuits.jumper_id
+							AND jumper_wire_info.a_circuit_id = jumper_circuits.a_circuit_id
+						) AS t)	AS wires
+					FROM jumper_circuits
+					WHERE jumper_circuits.a_circuit_id = circuit.id
+					ORDER BY jumper_circuits.jumper_id
+				) AS u
+			) AS jumpers
+		FROM block
+		JOIN circuit ON (circuit.block_id = block.id)
+		WHERE block.id = p_block_id
+		ORDER BY block_id ASC, block.position ASC, circuit.position ASC
+	) AS v;
+END
+$$ LANGUAGE plpgsql;
 
 
 

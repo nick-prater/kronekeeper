@@ -170,7 +170,49 @@ FROM jumper_wire_nodes AS j1
 JOIN jumper_wire ON (jumper_wire.id = j1.jumper_wire_id)
 JOIN colour ON (colour.id = jumper_wire.colour_id)
 ORDER BY jumper_id, jumper_wire_id;
-  
+ 
+ 
+
+/* Shows connections info for each wire making up a jumper */
+CREATE OR REPLACE VIEW jumper_wire_info AS
+SELECT
+	jumper_wire.jumper_id,
+	jumper_wire.id AS jumper_wire_id,
+	pin1.designation AS a_pin_designation,
+	pin2.designation AS b_pin_designation,
+	circuit1.id AS a_circuit_id,
+	circuit2.id AS b_circuit_id,
+	CONCAT(vertical1.designation, block1.designation, '.', circuit1.designation) AS a_circuit_full_designation,
+	CONCAT(vertical2.designation, block2.designation, '.', circuit2.designation) AS b_circuit_full_designation,
+	CONCAT(vertical1.designation, block1.designation, '.', circuit1.designation, pin1.designation) AS a_full_designation,
+	CONCAT(vertical2.designation, block2.designation, '.', circuit2.designation, pin2.designation) AS b_full_designation,
+	is_simple_jumper(jumper_wire.jumper_id),
+	colour.id AS colour_id,
+	colour.name AS colour_name,
+	colour.short_name AS colour_short_name,
+	colour.html_code AS colour_html_code
+FROM connection AS connection1
+JOIN pin AS pin1 ON (pin1.id = connection1.pin_id)
+JOIN circuit AS circuit1 ON (circuit1.id = pin1.circuit_id)
+JOIN block AS block1 ON (block1.id = circuit1.block_id)
+JOIN vertical AS vertical1 ON (vertical1.id = block1.vertical_id)
+JOIN connection AS connection2 ON (
+        connection2.jumper_wire_id = connection1.jumper_wire_id
+        AND connection2.id != connection1.id
+)
+JOIN pin AS pin2 ON (pin2.id = connection2.pin_id)
+JOIN circuit AS circuit2 ON (circuit2.id = pin2.circuit_id)
+JOIN block AS block2 ON (block2.id = circuit2.block_id)
+JOIN vertical AS vertical2 ON (vertical2.id = block2.vertical_id)
+JOIN jumper_wire ON (jumper_wire.id = connection1.jumper_wire_id)
+JOIN colour ON (colour.id = jumper_wire.colour_id)
+ORDER BY (
+	vertical1.position, block1.position, circuit1.position, pin1.position,
+	vertical2.position, block2.position, circuit2.position, pin2.position,
+	jumper_wire.jumper_id
+);
+
+
 
 /* Returns the number of wires contained within a jumper template */
 CREATE OR REPLACE FUNCTION jumper_template_wire_count(

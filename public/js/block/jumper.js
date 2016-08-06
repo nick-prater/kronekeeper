@@ -41,11 +41,46 @@ define([
 
 		defaults: {
 			designation: null,
-			id: null
+			id: null,
+			is_simple_jumper: false,
+			wires: []
 		},
 
 		initialize: function(attributes, options) {
 			this.circuit = options.circuit;
+		},
+
+		parse: function(response, options) {
+
+			var data = response.data;
+			//console.log("data:", data);
+			//console.log("options:", options);
+
+			/* Sanity check - a jumper should always have at least one wire */
+			if(!(data.wires.length >= 1)) {
+				alert("ERROR: jumper has no associated wires, therefore no connections!");
+			}
+
+			/* Assumption is that all wires lead to the same destination circuit
+			 * We've no UI to create a jumper other than this, but still, we trap this
+			 * in case we do something crazy in future and forget to update this part of the UI
+			 */
+			data.wires.forEach(function(wire, index) {
+				if(wire.b_circuit_id != data.wires[0].b_circuit_id) {
+					alert(
+						"UNEXPECTED CONDITION: jumper has wires terminating on " +
+						"different circuits. Not all connections are shown"
+					);
+				}
+			});
+
+			/* This is the data finally used to construct the new Model */
+			return {
+				id: data.jumper_id,
+				is_simple_jumper: data.is_simple_jumper,
+				wires: data.wires,
+				designation: data.wires[0].b_circuit_full_designation	
+			};
 		},
 
 		urlRoot: '/api/jumper'

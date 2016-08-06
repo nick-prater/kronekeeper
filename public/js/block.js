@@ -138,10 +138,10 @@ require([
 			this.jumper_models = [];
 			attributes.jumpers.forEach(function(jumper_data, index) {
 				this.jumper_models.push(new jumper.model({
-					designation: jumper_data.designation,
-					id: jumper_data.id
+					data: jumper_data,
 				},
 				{
+					parse: true,
 					circuit: this
 				}));
 			}, this);

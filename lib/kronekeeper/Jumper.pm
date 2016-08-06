@@ -790,8 +790,8 @@ sub add_jumper_wire {
 		$jumper_id,
 		$connection->{a_pin_id},
 		$connection->{b_pin_id},
-	);	$connection->{wire_colour_id},
-
+		$connection->{wire_colour_id},
+	);
 
 	$q->execute(
 		$jumper_id,
