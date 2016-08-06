@@ -145,7 +145,24 @@ require([
 					circuit: this
 				}));
 			}, this);
+
+			this.listenTo(
+				this,
+				"circuit_jumper_change",
+				this.jumper_changed
+			);
+
+		},
+
+		jumper_changed: function(changed_circuit_id) {
+
+			console.log("reacting to event changed_circuit_id ", changed_circuit_id);
+
+			if(changed_circuit_id = this.get("id")) {
+				console.log("jumper_changed on circuit_id " + changed_circuit_id);
+			}
 		}
+
 	});
 
 

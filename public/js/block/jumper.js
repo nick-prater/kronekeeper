@@ -171,16 +171,28 @@ define([
 						e.target.parentNode.classList.remove('change_pending');
 						jumper_view.render();
 						jumper_view.$el.effect("highlight", highlight_green, highlight_duration);
-
-						/* Propagate change to any circuits affected by the new jumper */
-						data.jumper_info.wires.forEach(function(wire) {
-							if(wire.b_circuit_id != wire.a_circuit_id) {
-								console.log("propagating jumper change for circuit_id " + wire.b_circuit_id);
-								jumper_view.model.circuit.collection.trigger("circuit_jumper_change", wire.b_circuit_id);
-							}
-						});
+						propagate_circuit_changes(data.jumper_info.wires);
 					}
 				});
+
+				function propagate_circuit_changes(wires) {
+
+						/* Build list of changed circuits, so we only trigger one event for each */
+						var changed_circuits = [];
+						wires.forEach(function(wire) {
+							
+							/* Exclude ourselves - we already know about the change */
+							if(wire.b_circuit_id != wire.a_circuit_id) {
+								changed_circuits[wire.b_circuit_id] = true;
+							}
+						});
+
+						/* Trigger an event for each one, apart from ourselves */
+						changed_circuits.forEach(function(changed, circuit_id) {
+							console.log("propagating jumper change for circuit_id ", circuit_id);
+							jumper_view.model.circuit.trigger("circuit_jumper_change",circuit_id);
+						});
+				}
 			}
 		},
 
