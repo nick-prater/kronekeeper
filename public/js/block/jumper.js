@@ -222,6 +222,7 @@ define([
 			 * same id, but the text input field won't have been cleared.
 			 */
 			if(deleted_jumper_id == this.model.get("id") && this.$("input").val() != "") {
+				console.log("jumper_deleted", deleted_jumper_id);
 				this.model.set(this.model.defaults);
 				this.render();
 				this.$el.effect("highlight", highlight_green, highlight_duration);

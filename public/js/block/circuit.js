@@ -66,7 +66,11 @@ define([
 				"circuit_jumper_change",
 				this.jumper_changed
 			);
-
+			this.listenTo(
+				this,
+				"loaded_jumper_data",
+				this.display_jumper_data
+			);
 		},
 
 		jumper_changed: function(changed_circuit_id) {
@@ -78,6 +82,7 @@ define([
 
 		reload_jumpers: function() {
 
+			var circuit_model = this;
 			var circuit_id = this.get("circuit_id");
 			var url = '/api/circuit/' + circuit_id + '/jumpers';
 			var data = {
@@ -89,14 +94,77 @@ define([
 				type: "GET",
 				dataType: "json",
 				success: function(json) {
-					console.log("loaded jumper data OK");
+					console.log("jumper data loaded OK");
+					circuit_model.trigger("loaded_jumper_data", json);
 				},
 				error: function(xhr, status) {
 					var error_code = xhr.status + " " + xhr.statusText;
 					console.log("failed to reload jumper data:", error_code);
 				}
 			});
+		},
+
+		display_jumper_data: function(data) {
+
+			data.jumpers.forEach(function(jumper_data) {
+
+				/* Is this jumper already displayed?
+				 * nothing to do if so - at present we don't update jumpers,
+				 * we delete and add new for any changes
+				 */
+				var jumper_model = this.jumper_model_by_id(jumper_data.jumper_id);
+				if(jumper_model) {
+					console.log("already have jumper_id", jumper_data.jumper_id);
+				}
+				else {
+					console.log("adding new jumper_id", jumper_data.jumper_id);
+
+					/* Is there an existing model we can populate? */
+					var jumper_model = this.get_empty_jumper_model();
+
+					if(jumper_model) {
+						console.log("populating existing jumper model");
+						jumper_model.set(
+							jumper_model.parse({data: jumper_data})
+						);
+					}
+					else {
+						console.log("No empty jumper models found - adding one");
+
+						jumper_model = new jumper.model({
+							data: jumper_data,
+						},
+						{
+							parse: true,
+							circuit: this
+						});
+						this.jumper_models.push(jumper_model);
+					}
+
+					this.trigger("render_jumpers_request");
+				}
+
+			}, this);
+
+		},
+
+		jumper_model_by_id: function(wanted_jumper_id) {
+
+			/* Returns the jumper model having the given jumper_id */
+			return this.jumper_models.find(function(jumper_model) {
+				return wanted_jumper_id == jumper_model.get("id");
+			});
+		},
+
+		get_empty_jumper_model: function() {
+
+			/* Returns the first unpopulated jumper model, or undef if none */
+			return this.jumper_models.find(function(jumper_model) {
+				return !jumper_model.get("id");
+			});
 		}
+		
+
 	});
 
 
@@ -163,6 +231,11 @@ define([
 				"provision_jumper_fields",
 				this.provision_jumper_fields
 			);
+			this.listenTo(
+				this.model,
+				"render_jumpers_request",
+				this.render_jumpers
+			);
 		},
 
 		template: _.template( $('#row_template').html() ),
@@ -178,21 +251,27 @@ define([
 			return this;
 		},
 
-		render_jumpers: function(jumper_text) {
+		render_jumpers: function() {
 
+			console.log("render_jumpers()");
+
+			/* This is called during initialisation to bulk-render all jumpers for the circuit */
 			var jumpers = this.model.jumper_models;
 
 			/* Ensure we have enough blank cells for all jumpers */
-			while(this.$el.children("td.jumper").not(".inactive").size() < jumpers.length) {
+			var cells_needed = jumpers.length;
+			while(this.$el.children("td.jumper").not(".inactive").size() < cells_needed) {
 				this.add_jumper();
 			}
 
 			/* Populate the blank cells */
 			var circuit_model = this.model;
 			this.$el.children("td.jumper").not(".inactive").each(function(index, cell) {
-				var jumper_model = jumpers[index] || new jumper.model(null, {circuit:circuit_model});
+				if(!jumpers[index]) {
+					jumpers[index] = new jumper.model(null, {circuit:circuit_model});
+				}
 				var view = new jumper.view({
-					model: jumper_model
+					model: jumpers[index]
 				});
 				$(cell).replaceWith(view.render().$el);
 			});
@@ -212,8 +291,10 @@ define([
 			}
 
 			/* Activate an inactive cell */
+			var jumper_model = new jumper.model(null, {circuit:this.model});
+			this.model.jumper_models.push(jumper_model);
 			var view = new jumper.view({
-				model: new jumper.model(null, {circuit:this.model})
+				model: jumper_model
 			});
 			this.$el.children("td.jumper.inactive").first().replaceWith(view.render().$el);
 		},
