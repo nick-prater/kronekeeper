@@ -114,6 +114,11 @@ prefix '/jumper' => sub {
 			);
 		}
 
+		my $a_pins = circuit_pins($a_circuit_info->{id});
+		my $b_pins = circuit_pins($b_circuit_info->{id});
+		my $max_pin_count = max(scalar(@{$a_pins}), scalar(@{$b_pins}));
+		my $offer_simple_jumper = 1;
+
 		# Cannot offer simple jumper connection if:
 		#   - there any other jumpers linking starting point and destination
 		#   - starting and destination circuits are identical
@@ -123,28 +128,29 @@ prefix '/jumper' => sub {
 			$a_circuit_info->{id} == $b_circuit_info->{id} ||
 			$a_circuit_info->{pin_count} != $b_circuit_info->{pin_count}
 		) {	
-			debug("cannot offer simple jumper - forward to custom jumper selection");
+			debug("cannot offer simple jumper - forward to custom jumper selection instead");
+			$offer_simple_jumper = 0;
 		}
-		else {
-			debug("offering choice of simple or custom jumper connection");
-			my $a_pins = circuit_pins($a_circuit_info->{id});
-			my $b_pins = circuit_pins($b_circuit_info->{id});
-			my $max_pin_count = max(scalar(@{$a_pins}), scalar(@{$b_pins}));
 
-			template(
-				'jumper/choose_connection',
-				{
-					a_circuit => $a_circuit_info,
-					b_circuit => $b_circuit_info,
-					a_pins => $a_pins,
-					b_pins => $b_pins,
-					max_pin_index => ($max_pin_count - 1),
-					replacing_jumper_id => param("replacing_jumper_id"),
-					colours => get_colours()
-				},
-				{ layout => undef }
-			);
-		}
+		template(
+			'jumper/choose_connection',
+			{
+				a_circuit => $a_circuit_info,
+				b_circuit => $b_circuit_info,
+				a_pins => $a_pins,
+				b_pins => $b_pins,
+				max_pin_index => ($max_pin_count - 1),
+				replacing_jumper_id => param("replacing_jumper_id"),
+				colours => get_colours(),
+				offer_simple_jumper => $offer_simple_jumper,
+			},
+			{ layout => undef }
+		);
+
+
+
+
+
 	};
 
 

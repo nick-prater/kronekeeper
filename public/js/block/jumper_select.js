@@ -92,7 +92,18 @@ define([
 			function(response, status, xhr) {
 				if(status=="success") {
 					console.log("loaded connection choices OK");
-					handle_connection_choice_load_success();
+
+					/* If a simple jumper connection is impossible, the
+					 * jumper type selection is hidden so we jump straight
+					 * to the wire choice step as though the user had
+					 * chosen "Custom Jumper"
+					 */
+					if($("#choose_jumper_type_div").attr("hidden")) {
+						handle_custom_jumper_click();
+					}
+					else {
+						handle_connection_choice_load_success();
+					}
 				}
 				else {
 					var error_code = xhr.status + " " + xhr.statusText;
@@ -127,8 +138,6 @@ define([
 		/* Set up events on dynamically loaded content */
 		$("#simple_jumper_button").on("click", handle_simple_jumper_click);
 		$("#custom_jumper_button").on("click", handle_custom_jumper_click);
-		$(".choose_jumper_connections select").on("change", jumper_connection_change);
-		$("select.wire_colour_picker").on("change", handle_wire_colour_change);
 	}
 
 
@@ -184,7 +193,8 @@ define([
 	function handle_custom_jumper_click(event) {
 
 		console.log("custom jumper selected");
-
+		$(".choose_jumper_connections select").on("change", jumper_connection_change);
+		$("select.wire_colour_picker").on("change", handle_wire_colour_change);
 		$("#choose_jumper_type_div").hide();
 		$("#choose_jumper_connections_div").show();
 

@@ -1,7 +1,14 @@
 [% USE JSON %]
 
 <!-- Step 1 -->
-<div class="choose_jumper_type" id="choose_jumper_type_div">
+<div 
+	class="choose_jumper_type"
+	id="choose_jumper_type_div"
+[%- UNLESS offer_simple_jumper %]
+	hidden="hidden"
+[%- END %]
+
+>
 	<h2>Jumpering <span class="designation">[% a_circuit.full_designation %]</span>
 	    &rarr; <span class="designation">[% b_circuit.full_designation %]</span>
 	</h2>
@@ -41,7 +48,13 @@
 
 
 <!-- Step 2 if the Custom Jumper option is selected -->
-<div class="choose_jumper_type choose_jumper_connections" id="choose_jumper_connections_div" hidden="hidden">
+<div 
+	class="choose_jumper_type choose_jumper_connections" 
+	id="choose_jumper_connections_div" 
+[%- IF offer_simple_jumper %]
+	hidden="hidden"
+[%- END %]
+>
 
 	<h2>Jumpering <span class="designation">[% a_circuit.full_designation %]</span>
 	    &rarr; <span class="designation">[% b_circuit.full_designation %]</span>
