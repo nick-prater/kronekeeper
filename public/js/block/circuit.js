@@ -38,35 +38,40 @@ define([
 		idAttribute: 'circuit_id',
 		urlRoot: '/api/circuit',
 
-		defaults: {
-			block_id: null,
-			circuit_id: null,
-			designation: null,
-			name: null,
-			cable_reference: null,
-			connection: null,
-			jumpers: []
+		defaults: function() {
+			return {
+				block_id: null,
+				circuit_id: null,
+				designation: null,
+				name: null,
+				cable_reference: null,
+				connection: null,
+				jumpers: []
+			};
 		},
 
 		initialize: function(attributes) {
 
+			this.jumper_models = [];
+
 			/* Handle the possibility that we have no jumpers */
 			if(!attributes.jumpers) {
+				console.log("WARNING: no jumpers passed to initialize circuit");
 				attributes.jumpers = [];
 			}
 
 			/* Build a discrete model for each jumper, so we 
 			 * can delete/patch/create these individually
 			 */
-			this.jumper_models = [];
 			attributes.jumpers.forEach(function(jumper_data, index) {
-				this.jumper_models.push(new jumper.model({
+				var jumper_model = new jumper.model({
 					data: jumper_data,
 				},
 				{
 					parse: true,
 					circuit: this
-				}));
+				});
+				this.jumper_models.push(jumper_model);
 			}, this);
 
 			this.listenTo(
@@ -79,16 +84,27 @@ define([
 				"loaded_jumper_data",
 				this.display_jumper_data
 			);
+
+			console.log(
+				"circuit model initialised for circuit", this.id,
+				"with", this.jumper_models.length, "jumper models"
+			);
 		},
 
 		jumper_changed: function(changed_circuit_id) {
 
+			/* Triggered whenever jumpering is changed elsewhere on
+			 * our block. If our circuit is affected, something has
+			 * changed in our jumper connections, so we need to reload
+			 */
 			if(changed_circuit_id == this.id) {
 				this.reload_jumpers();
 			}
 		},
 
 		reload_jumpers: function() {
+
+			console.log("reloading jumpers for circuit", this.id);
 
 			var circuit_model = this;
 			var url = '/api/circuit/' + this.id + '/jumpers';
@@ -230,6 +246,10 @@ define([
 		},
 
 		initialize: function() {
+
+			/* Keep track of component sub-views */
+			this.jumper_views = [];
+
 			this.listenTo(
 				this.model,
 				'sync',
@@ -255,7 +275,7 @@ define([
 		template: _.template( $('#row_template').html() ),
 
 		render: function() {
-			/* Jumpers are populated lates, once the basic
+			/* Jumpers are populated later, once the basic
 			 * table structure is in place so that we can
 			 * handle any requirement for extra columns
 			 * without race conditions.
@@ -272,8 +292,9 @@ define([
 			/* Typically a circuit has two jumper fields, but it can have more
 			 * Ensure we have enough blank cells for every jumper model
 			 */
-			var jumpers = this.model.jumper_models;
-			var cells_needed = jumpers.length;
+			var jumper_models = this.model.jumper_models;
+			var jumper_views = this.jumper_views;
+			var cells_needed = jumper_models.length;
 			while(this.$el.children("td.jumper").not(".inactive").size() < cells_needed) {
 				this.add_jumper();
 			}
@@ -282,19 +303,21 @@ define([
 			var circuit_model = this.model;
 			this.$el.children("td.jumper").not(".inactive").each(function(index, cell) {
 
-				console.log("populating jumper cell index", index);
+				console.log("populating jumper cell index");
 
-				if(!jumpers[index]) {
-					console.log("supposedly null jumper:", jumpers[index]);
-					jumpers[index] = new jumper.model(null, {circuit:circuit_model});
-					var view = new jumper.view({
-						model: jumpers[index]
-					});
-					$(cell).replaceWith(view.render().$el);
+				/* By default we have two jumper cells for each circuit, but the circuit
+				 * may have fewer, even none. If so, we initialise empty jumper models
+				 * and render associated views to fill the cells.
+				 */
+				if(!jumper_models[index]) {
+					jumper_models[index] = new jumper.model(null, {circuit:circuit_model});
 				}
-				else {
-					jumpers[index].trigger("change");
-				}		
+				if(!jumper_views[index]) {
+					jumper_views[index] = new jumper.view( {model: jumper_models[index]} );
+					jumper_views[index].setElement(cell);
+				}
+
+				jumper_views[index].render();
 			});
 		},
 
@@ -321,12 +344,8 @@ define([
 			}
 
 			/* Activate an inactive cell */
-			var jumper_model = new jumper.model(null, {circuit:this.model});
-			this.model.jumper_models.push(jumper_model);
-			var jumper_view = new jumper.view({
-				model: jumper_model
-			});
-			this.$el.children("td.jumper.inactive").first().replaceWith(jumper_view.render().$el);
+			this.$el.children("td.jumper.inactive").first().removeClass("inactive");
+			this.render_jumpers();
 		},
 
 		handle_keypress: function(e, attribute_name) {
