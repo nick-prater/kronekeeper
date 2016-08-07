@@ -21,29 +21,26 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 define([
 	'block/jumper_select',
+	'block/highlight',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
-	jumper_select
+	jumper_select,
+	highlight
 ) {
         'use strict';
-
-	/* Highlight effect options */
-	var highlight_green = {
-		color: '#00ff00'
-	};
-	var highlight_duration = 1000;
-
 
 
 	var Jumper_Model = Backbone.Model.extend({
 
-		defaults: {
-			designation: null,
-			id: null,
-			is_simple_jumper: false,
-			wires: []
+		defaults: function() {
+			return {
+				designation: null,
+				id: null,
+				is_simple_jumper: false,
+				wires: []
+			};
 		},
 
 		initialize: function(attributes, options) {
@@ -53,8 +50,6 @@ define([
 		parse: function(response, options) {
 
 			var data = response.data;
-			//console.log("data:", data);
-			//console.log("options:", options);
 
 			/* Sanity check - a jumper should always have at least one wire */
 			if(!(data.wires.length >= 1)) {
@@ -110,9 +105,20 @@ define([
 				'sync',
 				this.model_synced
 			);
+			/* this.listenTo(
+				this.model,
+				"need_render",
+				this.render
+			); */
+			this.listenTo(
+				this.model,
+				"change",
+				this.render
+			);
 		},
 	
 		render: function() {
+			console.log("jumper", this.model.id, "render on circuit", this.model.circuit.id);
 			var json = this.model.toJSON();
 			this.$el.html(this.template(json));
 			return this;
@@ -153,7 +159,7 @@ define([
 						console.log("cancel action");
 						e.target.value = jumper_view.model.get("designation");
 						e.target.parentNode.classList.remove('change_pending');
-						jumper_view.$el.effect("highlight", {}, highlight_duration);
+						jumper_view.$el.effect("highlight", {}, highlight.duration);
 					},
 					success_action: function(data) {
 						console.log("success action: ", data);
@@ -170,7 +176,7 @@ define([
 						);
 						e.target.parentNode.classList.remove('change_pending');
 						jumper_view.render();
-						jumper_view.$el.effect("highlight", highlight_green, highlight_duration);
+						jumper_view.$el.effect("highlight", highlight.green, highlight.duration);
 						propagate_circuit_changes(data.jumper_info.wires);
 					}
 				});
@@ -180,8 +186,6 @@ define([
 						/* Build list of changed circuits, so we only trigger one event for each */
 						var changed_circuits = [];
 						wires.forEach(function(wire) {
-							
-							/* Exclude ourselves - we already know about the change */
 							if(wire.b_circuit_id != wire.a_circuit_id) {
 								changed_circuits[wire.b_circuit_id] = true;
 							}
@@ -221,7 +225,7 @@ define([
 				this.$el.removeClass('change_pending');
 				this.model.set(this.model.defaults);
 				this.render();
-				this.$el.effect("highlight", highlight_green, highlight_duration);
+				this.$el.effect("highlight", highlight.green, highlight.duration);
 			}
 		},
 
@@ -231,7 +235,7 @@ define([
 			 */
 			console.log("jumper model synced");
 			this.$el.removeClass('change_pending');
-			this.$el.effect("highlight", highlight_green, highlight_duration);
+			this.$el.effect("highlight", highlight.green, highlight.duration);
 		}
 
 	});

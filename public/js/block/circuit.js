@@ -22,11 +22,13 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 define([
 	'block/jumper',
+	'block/highlight',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
-	jumper
+	jumper,
+	highlight
 ) {
         'use strict';
 
@@ -81,7 +83,7 @@ define([
 
 		jumper_changed: function(changed_circuit_id) {
 
-			if(changed_circuit_id == this.get("circuit_id")) {
+			if(changed_circuit_id == this.id) {
 				this.reload_jumpers();
 			}
 		},
@@ -89,10 +91,9 @@ define([
 		reload_jumpers: function() {
 
 			var circuit_model = this;
-			var circuit_id = this.get("circuit_id");
-			var url = '/api/circuit/' + circuit_id + '/jumpers';
+			var url = '/api/circuit/' + this.id + '/jumpers';
 			var data = {
-				circuit_id: this.get("circuit_id")
+				circuit_id: this.id
 			};
 
 			$.ajax({
@@ -218,14 +219,21 @@ define([
 		events: {
 			'click a.add_jumper' : 'add_jumper',
 			'input .circuit_name input' : 'circuit_name_input',
-			'change .circuit_name input' : 'circuit_name_change',
-			'keypress .circuit_name input' : 'circuit_name_keypress',
 			'input .cable_reference input' : 'cable_reference_input',
-			'change .cable_reference input' : 'cable_reference_change',
-			'keypress .cable_reference input' : 'cable_reference_keypress',
 			'input .connection input' : 'connection_input',
+
+			'keypress .circuit_name input': function(e) {
+				this.handle_keypress(e, 'name');
+			},
+			'keypress .cable_reference input': function(e) {
+				this.handle_keypress(e, 'cable_reference');
+			},
+			'keypress .connection input': function(e) {
+				this.handle_keypress(e, 'connection');
+			},
+			'change .circuit_name input' : 'circuit_name_change',
+			'change .cable_reference input' : 'cable_reference_change',
 			'change .connection input' : 'connection_change',
-			'keypress .connection input' : 'connection_keypress'
 		},
 
 		initialize: function() {
@@ -254,10 +262,10 @@ define([
 		template: _.template( $('#row_template').html() ),
 
 		render: function() {
-			/* Jumpers are populated once the basic table
-			 * structure is in place so that we can handle
-			 * any requirement for extra columns without
-			 * race conditions.
+			/* Jumpers are populated lates, once the basic
+			 * table structure is in place so that we can
+			 * handle any requirement for extra columns
+			 * without race conditions.
 			 */
 			var json = this.model.toJSON();
 			this.$el.html(this.template(json));
@@ -268,13 +276,10 @@ define([
 
 			console.log("render_jumpers()");
 
-			/* This is called during initialisation to bulk-render all jumpers for the circuit */
+			/* Typically a circuit has two jumper fields, but it can have more
+			 * Ensure we have enough blank cells for every jumper model
+			 */
 			var jumpers = this.model.jumper_models;
-
-			console.log("cells_needed:", jumpers.length);
-			console.log("jumpers:", jumpers);
-
-			/* Ensure we have enough blank cells for all jumpers */
 			var cells_needed = jumpers.length;
 			while(this.$el.children("td.jumper").not(".inactive").size() < cells_needed) {
 				this.add_jumper();
@@ -283,18 +288,33 @@ define([
 			/* Populate the cells */
 			var circuit_model = this.model;
 			this.$el.children("td.jumper").not(".inactive").each(function(index, cell) {
+
+				console.log("populating jumper cell index", index);
+
 				if(!jumpers[index]) {
+					console.log("supposedly null jumper:", jumpers[index]);
 					jumpers[index] = new jumper.model(null, {circuit:circuit_model});
+					var view = new jumper.view({
+						model: jumpers[index]
+					});
+					$(cell).replaceWith(view.render().$el);
 				}
-				//TODO we're creating a new view here... why not re-render an existing view?
-				var view = new jumper.view({
-					model: jumpers[index]
-				});
-				$(cell).replaceWith(view.render().$el);
+				else {
+					jumpers[index].trigger("change");
+				}		
 			});
 		},
 
 		add_jumper: function(e) {
+
+			/* Add an active jumper cell.
+			 * First see if there is an inactive cell to which we can assign
+			 * a model and view. (An inactive cell is an existing table cell
+			 * which is greyed-out and has neither model or view associated).
+			 * If there are no inactive cells in this table row, we expand
+			 * the table to add an active jumper cell to this row and an
+			 * inactive table cell to every other circuit row.
+			 */
 
 			var inactive_cell_count = this.$el.children("td.jumper.inactive").size();
 
@@ -310,25 +330,13 @@ define([
 			/* Activate an inactive cell */
 			var jumper_model = new jumper.model(null, {circuit:this.model});
 			this.model.jumper_models.push(jumper_model);
-			var view = new jumper.view({
+			var jumper_view = new jumper.view({
 				model: jumper_model
 			});
-			this.$el.children("td.jumper.inactive").first().replaceWith(view.render().$el);
+			this.$el.children("td.jumper.inactive").first().replaceWith(jumper_view.render().$el);
 		},
 
-		circuit_name_keypress: function(e) {
-			this.reset_on_escape_key(e, 'name');
-		},
-
-		cable_reference_keypress: function(e) {
-			this.reset_on_escape_key(e, 'cable_reference');
-		},
-
-		connection_keypress: function(e) {
-			this.reset_on_escape_key(e, 'connection');
-		},
-
-		reset_on_escape_key: function(e, attribute_name) {
+		handle_keypress: function(e, attribute_name) {
 			if(e.keyCode == 27) {
 				e.target.value = this.model.get(attribute_name);
 				e.target.parentNode.classList.remove('change_pending');
@@ -388,13 +396,13 @@ define([
 			 * Server returns the changed fields to confirm which have been updated
 			 */
 			if('name' in response) {
-				highlight_element_change_applied(this.$el, "td.circuit_name");
+				highlight.element_change_applied(this.$el, "td.circuit_name");
 			}
 			if('cable_reference' in response) {
-				highlight_element_change_applied(this.$el, "td.cable_reference");
+				highlight.element_change_applied(this.$el, "td.cable_reference");
 			}
 			if('connection' in response) {
-				highlight_element_change_applied(this.$el, "td.connection");
+				highlight.element_change_applied(this.$el, "td.connection");
 			}
 		},
 

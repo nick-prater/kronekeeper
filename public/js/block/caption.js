@@ -21,10 +21,12 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 define([
+	'block/highlight',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
+	highlight
 ) {
         'use strict';
 
@@ -93,7 +95,7 @@ define([
 			 * Server returns the changed fields to confirm which have been updated
 			 */
 			if('name' in response) {
-				highlight_element_change_applied(this.$el, "input.name");
+				highlight.element_change_applied(this.$el, "input.name");
 			};
 		}
 	});

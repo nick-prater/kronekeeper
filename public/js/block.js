@@ -40,11 +40,6 @@ require([
 		initialize: function() {
 			this.listenTo(
 				this.collection,
-				'reset',
-				this.render
-			);
-			this.listenTo(
-				this.collection,
 				'provision_jumper_fields',
 				this.set_jumper_columns
 			);
@@ -53,8 +48,15 @@ require([
 		render: function() {
 			this.collection.each(function(model) {
 				var row = new circuit.view({model: model});
-				$(this.el).append(row.render().$el);
+				this.$el.append(row.render().$el);
 			}, this);
+
+			/* The jumpers on each circuit are only rendered
+			 * once all circuit row views have been instantiated, 
+			 * so that if there's a circuit needing more than the
+			 * initial 2 jumper cells, all circuit rows are able
+			 * to respond. Otherwise we have a race condition.
+			 */
 			this.collection.trigger("table_structure_rendered");
 			return this;
 		},
@@ -72,12 +74,12 @@ require([
 	var block_view = new Block_View({collection: circuit_list});
 
 	circuit_list.fetch({
-		reset: true,
 		success: function(collection, response, options) {
 			console.log("fetched circuit list OK");
+			block_view.render();
 		},
 		error: function(collection, response, options) {
-			console.log("ERROR: failed to fetch circuit list");
+			alert("ERROR: failed to fetch circuit list");
 		}
 	});
 
