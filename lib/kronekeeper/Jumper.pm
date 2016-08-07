@@ -271,6 +271,11 @@ prefix '/api/jumper' => sub {
 		my @connections = @{$data->{connections}};
 
 		foreach my $connection(@connections) {
+			if($connection->{a_pin_id} == $connection->{b_pin_id}) {
+				database->rollback;
+				send_error("cannot jumper a pin to itself", 400);
+			}
+
 			add_jumper_wire($new_jumper_id, $connection);
 			$connection->{a_pin_info} = get_pin_info($connection->{a_pin_id});
 			$connection->{b_pin_info} = get_pin_info($connection->{b_pin_id});
