@@ -47,6 +47,12 @@ define([
 		},
 
 		initialize: function(attributes) {
+
+			/* Handle the possibility that we have no jumpers */
+			if(!attributes.jumpers) {
+				attributes.jumpers = [];
+			}
+
 			/* Build a discrete model for each jumper, so we 
 			 * can delete/patch/create these individually
 			 */
@@ -106,6 +112,10 @@ define([
 
 		display_jumper_data: function(data) {
 
+			var jumpers = this.jumper_models;
+			console.log("cells_needed:", jumpers.length);
+			console.log("jumpers:", jumpers);
+
 			data.jumpers.forEach(function(jumper_data) {
 
 				/* Is this jumper already displayed?
@@ -115,6 +125,9 @@ define([
 				var jumper_model = this.jumper_model_by_id(jumper_data.jumper_id);
 				if(jumper_model) {
 					console.log("already have jumper_id", jumper_data.jumper_id);
+					jumper_model.set(
+						jumper_model.parse({data: jumper_data})
+					);
 				}
 				else {
 					console.log("adding new jumper_id", jumper_data.jumper_id);
@@ -123,10 +136,12 @@ define([
 					var jumper_model = this.get_empty_jumper_model();
 
 					if(jumper_model) {
+						console.log("cells_needed pre-populate-existing:", jumpers.length);
 						console.log("populating existing jumper model");
 						jumper_model.set(
 							jumper_model.parse({data: jumper_data})
 						);
+						console.log("cells_needed after populate-existing:", jumpers.length);
 					}
 					else {
 						console.log("No empty jumper models found - adding one");
@@ -140,12 +155,10 @@ define([
 						});
 						this.jumper_models.push(jumper_model);
 					}
-
-					this.trigger("render_jumpers_request");
 				}
-
 			}, this);
 
+			this.trigger("render_jumpers_request");
 		},
 
 		jumper_model_by_id: function(wanted_jumper_id) {
@@ -258,18 +271,22 @@ define([
 			/* This is called during initialisation to bulk-render all jumpers for the circuit */
 			var jumpers = this.model.jumper_models;
 
+			console.log("cells_needed:", jumpers.length);
+			console.log("jumpers:", jumpers);
+
 			/* Ensure we have enough blank cells for all jumpers */
 			var cells_needed = jumpers.length;
 			while(this.$el.children("td.jumper").not(".inactive").size() < cells_needed) {
 				this.add_jumper();
 			}
 
-			/* Populate the blank cells */
+			/* Populate the cells */
 			var circuit_model = this.model;
 			this.$el.children("td.jumper").not(".inactive").each(function(index, cell) {
 				if(!jumpers[index]) {
 					jumpers[index] = new jumper.model(null, {circuit:circuit_model});
 				}
+				//TODO we're creating a new view here... why not re-render an existing view?
 				var view = new jumper.view({
 					model: jumpers[index]
 				});

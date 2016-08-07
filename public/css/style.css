@@ -163,6 +163,7 @@ body {
 
 .block td {
 	background: white;
+	height: 10pt;
 }
 
 .block td.cable_reference {

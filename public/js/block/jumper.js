@@ -147,7 +147,7 @@ define([
 				var jumper_view = this;
 				jumper_select.display({
 					circuit_id: this.model.circuit.id,
-					jumper_id: this.model.get("id"),
+					jumper_id: this.model.id,
 					destination_designation: e.target.value,
 					cancel_action: function() {
 						console.log("cancel action");
@@ -197,32 +197,28 @@ define([
 		},
 
 		jumper_remove: function() {
-			var jq_element = this.$el;
-			var view = this;
+
 			this.model.destroy({
 				success: function(model, response, options) {
 					console.log("jumper removed OK");
-					jq_element.removeClass('change_pending');
-					view.render();
-					jq_element.effect("highlight", highlight_green, highlight_duration);
+					model.circuit.collection.trigger("jumper_deleted", model.id);
 				},
 				error: function(model, response, options) {
 					console.log("ERROR removing jumper");
 					alert("ERROR removing jumper");
 				}
 			});
-			this.model.circuit.collection.trigger("jumper_deleted", this.model.get("id"));
-			this.model.set(this.model.defaults);
 		},
 
 		jumper_deleted: function(deleted_jumper_id) {
 
-			/* Responds to another jumper being deleted
+			/* Event handler that responds to another jumper being deleted.
 			 * If we are the other end of the deleted jumper, we'll have the
 			 * same id, but the text input field won't have been cleared.
 			 */
-			if(deleted_jumper_id == this.model.get("id") && this.$("input").val() != "") {
-				console.log("jumper_deleted", deleted_jumper_id);
+			if(deleted_jumper_id == this.model.id) {
+				console.log("jumper_deleted on circuit_id:", this.model.circuit.id, "jumper_id:", this.model.id);
+				this.$el.removeClass('change_pending');
 				this.model.set(this.model.defaults);
 				this.render();
 				this.$el.effect("highlight", highlight_green, highlight_duration);
