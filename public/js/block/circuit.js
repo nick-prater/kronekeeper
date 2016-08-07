@@ -217,23 +217,16 @@ define([
 		className: 'circuit',
 
 		events: {
-			'click a.add_jumper' : 'add_jumper',
-			'input .circuit_name input' : 'circuit_name_input',
-			'input .cable_reference input' : 'cable_reference_input',
-			'input .connection input' : 'connection_input',
-
-			'keypress .circuit_name input': function(e) {
-				this.handle_keypress(e, 'name');
-			},
-			'keypress .cable_reference input': function(e) {
-				this.handle_keypress(e, 'cable_reference');
-			},
-			'keypress .connection input': function(e) {
-				this.handle_keypress(e, 'connection');
-			},
-			'change .circuit_name input' : 'circuit_name_change',
-			'change .cable_reference input' : 'cable_reference_change',
-			'change .connection input' : 'connection_change',
+			'click a.add_jumper'              : 'add_jumper',
+			'input .circuit_name input'       : function(e) {this.highlight_change(e, 'name')},
+			'input .cable_reference input'    : function(e) {this.highlight_change(e, 'cable_reference')},
+			'input .connection input'         : function(e) {this.highlight_change(e, 'connection')},
+			'keypress .circuit_name input'    : function(e) {this.handle_keypress(e, 'name')},
+			'keypress .cable_reference input' : function(e) {this.handle_keypress(e, 'cable_reference')},
+			'keypress .connection input'      : function(e) {this.handle_keypress(e, 'connection')},
+			'change .circuit_name input'      : function(e) {this.save_data({name: e.target.value})},
+			'change .cable_reference input'   : function(e) {this.save_data({cable_reference: e.target.value})},
+			'change .connection input'        : function(e) {this.save_data({connection: e.target.value})}
 		},
 
 		initialize: function() {
@@ -343,19 +336,6 @@ define([
 			}
 		},
 
-
-		circuit_name_input: function(e) {
-			this.highlight_change(e, 'name');
-		},
-
-		cable_reference_input: function(e) {
-			this.highlight_change(e, 'cable_reference');
-		},
-
-		connection_input: function(e) {
-			this.highlight_change(e, 'connection');
-		},
-
 		highlight_change: function(e, attribute_name) {
 			if(e.target.value != this.model.get(attribute_name)) {
 				e.target.parentNode.classList.add('change_pending');
@@ -363,19 +343,6 @@ define([
 			else {
 				e.target.parentNode.classList.remove('change_pending');
 			}
-		},
-
-
-		circuit_name_change: function(e) {
-			this.save_data({name: e.target.value});
-		},
-
-		cable_reference_change: function(e) {
-			this.save_data({cable_reference: e.target.value});
-		},
-
-		connection_change: function(e) {
-			this.save_data({connection: e.target.value});
 		},
 
 		save_data: function(data) {
@@ -389,7 +356,6 @@ define([
 				}
 			});
 		},
-
 
 		model_synced: function(model, response, options) {
 			/* Clear field highlighting and flash green to indicate successful save
