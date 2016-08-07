@@ -22,83 +22,15 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 require([
 	'block/circuit',
+	'block/caption',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
-	circuit
+	circuit,
+	caption
 ) {
         'use strict';
-
-
-	var Block_Caption_Model = Backbone.Model.extend({
-
-		urlRoot: '/api/block',
-		defaults: {
-			name: null
-		}
-	});
-
-
-	var Block_Caption_View = Backbone.View.extend({
-
-		el: '#block_table_caption',
-
-		events: {
-			'input' : 'highlight_change',
-			'change' : 'save_caption',
-			'keypress' : 'reset_on_escape_key'
-		},
-
-		initialize: function() {
-			this.listenTo(
-				this.model,
-				'sync',
-				this.model_synced
-			);
-		},
-
-		highlight_change: function(e) {
-			if(e.target.value != this.model.get("name")) {
-				e.target.classList.add('change_pending');
-			}
-			else {
-				e.target.classList.remove('change_pending');
-			}
-		},
-
-		reset_on_escape_key: function(e) {
-			if(e.keyCode == 27) {
-				e.target.value = this.model.get("name");
-				e.target.classList.remove('change_pending');
-			}
-		},
-
-		save_caption: function(e) {
-			var data = {
-				name: e.target.value
-			};
-
-			this.model.save(data, {
-				patch: true,
-				success: function(model, response, options) {
-					console.log("circuit data saved");
-				},
-				error: function(model, xhr, options) {
-					console.log("ERROR saving circuit data");
-				}
-			});
-		},
-
-		model_synced: function(model, response, options) {
-			/* Clear field highlighting and flash green to indicate successful save
-			 * Server returns the changed fields to confirm which have been updated
-			 */
-			if('name' in response) {
-				highlight_element_change_applied(this.$el, "input.name");
-			};
-		}
-	});
 
 
 	var Block_View = Backbone.View.extend({
@@ -133,9 +65,8 @@ require([
 	});
 
 
-
-	var caption_view = new Block_Caption_View({
-		model: new Block_Caption_Model(window.block_info)
+	var caption_view = new caption.view({
+		model: new caption.model(window.block_info)
 	});
 	var circuit_list = new circuit.collection(null, {block_id: window.block_info.id});
 	var block_view = new Block_View({collection: circuit_list});
