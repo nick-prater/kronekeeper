@@ -60,14 +60,15 @@ define([
 			 * We've no UI to create a jumper other than this, but still, we trap this
 			 * in case we do something crazy in future and forget to update this part of the UI
 			 */
-			data.wires.forEach(function(wire, index) {
-				if(wire.b_circuit_id != data.wires[0].b_circuit_id) {
-					alert(
-						"UNEXPECTED CONDITION: jumper has wires terminating on " +
-						"different circuits. Not all connections are shown"
-					);
-				}
+			var mismatched_wire = data.wires.find(function(wire) {
+				return (wire.b_circuit_id != data.wires[0].b_circuit_id);
 			});
+			if(mismatched_wire) {
+				alert(
+					"UNEXPECTED CONDITION: jumper has wires terminating on " +
+					"different circuits. Not all connections are shown"
+				);
+			}
 
 			/* This is the data finally used to construct the new Model */
 			return {
@@ -104,16 +105,6 @@ define([
 				this.model,
 				'sync',
 				this.model_synced
-			);
-			/* this.listenTo(
-				this.model,
-				"need_render",
-				this.render
-			); */
-			this.listenTo(
-				this.model,
-				"change",
-				this.render
 			);
 		},
 	
@@ -169,6 +160,7 @@ define([
 							jumper_view.model.circuit.collection.trigger("jumper_deleted", data.deleted_jumper_id);
 						}
 
+						/* Update our own model and re-render */
 						jumper_view.model.set(
 							jumper_view.model.parse({
 								data: data.jumper_info
@@ -177,6 +169,8 @@ define([
 						e.target.parentNode.classList.remove('change_pending');
 						jumper_view.render();
 						jumper_view.$el.effect("highlight", highlight.green, highlight.duration);
+
+						/* Trigger update and re-render for other affected circuits */
 						propagate_circuit_changes(data.jumper_info.wires);
 					}
 				});
@@ -186,12 +180,14 @@ define([
 						/* Build list of changed circuits, so we only trigger one event for each */
 						var changed_circuits = [];
 						wires.forEach(function(wire) {
+
+							/* Don't trigger an event on ourselves */
 							if(wire.b_circuit_id != wire.a_circuit_id) {
 								changed_circuits[wire.b_circuit_id] = true;
 							}
 						});
 
-						/* Trigger an event for each one, apart from ourselves */
+						/* Trigger an event for each affected circuit, so they can reload their jumper models */
 						changed_circuits.forEach(function(changed, circuit_id) {
 							console.log("propagating jumper change for circuit_id ", circuit_id);
 							jumper_view.model.circuit.collection.trigger("circuit_jumper_change",circuit_id);
@@ -222,10 +218,9 @@ define([
 			 */
 			if(deleted_jumper_id == this.model.id) {
 				console.log("jumper_deleted on circuit_id:", this.model.circuit.id, "jumper_id:", this.model.id);
-				this.$el.removeClass('change_pending');
-				this.model.set(this.model.defaults);
+				this.model.set(this.model.defaults());
 				this.render();
-				this.$el.effect("highlight", highlight.green, highlight.duration);
+				this.model_synced();
 			}
 		},
 

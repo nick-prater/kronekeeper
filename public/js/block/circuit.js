@@ -135,54 +135,44 @@ define([
 
 			data.jumpers.forEach(function(jumper_data) {
 
-				/* Is this jumper already displayed?
-				 * nothing to do if so - at present we don't update jumpers,
-				 * we delete and add new for any changes
-				 */
-				var jumper_model = this.jumper_model_by_id(jumper_data.jumper_id);
+				/* Is there already a model for this jumper, or an empty one? */
+				var jumper_model = (
+					this.jumper_model_by_id(jumper_data.jumper_id) ||
+					this.get_empty_jumper_model()
+				);
 				if(jumper_model) {
-					console.log("already have jumper_id", jumper_data.jumper_id);
 					jumper_model.set(
 						jumper_model.parse({data: jumper_data})
 					);
 				}
 				else {
-					console.log("adding new jumper_id", jumper_data.jumper_id);
+					console.log("No empty jumper models found - adding one");
 
-					/* Is there an existing model we can populate? */
-					var jumper_model = this.get_empty_jumper_model();
-
-					if(jumper_model) {
-						console.log("cells_needed pre-populate-existing:", jumpers.length);
-						console.log("populating existing jumper model");
-						jumper_model.set(
-							jumper_model.parse({data: jumper_data})
-						);
-						console.log("cells_needed after populate-existing:", jumpers.length);
-					}
-					else {
-						console.log("No empty jumper models found - adding one");
-
-						jumper_model = new jumper.model({
-							data: jumper_data,
-						},
-						{
-							parse: true,
-							circuit: this
-						});
-						this.jumper_models.push(jumper_model);
-					}
+					jumper_model = new jumper.model({
+						data: jumper_data,
+					},
+					{
+						parse: true,
+						circuit: this
+					});
+					this.jumper_models.push(jumper_model);
 				}
-			}, this);
 
-			this.trigger("render_jumpers_request");
+				console.log(
+					"updated/added model on circuit", this.id,
+					"for jumper", jumper_model.id
+				);
+
+				/* Trigger re-render of these jumper models */
+				this.trigger("jumper_model_changed");
+			}, this);
 		},
 
 		jumper_model_by_id: function(wanted_jumper_id) {
 
 			/* Returns the jumper model having the given jumper_id */
 			return this.jumper_models.find(function(jumper_model) {
-				return wanted_jumper_id == jumper_model.get("id");
+				return wanted_jumper_id == jumper_model.id;
 			});
 		},
 
@@ -190,7 +180,7 @@ define([
 
 			/* Returns the first unpopulated jumper model, or undef if none */
 			return this.jumper_models.find(function(jumper_model) {
-				return !jumper_model.get("id");
+				return !jumper_model.id;
 			});
 		}
 		
@@ -267,7 +257,7 @@ define([
 			);
 			this.listenTo(
 				this.model,
-				"render_jumpers_request",
+				"jumper_model_changed",
 				this.render_jumpers
 			);
 		},
