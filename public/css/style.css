@@ -105,6 +105,9 @@ body {
 	color: red;
 }
 
+
+
+/* Styling for the frame view, which shows all blocks */
 .frame table {
 	text-align: center;
 }
@@ -113,45 +116,87 @@ body {
 	width: 2em;
 }
 
+
+/* the size of a block is fixed and defined here. */
 .frame td {
 	width: 17em;
-	height: 18pt;
+	height: 24pt;
 	background: white;
 	border: 1px solid black;
 	font-size: 12pt;
 }
 
-
-
-/* Make link cover entire table cell */
-.frame .block a {
-	display: block;
-	width: 100%;
-	text-decoration: none;
-	color: black;
-}
-
-.frame td.is_free,
-.frame .block.is_free a {
+.frame .block.is_free span.name {
 	color: grey;
 	font-style: italic;
 	font-size: 6pt;
 }
 
-.frame td.unavailable {
-	color: gray;
-	font-style: italic;
-	font-size: 6pt;
-	border: none;
+.frame td.block.unavailable {
 	background: inherit;
+	border: none;
 }
+.frame .unavailable span.name {
+	color: gray;
+	font-size: 6pt;
+	font-style: italic;
+}
+
+
+.frame .block div.container {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+/* Make link cover entire table cell */
+.frame .block a.link {
+	display: block;
+	width: 100%;
+	height: 100%;
+	text-decoration: none;
+	color: black;
+}
+
+/* Centre the block name vertically and horizontally */
+.frame .block span.name {
+	position: absolute;
+	width: 100%;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+
+/* The menu button is overlaid in the top right corner */
+.frame .block div.menu_button {
+	position: absolute;
+	width: 0.6em;
+	top: 0px;
+	right: 0px;
+	text-align: center;
+}
+.frame .block .menu_button a {
+	right: 0px;
+	border-radius: 1px;
+	background: #dddddd;
+	font-size: 8pt;
+	text-decoration: none;
+	color: black;
+}
+.frame .block .menu_button a:hover {
+        color: white;
+        background: #aaaaaa;
+	border-color: black;
+}
+
+
 
 
 .block table {
 	border-collapse: collapse;
 }
 
-/* .block table, */
 .block td,
 .block th {
 	border: 1px solid black;

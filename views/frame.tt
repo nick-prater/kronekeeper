@@ -37,22 +37,45 @@
 		    [% IF block.id  # -- Block exists -- %]
 		      [% SET id = frame_blocks.$vertical_position.blocks.$block_position.id %]
 		      [% SET url = "$frame_info.id/$id" %]
-		      [% SET title = "$vertical.designation$block.designation" %]
+		      [% SET title = "block $vertical.designation$block.designation" %]
 		      [% IF block.is_free  # -- Block position is unused -- %]
+
 			<td class="block is_free" id="block_[% id %]">
-				<a href="[% url %]" title="[% title %]">
-					unused
-				</a>
+				<div class="container">
+					<a class="link" href="[% url %]" title="[% title %]">
+						<span class="name">unused</span>
+					</a>
+					<div class="menu_button">
+						<a title="menu" href="javascript:void(0)">&#9776;</a>
+					</div>
+				</div>
 			</td>
+
 		      [% ELSE  # -- Block position is in use -- %]
-			<td class="block" id="block_[% id %]"> 
-				<a href="[% url %]" title="[% title %]">
-					[% frame_blocks.$vertical_position.blocks.$block_position.name || '&nbsp;' %]
-				</a>
+
+			<td class="block" id="block_[% id %]">
+				<div class="container">
+					<a class="link" href="[% url %]" title="[% title %]">
+						<span class="name">[% frame_blocks.$vertical_position.blocks.$block_position.name %]</span>
+					</a>
+					<div class="menu_button">
+						<a title="menu" href="javascript:void(0)">&#9776;</a>
+					</div>
+				</div>
 			</td>
+
 		      [% END %]
 		    [% ELSE %]
-			<td class="block unavailable">unavailable</td>
+
+			<td class="block unavailable">
+				<div class="container">
+					<span class="name">unavailable</span>
+					<div class="menu_button">
+						<a title="menu" href="javascript:void(0)">&#9776;</a>
+					</div>
+				</div>
+			</td>
+
 		    [% END %]
 		  [% END %]
 			<th>[% row_designation %]</th>
