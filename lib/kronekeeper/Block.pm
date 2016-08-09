@@ -30,6 +30,14 @@ use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
 use kronekeeper::Activity_Log;
+use Exporter qw(import);
+our $VERSION = '0.01';
+our @EXPORT_OK = qw(
+	block_id_valid_for_account
+	block_info
+	block_is_free
+);
+
 
 my $al = kronekeeper::Activity_Log->new();
 
@@ -170,6 +178,18 @@ sub block_info {
 	$q->execute($block_id);
 	return $q->fetchrow_hashref;
 };
+
+
+sub block_is_free {
+	my $block_id = shift;
+	my $q = database->prepare("
+		SELECT *
+		FROM block_is_free(?) AS is_free
+	");
+	$q->execute($block_id);
+	my $result = $q->fetchrow_hashref;
+	return $result->{is_free};
+}
 
 
 sub block_circuits {

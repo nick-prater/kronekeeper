@@ -57,6 +57,7 @@ require([
 		/* Clicking outside the menu closes it */
 		$(document).on("click", function() {
 			$("#block_menu").menu().hide();
+			$("#block_menu").menu("collapseAll", null, true);
 		});
 	};
 
@@ -119,7 +120,6 @@ require([
 			block_id: block_id,
 			block_type: block_type
 		};
-
 
 		$.ajax({
 			url: url,

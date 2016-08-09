@@ -28,6 +28,10 @@ use warnings;
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
+use kronekeeper::Block qw(
+	block_id_valid_for_account
+	block_is_free
+);
 use Exporter qw(import);
 our $VERSION = '0.01';
 our @EXPORT_OK = qw(
@@ -89,6 +93,47 @@ prefix '/frame' => sub {
 		my $target =  "/block" . $route;
 		debug "redirecting to $target";
 		forward $target;
+	};
+
+};
+
+
+prefix '/api/frame' => sub {
+
+	post '/place_block' => sub {
+
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug "place_block()";
+		debug request->body;
+		my $data = from_json(request->body);
+
+		block_id_valid_for_account($data->{block_id}) or do {
+			send_error("block_id invalid or not permitted" => 403);
+		};
+
+		block_is_free($data->{block_id}) or do {
+			send_error("block is not free" => 400);
+		};
+
+		$data->{block_type} && $data->{block_type} =~ m/^(237A|ABS)$/ or do {
+			send_error("block_type invalid" => 400);
+		};
+
+		debug("adding $data->{block_type} block as block_id $data->{block_id}");
+		my $placed_block_id = place_block(
+			$data->{block_id},
+			$data->{block_type},
+		) or do {
+			database->rollback;
+			die;
+		};
+
+		return to_json {
+			block_id => $placed_block_id,
+		};
 	};
 
 };
@@ -170,6 +215,39 @@ sub frame_blocks {
 	return $verticals;
 }
 
+sub place_block {
+
+	my $block_id = shift;
+	my $block_type = shift;
+
+	my %block_commands = (
+		'237A' => 'place_237A_block',
+		'ABS'  => 'place_ABS_block',
+	);
+
+	my $block_command = $block_commands{$block_type} or do {
+		error("place_block called with unknows block type: $block_type");
+		die;
+	};
+
+	my $q = database->prepare(sprintf(
+		'SELECT %s(?) AS placed_block_id',
+		$block_command
+	));
+	$q->execute($block_id) or do {
+		error("ERROR running database command to place block");
+		database->rollback;
+		die;
+	};
+
+	my $result = $q->fetchrow_hashref or do {
+		error("received no result back from database after placing block");
+		database->rollback;
+		die;
+	};
+
+	return $result->{placed_block_id};
+}
 
 
 
