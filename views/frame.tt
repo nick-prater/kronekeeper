@@ -53,7 +53,7 @@
 
 		      [% ELSE  # -- Block position is in use -- %]
 
-			<td class="block" id="block_[% id %]">
+			<td class="block" id="block_[% id %]" data-block_id="[% id %]">
 				<div class="container">
 					<a class="link" href="[% url %]" title="[% title %]">
 						<span class="name">[% frame_blocks.$vertical_position.blocks.$block_position.name %]</span>
@@ -94,16 +94,15 @@
 
 	
 	<ul class="context_menu" id="block_menu">
-		<li><div>Open</div></li>
-		<li>
+		<li data-action="open"><div>Open</div></li>
+		<li data-action="place">
 			<div>Add Block</div>
 			<ul>
-				<li><div>237A</div></li>
-				<li><div>ABS</div></li>
-				<li><div>Earth</div></li>
+				<li data-action="place" data-block_type="237A"><div>237A</div></li>
+				<li data-action="place" data-block_type="ABS"><div>ABS</div></li>
 			</ul>
 		</li>
-		<li><div>Remove Block</div></li>
+		<li data-action="remove"><div>Remove Block</div></li>
 	</ul>
 </div>
 
