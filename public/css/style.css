@@ -359,4 +359,28 @@ body {
 }
 
 
+/* Override jqUI menu highlighted item colour */
+.ui-state-active,
+.ui-widget-content .ui-state-active {
+	border: 1px solid #000000;
+	background: #aaa;
+	color: black;
+}
+
+/* Set width of per-block context-menu in frame view */
+.frame .context_menu {
+	width: auto;
+	position: absolute;
+	display: none;
+	color: black;
+	font-size: 10pt;
+}
+
+
+
+
+
+
+
+
 

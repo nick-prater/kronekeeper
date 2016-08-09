@@ -40,7 +40,7 @@
 		      [% SET title = "block $vertical.designation$block.designation" %]
 		      [% IF block.is_free  # -- Block position is unused -- %]
 
-			<td class="block is_free" id="block_[% id %]">
+			<td class="block is_free" id="block_[% id %]" data-block_id="[% id %]">
 				<div class="container">
 					<a class="link" href="[% url %]" title="[% title %]">
 						<span class="name">unused</span>
@@ -92,4 +92,55 @@
 
 	</table>
 
+	
+	<ul class="context_menu" id="block_menu">
+		<li><div>Open</div></li>
+		<li>
+			<div>Add Block</div>
+			<ul>
+				<li><div>237A</div></li>
+				<li><div>ABS</div></li>
+				<li><div>Earth</div></li>
+			</ul>
+		</li>
+		<li><div>Remove Block</div></li>
+	</ul>
 </div>
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/frame.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
