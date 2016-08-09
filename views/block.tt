@@ -79,6 +79,7 @@
 <!-- Global state variables -->
 <script type="text/javascript">
 var block_info = [% block_info.json %];
+var circuits = [% circuits.json %];
 </script>
 
 <script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>

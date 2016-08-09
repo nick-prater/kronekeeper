@@ -70,9 +70,19 @@ require([
 	var caption_view = new caption.view({
 		model: new caption.model(window.block_info)
 	});
-	var circuit_list = new circuit.collection(null, {block_id: window.block_info.id});
+	var circuit_list = new circuit.collection(window.circuits, {block_id: window.block_info.id});
 	var block_view = new Block_View({collection: circuit_list});
+	block_view.render();
 
+
+
+	/****************************************************************************************
+	 * This code shows how to dynamically load data for a given block. The initial
+	 * block data is provided as part of the page load, as a javascript array, which
+	 * avoids having to make a ajax call after the page loads, so data displays faster.
+	 * This code is left here, because we're likely to want to add functions to this page
+	 * which dynamically load other frames
+	 *
 	circuit_list.fetch({
 		success: function(collection, response, options) {
 			console.log("fetched circuit list OK");
@@ -82,6 +92,9 @@ require([
 			alert("ERROR: failed to fetch circuit list");
 		}
 	});
+	 ****************************************************************************************
+	 */
+
 
 	console.log("loaded block.js");
 });

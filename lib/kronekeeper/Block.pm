@@ -50,6 +50,7 @@ prefix '/block' => sub {
 		template('block', {
 			block_id   => $id,
 			block_info => block_info($id),
+			circuits   => block_circuits($id),
 		});
 	};
 
