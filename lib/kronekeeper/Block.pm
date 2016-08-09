@@ -182,9 +182,6 @@ sub block_circuits {
 	my $result = $q->fetchrow_hashref or return undef;
 	my $rv = from_json($result->{json_data});
 
-	use Data::Dumper;
-	debug Dumper $rv;
-
 	return $rv;
 }
 
