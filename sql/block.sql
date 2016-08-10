@@ -123,4 +123,34 @@ $$ LANGUAGE plpgsql;
 
 
 
+/* Removes the given block_id and it's associated pins and circuits.
+ * But note this leaves the block position itself intact, so it reains
+ * available for a new block to be placed there later
+ */
+CREATE OR REPLACE FUNCTION remove_block(
+	p_block_id INTEGER
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+
+	DELETE FROM pin
+	USING circuit
+	WHERE circuit.block_id = p_block_id
+	AND pin.circuit_id = circuit.id;
+
+	DELETE FROM circuit
+	WHERE circuit.block_id = p_block_id;
+
+	/* Setting a block's name to NULL means it
+	 * is considered as an available position
+	 */
+	UPDATE block
+	SET name = NULL
+	WHERE block.id = p_block_id;
+
+	RETURN FOUND;
+END
+$$ LANGUAGE plpgsql;
+
+
 

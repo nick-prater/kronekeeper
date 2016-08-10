@@ -28,9 +28,15 @@ use warnings;
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
+use kronekeeper::Activity_Log;
 use kronekeeper::Block qw(
 	block_id_valid_for_account
 	block_is_free
+	block_info
+	block_circuits
+);
+use kronekeeper::Jumper qw(
+	delete_jumper
 );
 use Exporter qw(import);
 our $VERSION = '0.01';
@@ -39,6 +45,7 @@ our @EXPORT_OK = qw(
 	frame_info
 );
 
+my $al = kronekeeper::Activity_Log->new();
 
 
 prefix '/frame' => sub {
@@ -131,8 +138,74 @@ prefix '/api/frame' => sub {
 			die;
 		};
 
+		
+		# Update Activity Log
+		my $info = block_info($placed_block_id);
+		my $note = sprintf(
+			'placed %s block at %s',
+			$data->{block_type},
+			$info->{full_designation},
+		);
+
+		$al->record({
+			function     => 'kronekeeper::Frame::place_block',
+			frame_id     => $info->{frame_id},
+			block_id_a   => $info->{block_id},
+			note         => $note,
+		});
+
+		database->commit;
+
 		return to_json {
 			block_id => $placed_block_id,
+		};
+	};
+
+
+	post '/remove_block' => sub {
+		
+		# Removes a block and all associated jumpers, circuits, pins etc...
+
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug "remove_block()";
+		debug request->body;
+		my $data = from_json(request->body);
+
+		block_id_valid_for_account($data->{block_id}) or do {
+			send_error("block_id invalid or not permitted" => 403);
+		};
+		my $info = block_info($data->{block_id});
+
+		debug("removing block_id $data->{block_id} and all associated elements");
+		my $removed_block = remove_block(
+			$data->{block_id},
+		) or do {
+			database->rollback;
+			die;
+		};
+
+		# Update Activity Log
+		my $note = sprintf(
+			'Removed block from %s (was "%s")',
+			$info->{full_designation},
+			$info->{name} || '',
+		);
+
+		$al->record({
+			function     => 'kronekeeper::Frame::remove_block',
+			frame_id     => $info->{frame_id},
+			block_id_a   => $info->{block_id},
+			note         => $note,
+		});
+
+		database->commit;
+
+		return to_json {
+			success => $removed_block,
+			activity_log_note => $note,
 		};
 	};
 
@@ -179,6 +252,7 @@ sub frame_info {
 	return $q->fetchrow_hashref;
 }
 
+
 sub verticals {
 	my $frame_id = shift;
 	my $q = database->prepare("
@@ -189,6 +263,7 @@ sub verticals {
 	$q->execute($frame_id);
 	return $q->fetchall_hashref('position');
 }
+
 
 sub frame_blocks {
 	my $frame_id = shift;
@@ -214,6 +289,7 @@ sub frame_blocks {
 
 	return $verticals;
 }
+
 
 sub place_block {
 
@@ -247,6 +323,49 @@ sub place_block {
 	};
 
 	return $result->{placed_block_id};
+}
+
+
+sub remove_block {
+
+	my $block_id = shift;
+
+	# We deal with the activity log at this application level,
+	# rather than within the database. As we want to record the
+	# removal of every jumper connected to the block, before the
+	# block itself is removed, we do individual jumper removal
+	# from perl, rather than as a single database call.
+	#
+	# Note that this doesn't remove the block position itself.
+	# That remains available as a position for a new block to be
+	# placed.
+
+	# Get jumpers on this block
+	my $block_circuits = block_circuits($block_id);
+
+	# Delete the jumpers one-by-one
+	foreach my $circuit(@{$block_circuits}) {
+		my $jumpers = $circuit->{jumpers} or next; # maybe no jumpers
+		foreach my $jumper(@{$jumpers}) {
+			delete_jumper($jumper->{jumper_id});
+		}
+	}
+
+	# Finally delete the block
+	my $q = database->prepare("SELECT remove_block(?) AS removed_block");
+	$q->execute($block_id) or do {
+		error("ERROR running database command to remove block");
+		database->rollback;
+		die;
+	};
+
+	my $result = $q->fetchrow_hashref or do {
+		error("received no result back from database after removing block");
+		database->rollback;
+		die;
+	};
+
+	return $result->{removed_block};
 }
 
 

@@ -30,10 +30,7 @@ use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
 use Moo;
-use kronekeeper::Frame qw(
-	frame_id_valid_for_account
-	frame_info
-);
+use kronekeeper::Frame;
 our $VERSION = '0.01';
 
 
@@ -45,7 +42,7 @@ prefix '/activity_log' => sub {
 		user_has_role('view_activity_log') or do {
 			send_error('forbidden' => 403);
 		};
-		frame_id_valid_for_account(param("frame_id")) or do {
+		kronekeeper::Frame::frame_id_valid_for_account(param("frame_id")) or do {
 			send_error('forbidden' => 403);
 		};
 
@@ -58,7 +55,7 @@ prefix '/activity_log' => sub {
 			'activity_log',
 			{
 				activity_log => $activity_log,
-				frame_info => frame_info(param("frame_id")),
+				frame_info => kronekeeper::Frame::frame_info(param("frame_id")),
 			}
 		);
 	};	
@@ -134,7 +131,7 @@ sub get_activity_log {
 		FROM activity_log
 		JOIN person ON (person.id = activity_log.by_person_id)
 		WHERE frame_id = ?
-		ORDER BY log_timestamp DESC
+		ORDER BY log_timestamp DESC, activity_log.id DESC
 		LIMIT ?
 		OFFSET ?
 	");

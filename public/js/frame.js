@@ -21,10 +21,12 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 require([
+	'frame/remove_block',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
+	remove_block
 ) {
         'use strict';
 
@@ -47,6 +49,7 @@ require([
 		jq_block = $(e.target).closest("td");
 
 		set_allowed_menu_options( );
+		$("#block_menu").menu("collapseAll", null, true);
 		$("#block_menu").menu().show().position({
 			my: "left top",
 			at: "left bottom",
@@ -106,6 +109,18 @@ require([
 					jq_block.data("block_id"),
 					e.currentTarget.dataset.block_type
 				);
+				break;
+
+			case "remove" :
+				$("#block_menu").menu().hide();
+				remove_block.activate({
+					block_id: jq_block.data("block_id"),
+					success: function () {
+						jq_block.addClass("is_free");
+						jq_block.find("span.name").first().text("unused");
+						console.log("finished removing block");
+					}
+				});
 				break;
 		}
 

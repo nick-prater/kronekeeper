@@ -35,6 +35,7 @@ our $VERSION = '0.01';
 our @EXPORT_OK = qw(
 	block_id_valid_for_account
 	block_info
+	block_circuits
 	block_is_free
 );
 

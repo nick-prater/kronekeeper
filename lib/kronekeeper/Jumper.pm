@@ -37,6 +37,12 @@ use kronekeeper::Circuit qw(
 	circuit_id_valid_for_account
 );
 use List::Util qw(max);
+use Exporter qw(import);
+our $VERSION = '0.01';
+our @EXPORT_OK = qw(
+	delete_jumper
+);
+
 
 my $al = kronekeeper::Activity_Log->new();
 
