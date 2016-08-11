@@ -8,7 +8,7 @@
 		<ul>
 
 			<li>
-				<label for="frame_name">Name</label>
+				<label for="frame_name">Name:</label>
 				<input
 					type="text"
 					required="required"
@@ -18,7 +18,7 @@
 				/>
 			</li>
 			<li>
-				<label for="frame_width">Width</label>
+				<label for="frame_width">Width:</label>
 				<input
 					type="number"
 					min="1"
@@ -31,7 +31,7 @@
 				/>
 			</li>
 			<li>
-				<label for="frame_height">Height</label>
+				<label for="frame_height">Height:</label>
 				<input
 					type="number"
 					min="1"
@@ -44,9 +44,11 @@
 				/>
 			</li>
 		</ul>
-
-		<button onclick="window.location='../'">Cancel</button>
-		<button type="submit">Create Frame</button>
+		
+		<div class="buttons">
+			<button onclick="window.location='../'">Cancel</button>
+			<button type="submit">Create Frame</button>
+		</div>
 	</form>
 
 

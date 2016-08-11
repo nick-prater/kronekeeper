@@ -29,7 +29,6 @@ body {
 	font-family: Sans-Serif;
 }
 
-
 .masthead {
 	margin-bottom: 2em;
 }
@@ -46,19 +45,21 @@ body {
 
 .masthead div.menu {
 	float: right;
+	width: 50%;
+	text-align: right;
 }
-.masthead .menu a {
+
+.menu a {
 	font-size: 10pt;
 	color: #555;
 	padding: 3px;
 	border-radius: 3px;
 }
-.masthead .menu a:hover {
+.menu a:hover {
         background: #aaaaaa;
 	color: white;
 	border-color: black;
 }
-
 
 .container {
 	width: 90%;
@@ -81,6 +82,10 @@ body {
 	color: black;
 }
 
+.add_frame table {
+	margin-top: 1em;
+	margin-left: 1em;
+}
 
 .dialog h1 {
 	text-align: center;
@@ -398,7 +403,27 @@ body {
 
 
 
-
+.add_frame form ul {
+	list-style-type: none;
+	list-style-position: outside;
+	margin: 0px;
+	padding: 0px;
+}
+.add_frame form li {
+	padding: 3px;
+	position: relative;
+}
+.add_frame form label {
+	width: 4em;
+	text-align: right;
+	display: inline-block;
+	float: left;
+	padding: 3px;
+}
+.add_frame form div.buttons {
+	margin-top: 1em;
+	margin-left: 2em;
+}
 
 
 

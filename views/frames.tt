@@ -1,8 +1,10 @@
 
-<div class="container">
+<div class="container add_frame">
 	<h1>Frames</h1>
 
-	<a href="add">add frame</a>
+	<div class="menu">
+		<a href="add">add frame</a>
+	</div>
 
 	<table>
 

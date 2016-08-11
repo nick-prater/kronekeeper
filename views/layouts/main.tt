@@ -12,12 +12,12 @@
 	<body>
 
 		<div class="masthead">
-			<div>
-				<div class="masthead_logo">
+				<div class="logo">
 					<a href="[% request.uri_base %]/">
 						<img src="[% request.uri_base %]/images/logo.png" alt="Kronekeeper logo" />
 					</a>
 				</div>
+
 				<div class="message">
 				[% IF session.logged_in_user %]
 					[% session.user.name %] : [% session.account.name %]
@@ -25,7 +25,6 @@
 					not logged in
 				[% END %]
 				</div>
-			</div>
 			<div class="menu">
 				<a href="/frame/">list frames</a>
 				<a href="/logout">logout</a>
