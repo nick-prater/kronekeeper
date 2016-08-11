@@ -47,6 +47,9 @@
 					<div class="menu_button">
 						<a title="menu" href="javascript:void(0)">&#9776;</a>
 					</div>
+					<div class="designation">
+						[% "$vertical.designation$block.designation" | html %]
+					</div>
 				</div>
 			</td>
 
@@ -61,6 +64,9 @@
 					</a>
 					<div class="menu_button">
 						<a title="menu" href="javascript:void(0)">&#9776;</a>
+					</div>
+					<div class="designation">
+						[% "$vertical.designation$block.designation" | html %]
 					</div>
 				</div>
 			</td>

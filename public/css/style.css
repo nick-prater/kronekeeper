@@ -215,7 +215,15 @@ body {
 	border-color: black;
 }
 
-
+.frame div.designation {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	text-align: left;
+	font-size: 6pt;
+	border: 0px;
+	background: inherit; 
+}
 
 
 .block table {
@@ -400,8 +408,6 @@ body {
 	color: black;
 	font-size: 10pt;
 }
-
-
 
 .add_frame form ul {
 	list-style-type: none;
