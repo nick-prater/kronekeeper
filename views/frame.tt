@@ -55,7 +55,9 @@
 			<td class="block" data-block_id="[% id %]">
 				<div class="container">
 					<a class="link" href="[% url %]" title="[% title | html %]">
-						<span class="name">[% frame_blocks.$vertical_position.blocks.$block_position.name | html %]</span>
+						<span class="name">
+							[% frame_blocks.$vertical_position.blocks.$block_position.name | html | truncate(50) %]
+						</span>
 					</a>
 					<div class="menu_button">
 						<a title="menu" href="javascript:void(0)">&#9776;</a>
