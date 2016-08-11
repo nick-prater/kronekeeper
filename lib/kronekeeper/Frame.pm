@@ -67,6 +67,68 @@ prefix '/frame' => sub {
 		template('frames', { frames => $f });
 	};	
 
+	get '/add' => sub {
+
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		template('add_frame', {});
+	};
+
+	post '/add' => sub {
+
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		param('frame_name') or do {
+			debug("invalid frame_name parameter");
+			send_error("invalid frame name parameter" => 400);
+		};
+
+		param('frame_width') && param('frame_width') =~ m/^\d+$/ or do {
+			debug("invalid frame_width parameter");
+			send_error("invalid frame_width parameter" => 400);
+		};
+
+		param('frame_height') && param('frame_height') =~ m/^\d+$/ or do {
+			debug("invalid frame_height parameter");
+			send_error("invalid frame_height parameter" => 400);
+		};
+
+		my $frame_id = create_frame(
+			param('frame_name'),
+			param('frame_width'),
+			param('frame_height'),
+		) or do {
+			error("Failed creating new frame");
+			database->rollback;
+			send_error("Failed creating new frame" => 500);
+		};
+
+		# Update Activity Log
+		my $note = sprintf(
+			'Created new frame "" with dimensions %d x %d',
+			param('frame_name'),
+			param('frame_width'),
+			param('frame_height'),
+		);
+
+		$al->record({
+			function     => 'kronekeeper::Frame::add_frame',
+			frame_id     => $frame_id,
+			note         => $note,
+		});
+
+		database->commit;
+
+		forward(
+			'/frame/',
+			{},
+			{method => 'GET'}
+		);
+	};
 
 	get '/:frame_id' => require_login sub {
 
@@ -89,7 +151,6 @@ prefix '/frame' => sub {
 			frame_blocks => frame_blocks($frame_id),
 		});
 	};
-
 
 	any qr{/\d+(/\d+.*)} => require_login sub {
 		
@@ -366,6 +427,44 @@ sub remove_block {
 	};
 
 	return $result->{removed_block};
+}
+
+
+sub create_frame {
+
+	my $frame_name = shift;
+	my $frame_width = shift;
+	my $frame_height = shift;
+	my $account_id = shift || session('account')->{id};
+
+	debug(sprintf(
+		'creating frame "%s" with dimensions %dx%d',
+		$frame_name,
+		$frame_width,
+		$frame_height,
+	));
+
+	my $q = database->prepare("
+		SELECT create_regular_frame(?,?,?,?) AS new_frame_id
+	");
+	$q->execute(
+		$account_id,
+		$frame_name,
+		$frame_width,
+		$frame_height
+	) or do {
+		error("ERROR running create_regular_frame on database");
+		database->rollback;
+		send_error("ERROR creating frame" => 500);
+	};
+
+	my $result = $q->fetchrow_hashref or do {
+		error("ERROR no result after running create_regular_frame on database");
+		database->rollback;
+		send_error("ERROR creating frame" => 500);
+	};
+
+	return $result->{new_frame_id};
 }
 
 

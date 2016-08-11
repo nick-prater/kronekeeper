@@ -44,6 +44,22 @@ body {
 	font-size: 70%;
 }
 
+.masthead div.menu {
+	float: right;
+}
+.masthead .menu a {
+	font-size: 10pt;
+	color: #555;
+	padding: 3px;
+	border-radius: 3px;
+}
+.masthead .menu a:hover {
+        background: #aaaaaa;
+	color: white;
+	border-color: black;
+}
+
+
 .container {
 	width: 90%;
 	margin: auto;
@@ -57,10 +73,14 @@ body {
 
 .footer {
 	clear: both;
-	padding-top: 2em;
+	padding-top: 12em;
 	text-align: center;
-	font-size: 60%;
+	font-size: 50%;
 }
+.footer a {
+	color: black;
+}
+
 
 .dialog h1 {
 	text-align: center;

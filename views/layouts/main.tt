@@ -26,11 +26,15 @@
 				[% END %]
 				</div>
 			</div>
+			<div class="menu">
+				<a href="/frame/">list frames</a>
+				<a href="/logout">logout</a>
+			</div>
 		</div>
-
 [% content %]
 
 		<div class="footer">
+			&copy; NP Broadcast Limited 2016<br />
 			Powered by <a href="http://perldancer.org/">Dancer2</a> [% dancer_version %]
 		</div>
 	</body>

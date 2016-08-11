@@ -1,14 +1,16 @@
 
 <div class="container">
-			<h1>Frames</h1>
+	<h1>Frames</h1>
 
-			<table>
+	<a href="add">add frame</a>
 
-				[% FOREACH frame IN frames %]
-				<tr>
-					<td><a href="[% frame.id %]">[% frame.name %]</a></td>
-				</tr>
-				[% END %]
-			</table>
+	<table>
+
+		[% FOREACH frame IN frames %]
+		<tr>
+			<td><a href="[% frame.id %]">[% frame.name %]</a></td>
+		</tr>
+		[% END %]
+	</table>
 
 </div>
