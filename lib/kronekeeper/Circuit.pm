@@ -245,7 +245,12 @@ sub get_circuit_jumpers {
 		SELECT * FROM json_circuit_jumpers(?) AS json_data
 	");
 	$q->execute($circuit_id);
-	my $result = from_json($q->fetchrow_hashref->{json_data});
+
+	# We set utf8=>0 here, because the database driver has already
+	# done the character decoding. Failing to set this option triggers
+	# an error when when accented characters or emoji.
+	# Fix for our Github issue #12
+	my $result = from_json($q->fetchrow_hashref->{json_data}, {utf8 => 0});
 
 	return $result;
 }

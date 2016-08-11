@@ -541,8 +541,13 @@ sub get_jumper_info {
 		$a_circuit_id
 	);
 	my $json = $q->fetchrow_hashref->{json_data} or return undef;
-	my @result = @{from_json($json)};  # database returns a json array
-	return $result[0];                 # we only want first element
+
+	# We set utf8=>0 here, because the database driver has already
+	# done the character decoding. Failing to set this option triggers
+	# an error when when accented characters or emoji.
+	# Fix for our Github issue #12
+	my @result = @{from_json($json), {utf8 => 0}};  # database returns a json array
+	return $result[0];                              # we only want first element
 }
 
 

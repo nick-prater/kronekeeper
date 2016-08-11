@@ -201,7 +201,12 @@ sub block_circuits {
 	");
 	$q->execute($block_id);
 	my $result = $q->fetchrow_hashref or return undef;
-	my $rv = from_json($result->{json_data});
+
+	# We set utf8=>0 here, because the database driver has already
+	# done the character decoding. Failing to set this option triggers
+	# an error when when accented characters or emoji.
+	# Fix for our Github issue #12
+	my $rv = from_json($result->{json_data}, {utf8 => 0});
 
 	return $rv;
 }
