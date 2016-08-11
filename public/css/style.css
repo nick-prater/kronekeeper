@@ -157,6 +157,10 @@ body {
 	font-size: 6pt;
 }
 
+.frame td.block.is_free {
+	background: inherit;
+}
+
 .frame td.block.unavailable {
 	background: inherit;
 	border: none;
