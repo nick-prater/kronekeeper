@@ -72,7 +72,7 @@ require([
 			!jq_block.hasClass("is_free") && !jq_block.hasClass("unavailable")
 		);
 		enable_menu_action_if_true(
-			"place",
+			"place_submenu",
 			jq_block.hasClass("is_free") && !jq_block.hasClass("unavailable")
 		);
 		enable_menu_action_if_true(

@@ -96,7 +96,7 @@
 	
 	<ul class="context_menu" id="block_menu">
 		<li data-action="open"><div>Open</div></li>
-		<li data-action="place">
+		<li data-action="place_submenu">
 			<div>Add Block</div>
 			<ul>
 				<li data-action="place" data-block_type="237A"><div>237A</div></li>
