@@ -25,7 +25,7 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
 use warnings;
-use base "Dancer2::Plugin::Auth::Extensible::Provider::Database";
+use parent "Dancer2::Plugin::Auth::Extensible::Provider::Database";
 
 our $VERSION = '0.1';
 
@@ -55,9 +55,7 @@ sub create_user {
 	$options{account_id} or die "no account name specified";
 	$options{name}       or die "no account name specified";
 
-	my $settings = $self->realm_settings;
-    	my $db = $self->realm_dsl->database($settings->{db_connection_name});
-
+	my $db = $self->database;
 	my $q = $db->prepare("
 		INSERT INTO person (account_id, email, name, password)
 		VALUES (?,?,?,?)
@@ -85,8 +83,7 @@ sub set_user_password {
 	$username or die "no username specified";
 	$password or die "no account name specified";
 
-	my $settings = $self->realm_settings;
-    	my $db = $self->realm_dsl->database($settings->{db_connection_name});
+	my $db = $self->database;
 	my $encrypted_password = $self->encrypt_password($password);
 
 	my $q = $db->prepare("
