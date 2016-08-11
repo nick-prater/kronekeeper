@@ -40,6 +40,15 @@ my $al = kronekeeper::Activity_Log->new();
 our $VERSION = '0.1';
 
 
+hook 'database_error' => sub {
+
+	my $dbh = shift;
+	error("ERRROR: Caught database error - rolling back");
+	database->rollback;
+	send_error("Caught database error - rolling back" => 500);
+};
+
+
 prefix '/' => sub {
 
 	get '/' => sub {
