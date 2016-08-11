@@ -109,7 +109,7 @@ prefix '/frame' => sub {
 
 		# Update Activity Log
 		my $note = sprintf(
-			'Created new frame "" with dimensions %d x %d',
+			'Created new frame "%s" with dimensions %d x %d',
 			param('frame_name'),
 			param('frame_width'),
 			param('frame_height'),

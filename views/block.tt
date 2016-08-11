@@ -1,13 +1,13 @@
 [% USE JSON %]
 
 <div class="container block">
-	<h1><a href="[% request.uri_base %]/frame/[% block_info.frame_id %]" title="frame view">[% block_info.frame_name %]</a></h1>
+	<h1><a href="[% request.uri_base %]/frame/[% block_info.frame_id %]" title="frame view">[% block_info.frame_name | html %]</a></h1>
 
 	<table>
 		<caption id="block_table_caption">
-			[% block_info.full_designation %]
+			[% block_info.full_designation | html %]
 			:
-			<input class="name" type="text" value="[% block_info.name %]" />
+			<input class="name" type="text" value="[% block_info.name | html %]" />
 		</caption>
 		<thead>
 			<tr>

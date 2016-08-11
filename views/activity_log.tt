@@ -1,7 +1,7 @@
 
 <div class="container frame">
 	<h1>
-		<a href="[% request.uri_base %]/frame/[% frame_info.id %]">[% frame_info.name %]</a>
+		<a href="[% request.uri_base %]/frame/[% frame_info.id %]">[% frame_info.name | html %]</a>
 	</h1>
 
 	<table>
@@ -12,9 +12,9 @@
 		</tr>
 		[% FOREACH entry IN activity_log %]
 		<tr>
-			<td>[% entry.log_timestamp %]</td>
-			<td>[% entry.by_person_name %]</td>
-			<td>[% entry.note %]</td>
+			<td>[% entry.log_timestamp | html %]</td>
+			<td>[% entry.by_person_name | html %]</td>
+			<td>[% entry.note | html %]</td>
 		</tr>
 		[% END %]
 	</table>

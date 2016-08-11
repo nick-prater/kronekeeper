@@ -20,7 +20,7 @@
 
 				<div class="message">
 				[% IF session.logged_in_user %]
-					[% session.user.name %] : [% session.account.name %]
+					[% session.user.name | html %] : [% session.account.name | html %]
 				[% ELSE %]
 					not logged in
 				[% END %]
@@ -34,7 +34,7 @@
 
 		<div class="footer">
 			&copy; NP Broadcast Limited 2016<br />
-			Powered by <a href="http://perldancer.org/">Dancer2</a> [% dancer_version %]
+			Powered by <a href="http://perldancer.org/">Dancer2</a> [% dancer_version | html %]
 		</div>
 	</body>
 </html>

@@ -10,7 +10,7 @@
 
 		[% FOREACH frame IN frames %]
 		<tr>
-			<td><a href="[% frame.id %]">[% frame.name %]</a></td>
+			<td><a href="[% frame.id %]">[% frame.name | html %]</a></td>
 		</tr>
 		[% END %]
 	</table>

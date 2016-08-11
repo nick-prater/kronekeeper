@@ -1,15 +1,15 @@
 <div class="ui-state-error ui-corner-all"> 
 	<h3>Cannot connect jumper.</h3>
 [% IF error_code == 'INVALID_CIRCUIT' %]
-	<p>Destination <span class="designation">[% b_designation %]</span> is not a valid circuit for this frame.</p>
+	<p>Destination <span class="designation">[% b_designation | html %]</span> is not a valid circuit for this frame.</p>
 [% ELSIF error_code == 'HAS_SIMPLE_JUMPER' %]
-	<p>Circuits <span class="designation">[% a_designation %]</span> and 
-	   <span class="designation">[% b_designation %]</span>
+	<p>Circuits <span class="designation">[% a_designation | html %]</span> and 
+	   <span class="designation">[% b_designation | html %]</span>
 	   are already fully connected by a simple jumper. Cannot add more jumpers between these circuits.
 	</p>
 [% ELSIF error_code == 'NO_PINS' %]
-	<p>Cannot connect circuits <span class="designation">[% a_designation %]</span> and 
-	   <span class="designation">[% b_designation %]</span> as at least one of them
+	<p>Cannot connect circuits <span class="designation">[% a_designation | html %]</span> and 
+	   <span class="designation">[% b_designation | html %]</span> as at least one of them
 	   has no pins to connect.
 	</p>
 [% ELSE %]

@@ -1,6 +1,5 @@
-
 <div class="container frame">
-	<h1>[% frame_info.name %]</h1>
+	<h1>[% frame_info.name | html %]</h1>
 	<a href="[% request.uri_base %]/activity_log/[% frame_info.id %]">activity_log</a>
 
 	<table>
@@ -8,7 +7,7 @@
 		<tr>
 			<th></th>
 			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
-			<th>[% frame_blocks.$vertical_position.designation %]</th>
+			<th>[% frame_blocks.$vertical_position.designation | html %]</th>
 			[% END %]
 			<th></th>
 		</tr>
@@ -30,19 +29,19 @@
 		    [% row_designation = '--' %]
 		  [% END %]
 
-			<th>[% row_designation %]</th>
+			<th>[% row_designation | html %]</th>
 		  [% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
-		  [% SET vertical = frame_blocks.$vertical_position %]
-		  [% SET block = vertical.blocks.$block_position %]
+		    [% SET vertical = frame_blocks.$vertical_position %]
+		    [% SET block = vertical.blocks.$block_position %]
 		    [% IF block.id  # -- Block exists -- %]
 		      [% SET id = frame_blocks.$vertical_position.blocks.$block_position.id %]
 		      [% SET url = "$frame_info.id/$id" %]
 		      [% SET title = "block $vertical.designation$block.designation" %]
 		      [% IF block.is_free  # -- Block position is unused -- %]
 
-			<td class="block is_free" id="block_[% id %]" data-block_id="[% id %]">
+			<td class="block is_free" data-block_id="[% id %]">
 				<div class="container">
-					<a class="link" href="[% url %]" title="[% title %]">
+					<a class="link" href="[% url %]" title="[% title | html %]">
 						<span class="name">unused</span>
 					</a>
 					<div class="menu_button">
@@ -53,10 +52,10 @@
 
 		      [% ELSE  # -- Block position is in use -- %]
 
-			<td class="block" id="block_[% id %]" data-block_id="[% id %]">
+			<td class="block" data-block_id="[% id %]">
 				<div class="container">
-					<a class="link" href="[% url %]" title="[% title %]">
-						<span class="name">[% frame_blocks.$vertical_position.blocks.$block_position.name %]</span>
+					<a class="link" href="[% url %]" title="[% title | html %]">
+						<span class="name">[% frame_blocks.$vertical_position.blocks.$block_position.name | html %]</span>
 					</a>
 					<div class="menu_button">
 						<a title="menu" href="javascript:void(0)">&#9776;</a>
@@ -78,14 +77,14 @@
 
 		    [% END %]
 		  [% END %]
-			<th>[% row_designation %]</th>
+			<th>[% row_designation | html %]</th>
 		</tr>
 		[%   block_position = block_position - 1 %]
 		[% END %]
 		<tr>
 			<th></th>
 			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
-			<th>[% frame_blocks.$vertical_position.designation %]</th>
+			<th>[% frame_blocks.$vertical_position.designation | html %]</th>
 			[% END %]
 			<th></th>
 		</tr>
@@ -121,33 +120,7 @@
 </div>
 
 
-
 <script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
 <script type="text/javascript" src="[% request.uri_base %]/js/frame.js"></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

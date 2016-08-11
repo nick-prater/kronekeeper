@@ -9,8 +9,8 @@
 [%- END %]
 
 >
-	<h2>Jumpering <span class="designation">[% a_circuit.full_designation %]</span>
-	    &rarr; <span class="designation">[% b_circuit.full_designation %]</span>
+	<h2>Jumpering <span class="designation">[% a_circuit.full_designation | html %]</span>
+	    &rarr; <span class="designation">[% b_circuit.full_designation | html %]</span>
 	</h2>
 
 	<div class="option_group">
@@ -19,9 +19,9 @@
 			<table>
 				[% FOREACH index IN [0 .. max_pin_index] %]
 				<tr>
-					<td>[% a_pins.$index.designation %]</td>
+					<td>[% a_pins.$index.designation | html %]</td>
 					<td>&rarr;</td>
-					<td>[% b_pins.$index.designation %]</td>
+					<td>[% b_pins.$index.designation | html %]</td>
 				</tr>
 				[% END %]
 			</table>
@@ -32,11 +32,11 @@
 			<table>
 				[% FOREACH index IN [0 .. max_pin_index] %]
 				<tr>
-					<td>[% a_pins.$index.designation %]</td>
+					<td>[% a_pins.$index.designation | html %]</td>
 				    [% IF index == 0 %]
 					<td rowspan="0">??</td>
 				    [% END %]
-					<td>[% b_pins.$index.designation %]</td>
+					<td>[% b_pins.$index.designation | html %]</td>
 				</tr>
 				[% END %]
 			</table>
@@ -56,20 +56,20 @@
 [%- END %]
 >
 
-	<h2>Jumpering <span class="designation">[% a_circuit.full_designation %]</span>
-	    &rarr; <span class="designation">[% b_circuit.full_designation %]</span>
+	<h2>Jumpering <span class="designation">[% a_circuit.full_designation | html %]</span>
+	    &rarr; <span class="designation">[% b_circuit.full_designation | html %]</span>
 	</h2>
 
 	<table class="pin_connections">
 		[% FOREACH a_pin IN a_pins %]
 		<tr data-a_pin_id="[% a_pin.id %]">
-			<td>[% a_pin.designation %]</td>
+			<td>[% a_pin.designation | html %]</td>
 			<td>&rarr;</td>
 			<td>
 				<select class="b_pin_picker">
 					<option value="">no connection</option>
 				    [% FOREACH b_pin IN b_pins %]
-					<option value="[% b_pin.id %]">[% b_pin.designation %]</option>
+					<option value="[% b_pin.id %]">[% b_pin.designation | html %]</option>
 				    [% END %]
 				</select>
 			</td>
@@ -78,7 +78,7 @@
 					<option value="">pick wire colour</option>
 				    [% FOREACH colour IN colours %]
 					<option value="[% colour.id %]" style="background: [% colour.html_colour %]; color: [% colour.contrasting_html_colour %]">
-						[% colour.name %]
+						[% colour.name | html %]
 					</option>
 				    [% END %]
 				</select>
