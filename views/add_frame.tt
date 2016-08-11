@@ -1,0 +1,83 @@
+
+<div class="container add_frame">
+	<h1>Add Frame</h1>
+
+	<form
+		method="post"
+	>
+		<ul>
+
+			<li>
+				<label for="frame_name">Name</label>
+				<input
+					type="text"
+					required="required"
+					name="frame_name"
+					id="frame_name"
+					placeholder="frame name"
+				/>
+			</li>
+			<li>
+				<label for="frame_width">Width</label>
+				<input
+					type="number"
+					min="1"
+					max="100"
+					step="1"
+					name="frame_width"
+					id="frame_width"
+					value="3"
+					required="required"
+				/>
+			</li>
+			<li>
+				<label for="frame_height">Height</label>
+				<input
+					type="number"
+					min="1"
+					max="100"
+					step="1"
+					name="frame_height"
+					id="frame_height"
+					value="5"
+					required="required"
+				/>
+			</li>
+		</ul>
+
+		<button onclick="window.location='../'">Cancel</button>
+		<button type="submit">Create Frame</button>
+	</form>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
