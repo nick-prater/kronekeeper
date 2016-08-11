@@ -144,7 +144,7 @@ body {
 
 /* the size of a block is fixed and defined here. */
 .frame td {
-	width: 17em;
+	min-width: 17em;
 	height: 24pt;
 	background: white;
 	border: 1px solid black;
