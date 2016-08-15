@@ -43,7 +43,7 @@ our $VERSION = '0.1';
 hook 'database_error' => sub {
 
 	my $dbh = shift;
-	error("ERRROR: Caught database error - rolling back");
+	error("ERROR: Caught database error - rolling back");
 	database->rollback;
 	send_error("Caught database error - rolling back" => 500);
 };
