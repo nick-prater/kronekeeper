@@ -1,0 +1,62 @@
+
+<div class="container credits">
+	<p>
+	Kronekeeper has been developed by <a href="https://twitter.com/npbroadcast">Nick Prater</a>
+	of <a href="http://www.npbroadcast.com">NP Broadcast Ltd</a>.
+	</p>
+	<p>
+	Initial development of Kronekeeper was supported by <a href="http://www.thisisglobal.com/radio/">Global Radio</a>.
+	Special thanks go to the team there, especially Jon Crew, David Holroyd, Simon Price and Matt Gray for
+	their inspiration, support, testing and suggestions.
+	</p>
+	<p>
+	Kronekeeper makes use of a number of other open-source components, including the
+	<a href="http://perldancer.org/">Dancer2</a> web framework, the <a href="https://www.perl.org/">Perl</a>
+	programming language and a number of javascript libraries:
+	</p>
+	<dl>
+
+		<dt>
+			<a href="http://requirejs.org/">Require.js</a>
+		</dt>
+		<dd>
+			<a href="https://github.com/requirejs/requirejs">MIT licence</a>
+			<a href="https://github.com/requirejs/requirejs">source code</a>
+		</dd>
+
+		<dt>
+			<a href="http://backbonejs.org/">Backbone.js</a>
+		</dt>
+		<dd>
+			<a href="https://github.com/jashkenas/backbone/blob/master/LICENSE">MIT licence</a>
+			<a href="http://github.com/jashkenas/backbone">source code</a>
+		</dd>
+
+		<dt>
+			<a href="http://jquery.com/">JQuery</a>
+		</dt>
+		<dd>
+			<a href="https://jquery.org/license/">MIT licence</a>
+			<a href="https://github.com/jquery/jquery">source code</a>
+		</dd>
+
+		<dt>
+			<a href="http://jqueryui.com/">JQuery UI</a>
+		</dt>
+		<dd>
+			<a href="https://jquery.org/license/">MIT licence</a>
+			<a href="https://github.com/jquery/jqueryui.com">source code</a>
+		</dd>
+
+		<dt>
+			<a href="http://underscorejs.org/">Underscore.js</a>
+		</dt>
+		<dd>
+			<a href="https://github.com/jashkenas/underscore/blob/master/LICENSE">MIT licence</a>
+			<a href="https://github.com/jashkenas/underscore">source code</a>
+		</dd>
+	</dl>
+	<p>
+	Contributions, support, bug reports, pull requests and suggestions are gratefully received.
+	</p>
+</div>

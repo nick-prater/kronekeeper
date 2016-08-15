@@ -29,6 +29,18 @@ body {
 	font-family: Sans-Serif;
 }
 
+a {
+	color: #555;
+	border-radius: 3px;
+	border: 1px solid transparent;
+}
+a:hover {
+	border-color: black;
+	border: 1px dashed black;
+}
+
+
+
 .masthead {
 	margin-bottom: 2em;
 }
@@ -58,7 +70,7 @@ body {
 .menu a:hover {
         background: #aaaaaa;
 	color: white;
-	border-color: black;
+	border-color: transparent;
 }
 
 .container {
@@ -76,11 +88,24 @@ body {
 	clear: both;
 	padding-top: 12em;
 	text-align: center;
-	font-size: 50%;
+	font-size: 6pt;
 }
 .footer a {
 	color: black;
+	font-size: inherit;
 }
+.footer ul {
+	list-style: none;
+	padding: 0px;
+}
+.footer li {
+	display: inline-block;
+}
+
+div.credits.container {
+	padding-top: 2em;
+}
+
 
 .add_frame table {
 	margin-top: 1em;
@@ -435,7 +460,17 @@ body {
 	margin-left: 2em;
 }
 
-
-
+.credits dt {
+	max-width: 10em;
+	width: 10em;
+	float: left;
+	text-align: right;
+}
+.credits dt::after {
+	content: "\2014";  /* em-dash */
+}
+.credits dd {
+	margin-left: 10.5em;
+}
 
 

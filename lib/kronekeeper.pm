@@ -60,6 +60,9 @@ prefix '/' => sub {
 		}
 	};
 
+	get '/credits' => sub {
+		template 'credits';
+	};
 
 	get '/login' => sub {
 		template 'login';
