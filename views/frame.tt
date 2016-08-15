@@ -34,34 +34,24 @@
 		    [% SET vertical = frame_blocks.$vertical_position %]
 		    [% SET block = vertical.blocks.$block_position %]
 		    [% IF block.id  # -- Block exists -- %]
+
 		      [% SET id = frame_blocks.$vertical_position.blocks.$block_position.id %]
 		      [% SET url = "$frame_info.id/$id" %]
 		      [% SET title = "block $vertical.designation$block.designation" %]
 		      [% IF block.is_free  # -- Block position is unused -- %]
-
 			<td class="block is_free" data-block_id="[% id %]">
-				<div class="container">
-					<a class="link" href="[% url %]" title="[% title | html %]">
-						<span class="name">unused</span>
-					</a>
-					<div class="menu_button">
-						<a title="menu" href="javascript:void(0)">&#9776;</a>
-					</div>
-					<div class="designation">
-						[% "$vertical.designation$block.designation" | html %]
-					</div>
-				</div>
-			</td>
-
 		      [% ELSE  # -- Block position is in use -- %]
-
 			<td class="block in_use" data-block_id="[% id %]">
+		      [% END %]
 				<div class="container">
 					<a class="link" href="[% url %]" title="[% title | html %]">
 						<span class="name">
 							[% frame_blocks.$vertical_position.blocks.$block_position.name | html | truncate(50) %]
 						</span>
 					</a>
+					<div class="label">
+						unused
+					</div>
 					<div class="menu_button">
 						<a title="menu" href="javascript:void(0)">&#9776;</a>
 					</div>
@@ -71,12 +61,13 @@
 				</div>
 			</td>
 
-		      [% END %]
 		    [% ELSE %]
 
 			<td class="block unavailable">
 				<div class="container">
-					<span class="name">unavailable</span>
+					<div class="label">
+						unavailable
+					</div>
 					<div class="menu_button">
 						<a title="menu" href="javascript:void(0)">&#9776;</a>
 					</div>

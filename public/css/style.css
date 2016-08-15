@@ -176,31 +176,44 @@ div.credits.container {
 	font-size: 12pt;
 }
 
-.frame .block.is_free span.name {
+.frame .block.is_free div.label {
 	color: grey;
 	font-style: italic;
 	font-size: 6pt;
 }
-
 .frame td.block.is_free {
 	background: inherit;
 }
+
 
 .frame td.block.unavailable {
 	background: inherit;
 	border: none;
 }
-.frame .unavailable span.name {
+.frame .unavailable div.label {
 	color: gray;
 	font-size: 6pt;
 	font-style: italic;
 }
 
+.frame td.block.in_use:hover {
+	background-color: #aaaaaa;
+}
 
 .frame .block div.container {
 	position: relative;
 	width: 100%;
 	height: 100%;
+}
+
+.frame .block div.label,
+.frame .block span.name {
+	position: absolute;
+	width: 100%;
+	margin: 0;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 }
 
 /* Make link cover entire table cell */
@@ -211,21 +224,21 @@ div.credits.container {
 	text-decoration: none;
 	color: black;
 	border-color: transparent;
-}
-.frame .in_use a.link:hover {
-	background-color: #aaa;
+	background: transparent;
 }
 
 
-
-/* Centre the block name vertically and horizontally */
-.frame .block span.name {
-	position: absolute;
-	width: 100%;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
+/* Don't display block link unless a block is placed there */
+.frame .is_free a.link {
+	display: none;
 }
+
+/* Don't display 'unused' label if block is in use */
+.frame .block.in_use div.label {
+	display:none;
+}
+
+
 
 
 /* The menu button is overlaid in the top right corner */
