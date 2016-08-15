@@ -116,6 +116,7 @@ require([
 				remove_block.activate({
 					block_id: jq_block.data("block_id"),
 					success: function () {
+						jq_block.removeClass("in_use");
 						jq_block.addClass("is_free");
 						jq_block.find("span.name").first().text("unused");
 						console.log("finished removing block");
@@ -145,6 +146,7 @@ require([
 			success: function(json) {
 				console.log("placed block ok");
 				jq_block.removeClass("is_free");
+				jq_block.addClass("in_use");
 				jq_block.find("span.name").first().text("");
 			},
 			error: function(xhr, status) {
