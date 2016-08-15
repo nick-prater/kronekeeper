@@ -39,7 +39,7 @@ BEGIN
 	SELECT
 		MIN(count_pins_for_circuit_id(pin.circuit_id)) AS min_pin_count,
 		MAX(count_pins_for_circuit_id(pin.circuit_id)) AS max_pin_count 
-	INTO max_pin_count, min_pin_count
+	INTO min_pin_count, max_pin_count
 	FROM jumper_wire
 	JOIN connection ON (connection.jumper_wire_id = jumper_wire.id)
 	JOIN pin ON (pin.id = connection.pin_id)
