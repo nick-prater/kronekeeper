@@ -1,11 +1,17 @@
 <div class="container frame">
-	<h1>[% frame_info.name | html %]</h1>
+	<h1>
+		[% frame_info.name | html %]
+	</h1>
 	<a href="[% request.uri_base %]/activity_log/[% frame_info.id %]">activity_log</a>
 
 	<table>
 
 		<tr>
-			<th></th>
+			<th>
+				<div class="menu_button">
+					<a title="menu" href="javascript:void(0)">&#9776;</a>
+				</div>
+			</th>
 			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
 			<th>[% frame_blocks.$vertical_position.designation | html %]</th>
 			[% END %]

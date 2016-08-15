@@ -248,7 +248,7 @@ div.credits.container {
 	right: 0px;
 	text-align: right;
 }
-.frame .block .menu_button a {
+.frame .menu_button a {
 	right: 0px;
 	border-radius: 1px;
 	background: #dddddd;
@@ -256,7 +256,7 @@ div.credits.container {
 	text-decoration: none;
 	color: black;
 }
-.frame .block .menu_button a:hover {
+.frame .menu_button a:hover {
         color: white;
         background: #aaaaaa;
 	border-color: black;
