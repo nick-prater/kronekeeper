@@ -210,7 +210,13 @@ div.credits.container {
 	height: 100%;
 	text-decoration: none;
 	color: black;
+	border-color: transparent;
 }
+.frame .in_use a.link:hover {
+	background-color: #aaa;
+}
+
+
 
 /* Centre the block name vertically and horizontally */
 .frame .block span.name {
@@ -225,10 +231,9 @@ div.credits.container {
 /* The menu button is overlaid in the top right corner */
 .frame .block div.menu_button {
 	position: absolute;
-	width: 0.6em;
 	top: 0px;
 	right: 0px;
-	text-align: center;
+	text-align: right;
 }
 .frame .block .menu_button a {
 	right: 0px;

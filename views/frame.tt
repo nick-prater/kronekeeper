@@ -55,7 +55,7 @@
 
 		      [% ELSE  # -- Block position is in use -- %]
 
-			<td class="block" data-block_id="[% id %]">
+			<td class="block in_use" data-block_id="[% id %]">
 				<div class="container">
 					<a class="link" href="[% url %]" title="[% title | html %]">
 						<span class="name">
