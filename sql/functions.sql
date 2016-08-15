@@ -113,11 +113,47 @@ END
 $$ LANGUAGE plpgsql;
 
 
+/* Mirrors the given position index.
+ * Provide the index number to invert (first position = 1)
+ * and the total number of positions available.
+ * For example:
+ * invert_position_index(2,100) => 99
+ */
+CREATE OR REPLACE FUNCTION invert_position_index(
+	p_position_index INTEGER,
+	p_position_count INTEGER
+)
+RETURNS INTEGER AS $$
+BEGIN
+	/* Validation */
+	CASE
+		WHEN p_position_index IS NULL THEN
+			RAISE EXCEPTION 'position index cannot be NULL';
+		WHEN p_position_count IS NULL THEN
+			RAISE EXCEPTION 'position count cannot be NULL';
+		WHEN p_position_index < 1 THEN
+			RAISE EXCEPTION 'position index cannot be less that 1';
+		WHEN p_position_count < 1 THEN
+			RAISE EXCEPTION 'position count cannot be less that 1';
+		WHEN p_position_index > p_position_count THEN
+			RAISE EXCEPTION 'position index cannot be greater than position count';
+		ELSE -- validation OK
+	END CASE;
+
+	RETURN p_position_count - (p_position_index - 1);
+END
+$$ LANGUAGE plpgsql;
+
 
 
 /* Initialises a regular, rectangular frame to specified dimensions,
  * creating the frame record and inserting the required number of
  * empty block positions.
+ * 
+ * Block designations are created, by default running
+ * left-to-right and bottom-to-top. The ordering of these designations
+ * can be reversed by setting the p_reverse_vertical_designations and
+ * p_reverse_block_designations parameters to TRUE.
  * 
  * Returns the id of the newly created frame.
  */
@@ -125,7 +161,9 @@ CREATE OR REPLACE FUNCTION create_regular_frame(
 	p_account_id INTEGER,
 	p_name TEXT,
 	p_vertical_count INTEGER,
-	p_row_count INTEGER
+	p_row_count INTEGER,
+	p_reverse_vertical_designations BOOLEAN,
+	p_reverse_row_designations BOOLEAN
 )
 RETURNS INTEGER AS $$
 DECLARE frame_id INTEGER;
@@ -133,6 +171,7 @@ DECLARE vertical_id INTEGER;
 DECLARE vertical_designation TEXT;
 DECLARE block_designation TEXT;
 DECLARE maximum_size INTEGER := 500;
+DECLARE designation_position INTEGER;
 BEGIN
 	
 	/* Validation */
@@ -163,27 +202,42 @@ BEGIN
 
 	/* Initialise the columns with empty blocks */
 	FOR vertical_position IN 1..p_vertical_count LOOP
+
+		/* Reversing vertical designations? */
+		IF p_reverse_vertical_designations THEN
+			designation_position := invert_position_index(vertical_position, p_vertical_count);
+		ELSE
+			designation_position := vertical_position;
+		END IF;
+
 		INSERT INTO vertical(frame_id, position, designation)
 		VALUES(
 			frame_id,
 			vertical_position,
-			regular_vertical_designation_from_position(vertical_position)
+			regular_vertical_designation_from_position(designation_position)
 		)
 		RETURNING id, designation INTO vertical_id, vertical_designation;
 		RAISE DEBUG 'Inserted vertical with designation %', vertical_designation;
 
 		FOR block_position IN 1..p_row_count LOOP
+
+			/* Reversing row designations? */
+			IF p_reverse_row_designations THEN
+				designation_position := invert_position_index(block_position, p_row_count);
+			ELSE
+				designation_position := block_position;
+			END IF;
+
 			INSERT INTO block(vertical_id, position, designation)
 			VALUES(
 				vertical_id,
 				block_position,
-				regular_block_designation_from_position(block_position, p_row_count)
+				regular_block_designation_from_position(designation_position, p_row_count)
 			)
 			RETURNING designation INTO block_designation;
 			RAISE NOTICE 'Inserted empty block with designation %', CONCAT(vertical_designation, block_designation);
 		END LOOP;
 	END LOOP;
-
 
 	RETURN frame_id;
 END

@@ -35,7 +35,7 @@
 				<input
 					type="number"
 					min="1"
-					max="100"
+					max="50"
 					step="1"
 					name="frame_height"
 					id="frame_height"
@@ -43,8 +43,28 @@
 					required="required"
 				/>
 			</li>
+			<li>
+				<label for="designation_order_h">Horizontal designation:</label>
+				<select 
+					name="designation_order_h"
+					id="designation_order_h"
+				>
+					<option value="left-to-right">left-to-right</option>
+					<option value="right-to-left">right-to-left</option>
+				</select>
+			</li>
+			<li>
+				<label for="designation_order_h">Vertical designation:</label>
+				<select 
+					name="designation_order_v"
+					id="designation_order_v"
+				>
+					<option value="bottom-to-top">bottom-to-top</option>
+					<option value="top-to-bottom">top-to-bottom</option>
+				</select>
+			</li>
 		</ul>
-		
+	
 		<div class="buttons">
 			<button onclick="window.location='../'">Cancel</button>
 			<button type="submit">Create Frame</button>

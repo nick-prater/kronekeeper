@@ -82,6 +82,8 @@ prefix '/frame' => sub {
 			send_error('forbidden' => 403);
 		};
 
+		debug request->body;
+
 		param('frame_name') or do {
 			debug("invalid frame_name parameter");
 			send_error("invalid frame name parameter" => 400);
@@ -97,10 +99,25 @@ prefix '/frame' => sub {
 			send_error("invalid frame_height parameter" => 400);
 		};
 
+		my $designation_order_h = param('designation_order_h') || 'left-to-right';
+		$designation_order_h =~ m/^(left-to-right|right-to-left)$/ or do {
+			debug("invalid designation_order_h parameter");
+			send_error("invalid designation_order_h parameter" => 400);
+		};
+			
+		my $designation_order_v = param('designation_order_v') || 'bottom-to-top';
+		$designation_order_v =~ m/^(bottom-to-top|top-to-bottom)$/ or do {
+			debug("invalid designation_order_v parameter");
+			send_error("invalid designation_order_v parameter" => 400);
+		};
+
+
 		my $frame_id = create_frame(
 			param('frame_name'),
 			param('frame_width'),
 			param('frame_height'),
+			$designation_order_h,
+			$designation_order_v,
 		) or do {
 			error("Failed creating new frame");
 			database->rollback;
@@ -435,7 +452,9 @@ sub create_frame {
 	my $frame_name = shift;
 	my $frame_width = shift;
 	my $frame_height = shift;
-	my $account_id = shift || session('account')->{id};
+	my $designation_order_h = shift;
+	my $designation_order_v = shift;
+	my $account_id = session('account')->{id};
 
 	debug(sprintf(
 		'creating frame "%s" with dimensions %dx%d',
@@ -443,15 +462,19 @@ sub create_frame {
 		$frame_width,
 		$frame_height,
 	));
+	debug("designations: $designation_order_h, $designation_order_v");
+
 
 	my $q = database->prepare("
-		SELECT create_regular_frame(?,?,?,?) AS new_frame_id
+		SELECT create_regular_frame(?,?,?,?,?,?) AS new_frame_id
 	");
 	$q->execute(
 		$account_id,
 		$frame_name,
 		$frame_width,
-		$frame_height
+		$frame_height,
+		($designation_order_h eq 'right-to-left' ? 't':'f'),  # whether to reverse or not
+		($designation_order_v eq 'top-to-bottom' ? 't':'f'),  # whether to reverse or not
 	) or do {
 		error("ERROR running create_regular_frame on database");
 		database->rollback;

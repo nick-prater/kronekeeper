@@ -467,11 +467,11 @@ div.credits.container {
 	position: relative;
 }
 .add_frame form label {
-	width: 4em;
+	width: 10em;
 	text-align: right;
 	display: inline-block;
-	float: left;
 	padding: 3px;
+	left: 0px;
 }
 .add_frame form div.buttons {
 	margin-top: 1em;
