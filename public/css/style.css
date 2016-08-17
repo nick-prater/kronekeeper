@@ -294,6 +294,10 @@ div.credits.container {
 .block td.cable_reference {
 	width: 5em;
 }
+.block td.circuit_name,
+.block td.connection {
+	width: 12em;
+}
 
 .block td.jumper {
 	width: 4em;
