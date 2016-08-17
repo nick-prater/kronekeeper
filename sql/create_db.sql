@@ -77,6 +77,7 @@ CREATE TABLE frame(
 	is_template BOOLEAN NOT NULL DEFAULT FALSE,
 	is_deleted BOOLEAN NOT NULL DEFAULT FALSE
 );
+
 	
 CREATE TABLE vertical(
 	id SERIAL NOT NULL PRIMARY KEY,
@@ -85,7 +86,19 @@ CREATE TABLE vertical(
 	designation TEXT
 );
 CREATE UNIQUE INDEX vertical_frame_position_idx ON vertical(frame_id, position);
-CREATE UNIQUE INDEX vertical_designation_frame_idx ON vertical(designation, frame_id);
+CREATE UNIQUE INDEX vertical_frame_designation_idx ON vertical(designation, frame_id);
+
+/* Transform these indexes into constraints so we can defer them during updates */
+ALTER TABLE vertical
+ADD CONSTRAINT vertical_unique_frame_position
+UNIQUE USING INDEX vertical_frame_position_idx
+DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE vertical
+ADD CONSTRAINT vertical_unique_frame_designation
+UNIQUE USING INDEX vertical_frame_designation_idx
+DEFERRABLE INITIALLY IMMEDIATE;
+
 
 CREATE TABLE block(
 	id SERIAL NOT NULL PRIMARY KEY,
@@ -96,6 +109,18 @@ CREATE TABLE block(
 );
 CREATE UNIQUE INDEX block_vertical_position_idx ON block(vertical_id, position);
 CREATE UNIQUE INDEX block_designation_vertical_idx ON block(designation, vertical_id);
+
+/* Transform these indexes into constraints so we can defer them during updates */
+ALTER TABLE block
+ADD CONSTRAINT block_unique_vertical_position
+UNIQUE USING INDEX block_vertical_position_idx
+DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE block
+ADD CONSTRAINT block_unique_vertical_designation
+UNIQUE USING INDEX block_designation_vertical_idx
+DEFERRABLE INITIALLY IMMEDIATE;
+
 
 CREATE TABLE circuit(
 	id SERIAL NOT NULL PRIMARY KEY,

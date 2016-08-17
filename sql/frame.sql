@@ -118,3 +118,136 @@ END
 $$ LANGUAGE plpgsql;
 
 
+
+/* For the given frame_id, reverse the order of the existing
+ * vertical designations.
+ * 
+ * This depends on vertical.position values starting at
+ * 1 and being contiguous. Should perhaps enforce that
+ * as a data constraint...
+ */
+CREATE OR REPLACE FUNCTION reverse_vertical_designations(
+	p_frame_id INTEGER
+)
+RETURNS BOOLEAN AS $$
+DECLARE vertical_count INTEGER;
+BEGIN
+
+	/* Create a reference copy of the current designations */
+	CREATE TEMPORARY TABLE temp_designation (
+		position INTEGER PRIMARY KEY,
+		designation TEXT
+	)
+	ON COMMIT DROP;
+		    
+	INSERT INTO temp_designation (position,	designation)
+	SELECT position, designation
+	FROM vertical
+	WHERE frame_id = p_frame_id;
+
+	/* How many verticals in total? */
+	GET DIAGNOSTICS vertical_count = ROW_COUNT;
+
+	/* Suspend unique constraint on designation during update */
+	SET CONSTRAINTS vertical_unique_frame_designation DEFERRED;
+
+	/* Then rename with the reversed designation sequence */
+	UPDATE vertical
+	SET designation = (
+		SELECT designation
+		FROM temp_designation AS t
+		WHERE t.position = invert_position_index(
+			vertical.position,
+			vertical_count
+		)
+	)
+	WHERE vertical.frame_id = p_frame_id;
+
+	/* Restore unique constraint */
+	SET CONSTRAINTS vertical_unique_frame_designation IMMEDIATE;
+
+	RETURN FOUND;
+
+END
+$$ LANGUAGE plpgsql;
+
+
+
+/* For the given frame_id, reverse the order of the existing
+ * block designations.
+ * 
+ * This depends on vertical.position values starting at
+ * 1 and being contiguous. Should perhaps enforce that
+ * as a data constraint... Also, we cannot sensibly perform
+ * this operation if there are differences in the number
+ * of blocks present in each vertical, as it's unclear
+ * where the missing blocks should be positioned or how
+ * they should be labelled.
+ */
+CREATE OR REPLACE FUNCTION reverse_block_designations(
+	p_frame_id INTEGER
+)
+RETURNS BOOLEAN AS $$
+DECLARE min_block_count INTEGER;
+DECLARE max_block_count INTEGER;
+BEGIN
+
+	/* How many blocks does each vertical have? */
+	SELECT MAX(block_count), MIN(block_count)
+	INTO max_block_count, min_block_count FROM (
+		SELECT COUNT(*) AS block_count
+		FROM block
+		JOIN vertical ON (vertical.id = block.vertical_id)
+		WHERE vertical.frame_id = p_frame_id
+		GROUP BY vertical.id
+	) AS t;
+
+	/* Do all verticals have the same number of blocks?
+	 * If not, we cannot automatically reverse/mirror the designations.
+	 */
+	IF max_block_count != min_block_count THEN
+		RAISE EXCEPTION 'Cannot automatically reverse designations when number of blocks in each vertical differ';
+	END IF;
+
+	/* Create a reference copy of the current designations */
+	CREATE TEMPORARY TABLE temp_designation (
+		position INTEGER,
+		vertical_id INTEGER,
+		designation TEXT
+	)
+	ON COMMIT DROP;
+		    
+	INSERT INTO temp_designation (position,	vertical_id, designation)
+	SELECT block.position, block.vertical_id, block.designation
+	FROM block
+	JOIN vertical ON (vertical.id = block.vertical_id)
+	WHERE vertical.frame_id = p_frame_id;
+
+	/* Suspend unique constraint on designation during update */
+	SET CONSTRAINTS block_unique_vertical_designation DEFERRED;
+
+	/* Then rename with the reversed designation sequence */
+	UPDATE block
+	SET designation = (
+		SELECT designation
+		FROM temp_designation AS t
+		WHERE t.vertical_id = block.vertical_id
+		AND t.position = invert_position_index(
+			block.position,
+			max_block_count
+		)
+	)
+	FROM vertical
+	WHERE vertical.id = block.vertical_id
+	AND vertical.frame_id = p_frame_id;
+
+	/* Restore unique constraint */
+	SET CONSTRAINTS block_unique_vertical_designation IMMEDIATE;
+
+	RETURN FOUND;
+
+END
+$$ LANGUAGE plpgsql;
+
+
+
