@@ -546,7 +546,7 @@ sub get_jumper_info {
 	# done the character decoding. Failing to set this option triggers
 	# an error when when accented characters or emoji.
 	# Fix for our Github issue #12
-	my @result = @{from_json($json), {utf8 => 0}};  # database returns a json array
+	my @result = @{from_json($json, {utf8 => 0})};  # database returns a json array
 	return $result[0];                              # we only want first element
 }
 
