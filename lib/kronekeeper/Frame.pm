@@ -287,6 +287,43 @@ prefix '/api/frame' => sub {
 		};
 	};
 
+
+	post '/reverse_designations' => sub {
+
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug "reverse_designations()";
+		debug request->body;
+		my $data = from_json(request->body);
+
+		frame_id_valid_for_account($data->{frame_id}) or do {
+			send_error("frame_id invalid or not permitted" => 403);
+		};
+
+		if($data->{vertical}) {
+			reverse_vertical_designations($data->{frame_id});
+			$al->record({
+				function     => 'kronekeeper::Frame::reverse_designations',
+				frame_id     => $data->{frame_id},
+				note         => "Reversed vertical designations",
+			});
+		}
+
+		if($data->{block}) {
+			reverse_block_designations($data->{frame_id});
+			$al->record({
+				function     => 'kronekeeper::Frame::reverse_vertical_designations',
+				frame_id     => $data->{frame_id},
+				note         => "Reversed block designations",
+			});
+		}
+
+		database->commit;
+
+		return to_json $data;
+	};
 };
 
 
@@ -491,5 +528,39 @@ sub create_frame {
 }
 
 
+sub reverse_vertical_designations {
+
+	my $frame_id = shift;
+	my $q = database->prepare("
+		SELECT reverse_vertical_designations(?) AS success
+	");
+	$q->execute($frame_id);
+	my $result = $q->fetchrow_hashref;
+
+	$result && $result->{success} or do {
+		database->rollback;
+		send_error("failed to reverse vertical designations for frame_id $frame_id");
+	};	
+
+	return $result->{success};
+}
+
+
+sub reverse_block_designations {
+
+	my $frame_id = shift;
+	my $q = database->prepare("
+		SELECT reverse_block_designations(?) AS success
+	");
+	$q->execute($frame_id);
+	my $result = $q->fetchrow_hashref;
+
+	$result && $result->{success} or do {
+		database->rollback;
+		send_error("failed to reverse block designations for frame_id $frame_id");
+	};	
+
+	return $result->{success};
+}
 
 1;

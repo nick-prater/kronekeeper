@@ -28,12 +28,16 @@ require([
 ) {
         'use strict';
 
+	var properties = {
+		selected_menu_option: null
+	};
 
 	/* Initialise the menus and associated events */
 	$("#frame_menu").menu({
 		select: handle_menu_selection
 	});
 	$(".frame a.frame_menu_button").on("click", show_menu);
+
 
 	/* Initialise dialogs */
 	var cancel_button = {
@@ -46,10 +50,16 @@ require([
 	var reverse_button = {
 		text: "Reverse",
 		icon: "ui-icon-shuffle",
-		click: reverse_vertical_designations
+		click: reverse_designations
 	};
 
 	$("#dialog_confirm_reverse_vertical_designations").dialog({
+		autoOpen: false,
+		modal: true,
+		buttons: [cancel_button, reverse_button]
+	});
+
+	$("#dialog_confirm_reverse_block_designations").dialog({
 		autoOpen: false,
 		modal: true,
 		buttons: [cancel_button, reverse_button]
@@ -63,6 +73,11 @@ require([
 		closeOnEscape: false
 	});
 
+	$("#dialog_cannot_reverse_block_designations").dialog({
+		autoOpen: false,
+		modal: true,
+		buttons: [cancel_button],
+	});
 
 	function show_menu(e) {
 
@@ -80,12 +95,13 @@ require([
 		$(document).on("click", function() {
 			$("#frame_menu").menu().hide();
 		});
-	};
+	}
 
 
 	function handle_menu_selection(e, jq_element) {
 
 		console.log(e.currentTarget.dataset.action, "action clicked");
+		properties.selected_menu_option = e.currentTarget.dataset.action;
 
 		switch(e.currentTarget.dataset.action) {
 
@@ -93,24 +109,46 @@ require([
 				$("#block_menu").menu().hide();
 				$("#dialog_confirm_reverse_vertical_designations").dialog("open");
 				break;
-		};
+
+			case "reverse_block_designations" :
+				$("#block_menu").menu().hide();
+
+				/* Can only automatically reverse block designations if there
+				 * are no differences in the size of each vertical. Differences
+				 * are apparent if there are blocks in the frame marked unavailable.
+				 */
+				if($("td.block.unavailable").length == 0) {
+					$("#dialog_confirm_reverse_block_designations").dialog("open");
+				}
+				else {
+					$("#dialog_cannot_reverse_block_designations").dialog("open");
+				}
+				break;
+		}
 
 	}
 
 
-	function reverse_vertical_designations () {
+	function reverse_designations() {
 
 		var url = "/api/frame/reverse_designations";
-
-		$("#dialog_confirm_reverse_vertical_designations").dialog("close");
-		$("#dialog_reversing_designations").dialog("open");
-
 		var data = {
-			frame_id: window.frame_id,
-			vertical: true
+			frame_id: window.frame_id
 		};
 
-	console.log(data);
+		/* Set request data according to selected menu option */
+		switch(properties.selected_menu_option) {
+			case "reverse_vertical_designations" :
+				data.vertical = true;
+				break;
+			case "reverse_block_designations" :
+				data.block = true;
+				break;
+		}
+
+		$("#dialog_confirm_reverse_vertical_designations").dialog("close");
+		$("#dialog_confirm_reverse_block_designations").dialog("close");
+		$("#dialog_reversing_designations").dialog("open");
 
 		$.ajax({
 			url: url,
@@ -119,13 +157,13 @@ require([
 			data: JSON.stringify(data),
 			contentType: 'application/json; charset=utf-8',
 			success: function(json) {
-				console.log("reversed vertical designations OK");
+				console.log("reversed designations OK");
 				window.location.reload();
 			},
 			error: function(xhr, status) {
 				var error_code = xhr.status + " " + xhr.statusText;
 				$("#dialog_reversing_designations").dialog("close");
-				alert("ERROR reversing vertical designations: " + error_code);
+				alert("ERROR reversing designations: " + error_code);
 			}
 		});
 	}

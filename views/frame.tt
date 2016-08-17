@@ -9,7 +9,7 @@
 		<tr>
 			<th>
 				<div class="menu_button">
-					<a title="menu" href="javascript:void(0)">&#9776;</a>
+					<a class="frame_menu_button" title="menu" href="javascript:void(0)">&#9776;</a>
 				</div>
 			</th>
 			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
@@ -108,6 +108,15 @@
 		</li>
 		<li data-action="remove"><div>Remove Block</div></li>
 	</ul>
+	<ul class="context_menu" id="frame_menu">
+		<li data-action="reverse_designations">
+			<div>Reverse Designations</div>
+			<ul>
+				<li data-action="reverse_vertical_designations"><div>vertical</div></li>
+				<li data-action="reverse_block_designations"><div>block</div></li>
+			</ul>
+		</li>
+	</ul>
 </div>
 
 
@@ -123,7 +132,58 @@
 		Are you sure?
 	</p>
 </div>
+<div id="dialog_confirm_reverse_vertical_designations" title="Reverse vertical designations?" style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		You are about to reverse the order in which the block columns are labelled. All jumper
+		designations within Kronekeeper will be updated automatically, but bear in mind that
+		any external documentation, cable numbering or labelling referring to block designations
+		will also need updating to match the new designations.
+	</p>
+	<p>
+		This operation is itself reversible. Repeating it will put things
+		back as they were.
+	<p>
+		Proceed with reversal of vertical designations?
+	</p>
+</div>
+<div id="dialog_confirm_reverse_block_designations" title="Reverse block designations?" style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		You are about to reverse the order in which the blocks are numbered. All jumper
+		designations within Kronekeeper will be updated automatically, but bear in mind that
+		any external documentation, cable numbering or labelling referring to block designations
+		will also need updating to match the new designations.
+	</p>
+	<p>
+		This operation is itself reversible. Repeating it will put things
+		back as they were.
+	<p>
+		Proceed with reversal of block designations?
+	</p>
+</div>
+<div id="dialog_cannot_reverse_block_designations" title="Reverse block designations" style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		Cannot automatically reverse block designations as the number of blocks in each
+		vertical column differs.
+	</p>
+</div>
+<div id="dialog_reversing_designations" title="Please wait..." style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-refresh" style="float:left; margin:0 7px 20px 0;"></span>
+		Reversing designations...
+	</p>
+</div>
 
+
+
+
+
+<!-- Global state variables -->
+<script type="text/javascript">
+var frame_id = [% frame_info.id %];
+</script>
 
 <script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
 <script type="text/javascript" src="[% request.uri_base %]/js/frame.js"></script>

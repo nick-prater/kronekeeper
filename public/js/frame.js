@@ -22,6 +22,7 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 require([
 	'frame/remove_block',
+	'frame/frame_menu',
 	'backbone',
         'jquery',
 	'jqueryui'
@@ -34,9 +35,9 @@ require([
 	var jq_block = null;
 	
 
-	/* Initialise the menu and associated events */
+	/* Initialise the menus and associated events */
 	$("#block_menu").menu({
-		select: handle_menu_selection
+		select: handle_block_menu_selection
 	});
 	$(".block .menu_button a").on("click", show_block_menu);
 
@@ -96,7 +97,7 @@ require([
 	}
 
 
-	function handle_menu_selection(e, jq_element) {
+	function handle_block_menu_selection(e, jq_element) {
 
 		switch(e.currentTarget.dataset.action) {
 

@@ -447,6 +447,12 @@ div.credits.container {
 	color: black;
 }
 
+/* Class to allow dialog close button to be disabled */
+.no-close .ui-dialog-titlebar-close {
+	display: none;
+}
+
+
 /* Set width of per-block context-menu in frame view */
 .frame .context_menu {
 	width: auto;
