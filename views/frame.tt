@@ -1,9 +1,9 @@
 <div class="container frame">
-	<h1 class="caption">
-		<input class="name" type="text" value="[% frame_info.name | html %]" />
-	</h1>
 
 	<table>
+		<caption id="block_table_caption">
+			<input class="name" type="text" title="Frame Name" value="[% frame_info.name | html %]" />
+		</caption>
 
 		<tr>
 			<th>

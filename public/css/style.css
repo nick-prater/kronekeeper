@@ -161,9 +161,12 @@ div.credits.container {
 .frame table {
 	text-align: center;
 }
-
 .frame th {
 	width: 2em;
+}
+.frame caption {
+	margin-left: 2em;
+	margin-bottom: 0.5em;
 }
 
 
@@ -322,7 +325,8 @@ div.credits.container {
 }
 
 
-.block caption {
+.block caption,
+.frame caption {
 	text-align: left;
 	font-weight: bold;
 	font-size: 120%;
@@ -336,7 +340,8 @@ div.credits.container {
 	background: transparent;
 }
 
-.block caption input {
+.block caption input,
+.frame caption input {
 	font-size: 120%;
 	color: black;
 	font-weight: bold;
@@ -350,7 +355,8 @@ div.credits.container {
 }
 
 .block td.change_pending,
-.block input.change_pending {
+.block input.change_pending,
+.frame input.change_pending {
 	background: #ffdede;
 }
 
