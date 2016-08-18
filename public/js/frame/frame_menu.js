@@ -105,6 +105,10 @@ require([
 
 		switch(e.currentTarget.dataset.action) {
 
+			case "show_activity_log" : 
+				window.location.href = "/activity_log/" + window.frame_id;
+				break;
+
 			case "reverse_vertical_designations" :
 				$("#block_menu").menu().hide();
 				$("#dialog_confirm_reverse_vertical_designations").dialog("open");
