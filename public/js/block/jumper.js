@@ -149,7 +149,7 @@ define([
 					cancel_action: function() {
 						console.log("cancel action");
 						e.target.value = jumper_view.model.get("designation");
-						e.target.parentNode.classList.remove('change_pending');
+						jumper_view.el.classList.remove('change_pending');
 						jumper_view.$el.effect("highlight", {}, highlight.duration);
 					},
 					success_action: function(data) {
@@ -166,7 +166,8 @@ define([
 								data: data.jumper_info
 							})
 						);
-						e.target.parentNode.classList.remove('change_pending');
+
+						jumper_view.el.classList.remove('change_pending');
 						jumper_view.render();
 						jumper_view.$el.effect("highlight", highlight.green, highlight.duration);
 
