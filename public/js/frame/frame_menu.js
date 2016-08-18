@@ -106,7 +106,7 @@ require([
 		switch(e.currentTarget.dataset.action) {
 
 			case "show_activity_log" : 
-				window.location.href = "/activity_log/" + window.frame_id;
+				window.location.href = "/activity_log/" + window.frame_info.id;
 				break;
 
 			case "reverse_vertical_designations" :
@@ -137,7 +137,7 @@ require([
 
 		var url = "/api/frame/reverse_designations";
 		var data = {
-			frame_id: window.frame_id
+			frame_id: window.frame_info.id
 		};
 
 		/* Set request data according to selected menu option */

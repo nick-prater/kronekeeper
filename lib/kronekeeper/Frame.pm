@@ -25,6 +25,7 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
 use warnings;
+use feature 'switch';
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
@@ -184,6 +185,42 @@ prefix '/frame' => sub {
 
 
 prefix '/api/frame' => sub {
+
+	patch '/:frame_id' => sub {
+
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $id = param('frame_id');
+		frame_id_valid_for_account($id) or do {
+			send_error('forbidden' => 403);
+		};
+		debug "updating frame: $id";
+
+		debug request->body;
+		my $data = from_json(request->body);
+		my $changes = {};
+		my $frame_info = frame_info($id);
+
+		foreach my $field(keys %{$data}) {
+			my $value = $data->{$field};
+			given($field) {
+				when('name') {
+					update_name($frame_info, $value);
+					$changes->{name} = $value;
+				};
+				default {
+					error "failed to update unrecognised frame field '$field'";
+				};					
+			};
+		};
+
+		database->commit;
+
+		content_type 'application/json';
+		return to_json $changes;
+	};
 
 	post '/place_block' => sub {
 
@@ -562,5 +599,40 @@ sub reverse_block_designations {
 
 	return $result->{success};
 }
+
+
+sub update_name {
+
+	my $info = shift;
+	my $name = shift;
+
+	# Rename circuit
+	my $q = database->prepare("
+		UPDATE frame SET name = ?
+		WHERE id = ?
+	");
+
+	$q->execute(
+		$name,
+		$info->{id},
+	) or do {
+		database->rollback;
+		send_error('error updating frame' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'frame renamed "%s" (was "%s")',
+		$name,
+		$info->{name} || '',
+	);
+
+	$al->record({
+		function     => 'kronekeeper::Frame::update_name',
+		frame_id     => $info->{id},
+		note         => $note,
+	});
+}
+
 
 1;

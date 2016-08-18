@@ -22,12 +22,14 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 require([
 	'frame/remove_block',
+	'frame/title',
 	'frame/frame_menu',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
-	remove_block
+	remove_block,
+	title
 ) {
         'use strict';
 
@@ -159,6 +161,9 @@ require([
 
 
 
+	var title_view = new title.view({
+		model: new title.model(window.frame_info)
+	});
 
 
 	console.log("loaded frame.js");

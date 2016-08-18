@@ -1,7 +1,8 @@
+[% USE JSON %]
 <div class="container frame">
 
 	<table>
-		<caption id="block_table_caption">
+		<caption id="frame_table_caption">
 			<input class="name" type="text" title="Frame Name" value="[% frame_info.name | html %]" />
 		</caption>
 
@@ -184,7 +185,7 @@
 
 <!-- Global state variables -->
 <script type="text/javascript">
-var frame_id = [% frame_info.id %];
+var frame_info = [% frame_info.json %];
 </script>
 
 <script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
