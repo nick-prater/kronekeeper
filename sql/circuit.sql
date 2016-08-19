@@ -144,6 +144,11 @@ BEGIN
 
 	RETURN QUERY
 	SELECT id FROM t_linked_circuits;
+
+	/* Must clean up temporary table */
+	DROP TABLE t_linked_circuits;
+
+	RETURN;
 END
 $$ LANGUAGE plpgsql;
 
