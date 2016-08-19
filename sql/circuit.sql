@@ -82,3 +82,90 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+
+
+/* Given a circuit id, return a list of all the circuit
+ * ids linked with it by jumpers. The returned list
+ * includes the given circuit_id. All jumpers are followed
+ * even as they are linked through other circuits, giving
+ * a complete picture of the circuit net.
+ */
+CREATE OR REPLACE FUNCTION connected_circuit_ids(
+	p_circuit_id INTEGER
+)
+RETURNS SETOF INTEGER AS $$
+DECLARE p_iteration_count INTEGER;
+DECLARE p_max_iterations INTEGER;
+DECLARE p_row_count INTEGER;
+BEGIN
+	/* We'll build a list of linked circuits in this temporary table */
+	CREATE TEMPORARY TABLE t_linked_circuits (
+		id INTEGER PRIMARY KEY
+	)
+	ON COMMIT DROP;
+
+	/* Seed with the circuit we're interested in */
+	INSERT INTO t_linked_circuits(id) VALUES (p_circuit_id);
+
+	/* Iterate looking for other connected circuits */
+	p_max_iterations := 100;
+	LOOP
+		/* Runaway protection */
+		p_iteration_count := p_iteration_count + 1;
+		IF p_iteration_count > p_max_iterations THEN
+			RAISE EXCEPTION 'Failed to resolve all circuits linked to % after % iterations',
+				p_circuit_id,
+				p_max_iterations;
+		END IF;
+
+		/* Look for circuits jumpered to those already in our temporary table */
+		INSERT INTO t_linked_circuits(id)
+		SELECT DISTINCT 
+			pin2.circuit_id
+		FROM jumper_wire
+		JOIN connection AS connection1 ON (connection1.jumper_wire_id = jumper_wire.id)
+		JOIN pin AS pin1 ON (pin1.id = connection1.pin_id)
+		JOIN connection AS connection2 ON (
+			connection2.jumper_wire_id = connection1.jumper_wire_id
+			AND connection2.id != connection1.id
+		)
+		JOIN pin AS pin2 ON (pin2.id = connection2.pin_id)
+		WHERE pin1.circuit_id IN (
+			SELECT id FROM t_linked_circuits
+		)
+		AND NOT EXISTS (
+			SELECT 1 FROM t_linked_circuits AS u
+			WHERE pin2.circuit_id = u.id
+		);
+		
+		GET DIAGNOSTICS p_row_count = ROW_COUNT;
+		EXIT WHEN p_row_count = 0;	
+	END LOOP;
+
+	RETURN QUERY
+	SELECT id FROM t_linked_circuits;
+END
+$$ LANGUAGE plpgsql;
+
+
+
+/* Renames a circuit and all connected circuits */
+CREATE OR REPLACE FUNCTION update_circuit_name_cascade(
+	p_circuit_id INTEGER,
+	p_name TEXT
+)
+RETURNS VOID AS $$
+BEGIN
+	UPDATE circuit
+	SET name = p_name
+	WHERE circuit.id IN (
+		SELECT connected_circuit_ids FROM connected_circuit_ids(p_circuit_id)
+	);
+END
+$$ LANGUAGE plpgsql;
+
+
+
+
+
+

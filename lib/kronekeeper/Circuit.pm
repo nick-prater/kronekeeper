@@ -70,6 +70,10 @@ prefix '/api/circuit' => sub {
 		# events on each field in the user interface.
 		foreach my $field(keys %{$data}) {
 			given($field) {
+				when(/^(name)$/) {
+					update_name_cascade($circuit_info, $data->{$field});
+					$changes->{$field} = $data->{$field};
+				};
 				when(/^(name|cable_reference|connection)$/) {
 					update_field($circuit_info, $field, $data->{$field});
 					$changes->{$field} = $data->{$field};
@@ -296,6 +300,39 @@ sub update_field {
 
 	$al->record({
 		function     => 'kronekeeper::Circuit::update_field',
+		frame_id     => $info->{frame_id},
+		block_id_a   => $info->{block_id},
+		circuit_id_a => $info->{id},
+		note         => $note,
+	});
+}
+
+
+sub update_name_cascade {
+
+	my $info = shift;
+	my $name = shift;
+
+	my $q = database->prepare("SELECT update_circuit_name_cascade(?, ?)");
+
+	$q->execute(
+		$info->{id},
+		$name,
+	) or do {
+		database->rollback;
+		send_error('error updating circuit name' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'circuit %s name changed to "%s" (was "%s")',
+		$info->{full_designation},
+		$name,
+		$info->{name} || '',
+	);
+
+	$al->record({
+		function     => 'kronekeeper::Circuit::update_name_cascade',
 		frame_id     => $info->{frame_id},
 		block_id_a   => $info->{block_id},
 		circuit_id_a => $info->{id},
