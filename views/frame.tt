@@ -42,7 +42,7 @@
 		    [% IF block.id  # -- Block exists -- %]
 
 		      [% SET id = frame_blocks.$vertical_position.blocks.$block_position.id %]
-		      [% SET url = "$frame_info.id/$id" %]
+		      [% SET url = "/block/$id" %]
 		      [% SET title = "block $vertical.designation$block.designation" %]
 		      [% IF block.is_free  # -- Block position is unused -- %]
 			<td class="block is_free" data-block_id="[% id %]">
