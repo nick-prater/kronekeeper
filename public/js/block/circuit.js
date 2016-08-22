@@ -80,15 +80,38 @@ define([
 				this.jumper_changed
 			);
 			this.listenTo(
+				this.collection,
+				"circuit_change",
+				this.circuit_changed
+			);
+			this.listenTo(
 				this,
 				"loaded_jumper_data",
 				this.display_jumper_data
+			);
+			this.listenTo(
+				this,
+				'sync',
+				this.model_synced
 			);
 
 			console.log(
 				"circuit model initialised for circuit", this.id,
 				"with", this.jumper_models.length, "jumper models"
 			);
+		},
+
+		model_synced: function(model, response, options) {
+
+			if(response.changes && response.changes.connected_circuits) {
+				/* Trigger reload of other circuits affected by this update */
+				response.changes.connected_circuits.forEach(function(circuit_id, index) {
+					/* But no need to signal ourselves */
+					if(circuit_id != this.id) {
+						this.collection.trigger("circuit_change", circuit_id);
+					}
+				}, this);
+			}
 		},
 
 		jumper_changed: function(changed_circuit_id) {
@@ -99,6 +122,18 @@ define([
 			 */
 			if(changed_circuit_id == this.id) {
 				this.reload_jumpers();
+			}
+		},
+
+		circuit_changed: function(changed_circuit_id) {
+
+			/* Triggered whenever a circuit_id is changed elsewhere on
+			 * our block. If our circuit is affected, our name has been
+			 * altered, so we need to update
+			 */
+			if(changed_circuit_id == this.id) {
+				console.log("name changed for circuit_id:", this.id);
+				this.fetch();
 			}
 		},
 
@@ -367,16 +402,46 @@ define([
 		},
 
 		model_synced: function(model, response, options) {
-			/* Clear field highlighting and flash green to indicate successful save
-			 * Server returns the changed fields to confirm which have been updated
+
+			/* There are two paths which lead here:
+			 * 
+			 * One is where we have made a change to the model and
+			 * pushed that change to the server. In that case we've already
+			 * updated the view with new data and the server returns a
+			 * changes array in it's response to indicate which fields have been
+			 * saved. This happens when the user edits one of the input fields on
+			 * display. The model's changedAttributes information is no help
+			 * here.
+			 * 
+			 * The other situation is where an update has happened on the server,
+			 * and we've requested the current model data. In this case, the
+			 * server response will contain the current value of all fields, while
+			 * the model's changedAttributes property will show which fields differ
+			 * from our current state. We'll need to update the view to reflect
+			 * those changes
 			 */
-			if('name' in response) {
+
+			var data = (response.changes ? response.changes
+			                             : model.changedAttributes
+			);
+
+			console.log("model synced id:", model.id);
+			console.log("changed attributes:", data);
+			console.log("options:", options);
+
+			/* Clear field highlighting, update value and flash green to indicate 
+			 * successful save.
+			 */
+			if('name' in data) {
+				this.$el.find(".circuit_name input").val(model.get("name"));
 				highlight.element_change_applied(this.$el, "td.circuit_name");
 			}
-			if('cable_reference' in response) {
+			if('cable_reference' in data) {
+				this.$el.find(".cable_reference input").val(model.get("cable_reference"));
 				highlight.element_change_applied(this.$el, "td.cable_reference");
 			}
-			if('connection' in response) {
+			if('connection' in data) {
+				this.$el.find(".connection input").val(model.get("connection"));
 				highlight.element_change_applied(this.$el, "td.connection");
 			}
 		},

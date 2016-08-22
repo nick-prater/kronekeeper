@@ -45,6 +45,28 @@ my $al = kronekeeper::Activity_Log->new();
 
 prefix '/api/circuit' => sub {
 
+	get '/:circuit_id' => require_login sub {
+
+		circuit_id_valid_for_account(param("circuit_id")) or do {
+			send_error('forbidden' => 403);
+		};
+
+		# Unfortunately the view that returns a collection of circuits
+		# uses slightly different field names to the view that returns
+		# a single circuit. Both are used by the user-interface Backbone
+		# Circuit model, so we map the field names here to match those
+		# used in /api/block/:block_id
+		my $circuit = circuit_info(param("circuit_id"));
+		return to_json {
+			circuit_id      => $circuit->{id},
+			block_id        => $circuit->{block_id},
+			name            => $circuit->{name},
+			cable_reference => $circuit->{cable_reference},
+			connection      => $circuit->{connection},
+			designation     => $circuit->{circuit_designation},
+		};
+	};
+
 	patch '/:circuit_id' => require_login sub {
 
 		user_has_role('edit') or do {
@@ -73,8 +95,9 @@ prefix '/api/circuit' => sub {
 				when(/^(name)$/) {
 					update_name_cascade($circuit_info, $data->{$field});
 					$changes->{$field} = $data->{$field};
+					$changes->{connected_circuits} = connected_circuits($id);
 				};
-				when(/^(name|cable_reference|connection)$/) {
+				when(/^(cable_reference|connection)$/) {
 					update_field($circuit_info, $field, $data->{$field});
 					$changes->{$field} = $data->{$field};
 				};
@@ -87,7 +110,9 @@ prefix '/api/circuit' => sub {
 		database->commit;
 
 		content_type 'application/json';
-		return to_json $changes;
+		return to_json {
+			changes => $changes,
+		};
 	};
 
 
@@ -341,5 +366,20 @@ sub update_name_cascade {
 }
 
 
+sub connected_circuits {
+
+	# Returns an arrayref of all circuits connected via (possibly
+	# multiple) jumpers to the given cicuit_id
+	my $circuit_id = shift;
+	my $q = database->prepare("SELECT * FROM connected_circuit_ids(?)");
+	$q->execute($circuit_id);
+	
+	my @rv;
+	while(my $row = $q->fetchrow_arrayref) {
+		push(@rv, $$row[0]);
+	}
+
+	return \@rv;
+}
 
 1;
