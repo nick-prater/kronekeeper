@@ -129,10 +129,12 @@ prefix '/jumper' => sub {
 		#   - there any other jumpers linking starting point and destination
 		#   - starting and destination circuits are identical
 		#   - starting and destination pin counts differ
+		#   - there are no jumper templates with a corresponding wire count
 		if(
 			$connections->{complex}->{connection_count} ||
 			$a_circuit_info->{id} == $b_circuit_info->{id} ||
-			$a_circuit_info->{pin_count} != $b_circuit_info->{pin_count}
+			$a_circuit_info->{pin_count} != $b_circuit_info->{pin_count} ||
+			!get_jumper_templates($a_circuit_info->{pin_count})
 		) {	
 			debug("cannot offer simple jumper - forward to custom jumper selection instead");
 			$offer_simple_jumper = 0;
