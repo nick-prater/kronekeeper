@@ -379,15 +379,18 @@ define([
 			switch(e.keyCode) {
 
 				case 27:
+					// Escape
 					e.target.value = this.model.get(attribute_name);
 					e.target.parentNode.classList.remove('change_pending');
 					break;
 
 				case 38:
+					// Up Arrow
 					$(e.target).closest("tr").prev().find(row_selector).find("input").focus();
 					break;
 
 				case 40:
+					// Down Arrow
 					$(e.target).closest("tr").next().find(row_selector).find("input").focus();
 					break;
 			}
