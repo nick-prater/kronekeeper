@@ -94,7 +94,7 @@ define([
 		events: {
 			'input' : 'highlight_change',
 			'change' : 'jumper_change',
-			'keypress' : 'reset_on_escape_key',
+			'keypress' : 'handle_keypress',
 			'dblclick' : 'handle_double_click',
 			'hashchange' : 'handle_hash_change'
 		},
@@ -144,11 +144,39 @@ define([
 			}
 		},
 
-		reset_on_escape_key: function(e) {
-			if(e.keyCode == 27) {
-				e.target.value = this.model.get("designation");
-				e.target.parentNode.classList.remove('change_pending');
+		handle_keypress: function(e) {
+
+			switch(e.keyCode) {
+
+				case 27:
+					// Escape - reset to original value
+					e.target.value = this.model.get("designation");
+					e.target.parentNode.classList.remove('change_pending');
+					break;
+
+				case 38:
+					// Up Arrow
+					this.move_focus(e, "up");
+					break;
+
+				case 40:
+					// Down Arrow
+					this.move_focus(e, "down");
+					break;
 			}
+		},
+
+		move_focus: function(e, direction) {
+
+			var td = $(e.target).closest("td");
+			var tr = td.closest("tr");
+			var index = tr.find("td").index(td);
+
+			tr = direction == "up" ? tr.prev()
+			                       : tr.next();
+
+			var columns = tr.find("td");
+			$(columns[index]).find("input").focus();
 		},
 
 		jumper_change: function(e) {
