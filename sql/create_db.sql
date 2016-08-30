@@ -258,6 +258,7 @@ SELECT create_jumper_template('Analogue Left',  'L', ARRAY['blu','red']);
 SELECT create_jumper_template('Analogue Mono',  'M', ARRAY['red','white']);
 SELECT create_jumper_template('DC', 'DC', ARRAY['green','yellow']);
 SELECT create_jumper_template('AES/EBU', 'AES', ARRAY['blue','white']);
+SELECT create_jumper_template(2, 'ABS', 'ABS', ARRAY['black','red','green']);
  */
 
 
