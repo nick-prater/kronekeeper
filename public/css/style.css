@@ -507,4 +507,6 @@ div.credits.container {
 	margin-left: 10.5em;
 }
 
-
+.highlight {
+	background: yellow !important;
+}

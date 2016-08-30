@@ -112,8 +112,19 @@ define([
 			);
 
 			var view = this;
+
+			/* Bind to window events to handle highlighting. If
+			 * this view is ever destroyed, we need to take care to
+			 * unbind them
+			 */
 			$(window).on("hashchange", function(e) {
 				view.handle_hash_change(e);
+			});
+			$(window).on("click", function(e) {
+				view.remove_highlighting(e);
+			});
+			$(window).on("keypress", function(e) {
+				view.remove_highlighting(e);
 			});
 		},
 	
@@ -253,7 +264,14 @@ define([
 
 		handle_hash_change: function(e) {
 			if(window.location.hash == ("#jumper_id=" + this.model.id)) {
-				this.$el.effect("highlight", {}, highlight.duration * 2);
+				this.$el.addClass("highlight");
+			}
+		},
+
+		remove_highlighting: function(e) {
+			this.$el.removeClass("highlight");
+			if(window.location.hash == ("#jumper_id=" + this.model.id)) {
+				window.location.hash = "";
 			}
 		}
 	});
