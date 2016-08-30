@@ -57,7 +57,6 @@ prefix '/block' => sub {
 		};
 
 		template('block', {
-			block_id   => $id,
 			block_info => block_info($id),
 			circuits   => block_circuits($id),
 		});
@@ -82,8 +81,8 @@ prefix '/api/block' => sub {
 
 		content_type 'application/json';
 		return to_json {
-			circuits   => block_circuits($id),
 			block_info => block_info($id),
+			circuits   => block_circuits($id),
 		};
 	};
 

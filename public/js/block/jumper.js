@@ -75,7 +75,9 @@ define([
 				id: data.jumper_id,
 				is_simple_jumper: data.is_simple_jumper,
 				wires: data.wires,
-				designation: data.wires[0].b_circuit_full_designation	
+				designation: data.wires[0].b_circuit_full_designation,
+				destination_block_id: data.wires[0].b_block_id,
+				destination_circuit_id: data.wires[0].b_circuit_id
 			};
 		},
 
@@ -92,7 +94,8 @@ define([
 		events: {
 			'input' : 'highlight_change',
 			'change' : 'jumper_change',
-			'keypress' : 'reset_on_escape_key'
+			'keypress' : 'reset_on_escape_key',
+			'dblclick' : 'handle_double_click'
 		},
 
 		initialize: function(attributes) {
@@ -232,6 +235,22 @@ define([
 			console.log("jumper model synced");
 			this.$el.removeClass('change_pending');
 			this.$el.effect("highlight", highlight.green, highlight.duration);
+		},
+
+		handle_double_click: function(e) {
+
+			console.log("double-click:", e);
+			console.log(this.model.attributes);
+
+			if(this.model.get("destination_block_id") == this.model.circuit.get("block_id")) {
+				console.log("Jumper destination is on same block, so not reloading");
+				return;
+			}
+
+			window.location.href = (
+				"/block/" + this.model.get("destination_block_id") +
+			        "#jumper_id=" + this.model.id
+			);
 		}
 
 	});
