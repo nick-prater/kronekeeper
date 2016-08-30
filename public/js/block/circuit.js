@@ -259,13 +259,13 @@ define([
 
 		events: {
 			'click a.add_jumper'              : 'add_jumper',
-			'input .circuit_name input'       : function(e) {this.highlight_change(e, 'name')},
+			'input .name input'               : function(e) {this.highlight_change(e, 'name')},
 			'input .cable_reference input'    : function(e) {this.highlight_change(e, 'cable_reference')},
 			'input .connection input'         : function(e) {this.highlight_change(e, 'connection')},
-			'keypress .circuit_name input'    : function(e) {this.handle_keypress(e, 'name')},
+			'keypress .name input'            : function(e) {this.handle_keypress(e, 'name')},
 			'keypress .cable_reference input' : function(e) {this.handle_keypress(e, 'cable_reference')},
 			'keypress .connection input'      : function(e) {this.handle_keypress(e, 'connection')},
-			'change .circuit_name input'      : function(e) {this.save_data({name: e.target.value})},
+			'change .name input'              : function(e) {this.save_data({name: e.target.value})},
 			'change .cable_reference input'   : function(e) {this.save_data({cable_reference: e.target.value})},
 			'change .connection input'        : function(e) {this.save_data({connection: e.target.value})}
 		},
@@ -446,8 +446,8 @@ define([
 			 * successful save.
 			 */
 			if('name' in data) {
-				this.$el.find(".circuit_name input").val(model.get("name"));
-				highlight.element_change_applied(this.$el, "td.circuit_name");
+				this.$el.find(".name input").val(model.get("name"));
+				highlight.element_change_applied(this.$el, "td.name");
 			}
 			if('cable_reference' in data) {
 				this.$el.find(".cable_reference input").val(model.get("cable_reference"));

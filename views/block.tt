@@ -33,7 +33,7 @@
 <!-- Templates for dynamic content -->
 <script type="text/template" id="row_template">
 				<th class="circuit_designation"><%- designation %></th>
-				<td class="circuit_name"><input type="text" value="<%- name %>" /></td>
+				<td class="name"><input type="text" value="<%- name %>" /></td>
 				<td class="cable_reference"><input type="text" value="<%- cable_reference %>" /></td>
 				<td class="connection"><input type="text" value="<%- connection %>" /></td>
 				<td class="jumper"></td>
