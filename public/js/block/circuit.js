@@ -448,18 +448,11 @@ define([
 			/* Clear field highlighting, update value and flash green to indicate 
 			 * successful save.
 			 */
-			if('name' in data) {
-				this.$el.find(".name input").val(model.get("name"));
-				highlight.element_change_applied(this.$el, "td.name");
-			}
-			if('cable_reference' in data) {
-				this.$el.find(".cable_reference input").val(model.get("cable_reference"));
-				highlight.element_change_applied(this.$el, "td.cable_reference");
-			}
-			if('connection' in data) {
-				this.$el.find(".connection input").val(model.get("connection"));
-				highlight.element_change_applied(this.$el, "td.connection");
-			}
+			var element = this.$el;
+			$.each(data, function(index, value) {
+				element.find("." + index + " input").val(model.get(index));
+				highlight.element_change_applied(element, ("td." + index));
+			});
 		},
 
 		provision_jumper_fields: function(required_count) {
