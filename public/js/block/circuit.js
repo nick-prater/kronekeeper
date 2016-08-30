@@ -374,9 +374,22 @@ define([
 		},
 
 		handle_keypress: function(e, attribute_name) {
-			if(e.keyCode == 27) {
-				e.target.value = this.model.get(attribute_name);
-				e.target.parentNode.classList.remove('change_pending');
+
+			var row_selector = "td." + attribute_name;
+			switch(e.keyCode) {
+
+				case 27:
+					e.target.value = this.model.get(attribute_name);
+					e.target.parentNode.classList.remove('change_pending');
+					break;
+
+				case 38:
+					$(e.target).closest("tr").prev().find(row_selector).find("input").focus();
+					break;
+
+				case 40:
+					$(e.target).closest("tr").next().find(row_selector).find("input").focus();
+					break;
 			}
 		},
 
