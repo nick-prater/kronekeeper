@@ -284,10 +284,12 @@ define([
 
 		handle_double_click: function(e) {
 			/* Load and highlight the other end of the double-clicked jumper. */
-			window.location.href = (
-				"/block/" + this.model.get("destination_block_id") +
-			        "#jumper_id=" + this.model.id
-			);
+			if(this.model.id) {
+				window.location.href = (
+					"/block/" + this.model.get("destination_block_id") +
+				        "#jumper_id=" + this.model.id
+				);
+			}
 		},
 
 		handle_hash_change: function(e) {
