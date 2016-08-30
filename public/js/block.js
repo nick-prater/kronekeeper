@@ -67,6 +67,7 @@ require([
 	});
 
 
+
 	var caption_view = new caption.view({
 		model: new caption.model(window.block_info)
 	});
@@ -74,7 +75,8 @@ require([
 	var block_view = new Block_View({collection: circuit_list});
 	block_view.render();
 
-
+	/* Trigger any highlighting determined by document fragment */
+	$(window).trigger("hashchange");
 
 	/****************************************************************************************
 	 * This code shows how to dynamically load data for a given block. The initial

@@ -95,7 +95,8 @@ define([
 			'input' : 'highlight_change',
 			'change' : 'jumper_change',
 			'keypress' : 'reset_on_escape_key',
-			'dblclick' : 'handle_double_click'
+			'dblclick' : 'handle_double_click',
+			'hashchange' : 'handle_hash_change'
 		},
 
 		initialize: function(attributes) {
@@ -109,6 +110,11 @@ define([
 				'sync',
 				this.model_synced
 			);
+
+			var view = this;
+			$(window).on("hashchange", function(e) {
+				view.handle_hash_change(e);
+			});
 		},
 	
 		render: function() {
@@ -238,21 +244,18 @@ define([
 		},
 
 		handle_double_click: function(e) {
-
-			console.log("double-click:", e);
-			console.log(this.model.attributes);
-
-			if(this.model.get("destination_block_id") == this.model.circuit.get("block_id")) {
-				console.log("Jumper destination is on same block, so not reloading");
-				return;
-			}
-
+			/* Load and highlight the other end of the double-clicked jumper. */
 			window.location.href = (
 				"/block/" + this.model.get("destination_block_id") +
 			        "#jumper_id=" + this.model.id
 			);
-		}
+		},
 
+		handle_hash_change: function(e) {
+			if(window.location.hash == ("#jumper_id=" + this.model.id)) {
+				this.$el.effect("highlight", {}, highlight.duration * 2);
+			}
+		}
 	});
 
 
