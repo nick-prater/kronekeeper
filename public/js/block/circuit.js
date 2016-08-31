@@ -262,9 +262,9 @@ define([
 			'input .name input'               : function(e) {this.highlight_change(e, 'name')},
 			'input .cable_reference input'    : function(e) {this.highlight_change(e, 'cable_reference')},
 			'input .connection input'         : function(e) {this.highlight_change(e, 'connection')},
-			'keypress .name input'            : function(e) {this.handle_keypress(e, 'name')},
-			'keypress .cable_reference input' : function(e) {this.handle_keypress(e, 'cable_reference')},
-			'keypress .connection input'      : function(e) {this.handle_keypress(e, 'connection')},
+			'keydown .name input'             : function(e) {this.handle_keydown(e, 'name')},
+			'keydown .cable_reference input'  : function(e) {this.handle_keydown(e, 'cable_reference')},
+			'keydown .connection input'       : function(e) {this.handle_keydown(e, 'connection')},
 			'change .name input'              : function(e) {this.save_data({name: e.target.value})},
 			'change .cable_reference input'   : function(e) {this.save_data({cable_reference: e.target.value})},
 			'change .connection input'        : function(e) {this.save_data({connection: e.target.value})}
@@ -373,7 +373,7 @@ define([
 			this.render_jumpers();
 		},
 
-		handle_keypress: function(e, attribute_name) {
+		handle_keydown: function(e, attribute_name) {
 
 			var row_selector = "td." + attribute_name;
 			switch(e.keyCode) {

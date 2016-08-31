@@ -34,7 +34,7 @@ define([
 	function initialise(args) {
 		element = args.element;
 		$element = $(args.element);
-		$(document).on("keypress", handle_keypress);
+		$(document).on("keydown", handle_keydown);
 	}
 
 	function enable_selection() {
@@ -43,11 +43,11 @@ define([
 	}
 
 	function close() {
-		$(document).off("keypress");
+		$(document).off("keydown");
 	}
 
 
-	function handle_keypress(e) {
+	function handle_keydown(e) {
 
 		/* Only process keypress if dialog is open */
 		if(!$element.dialog("isOpen")) {

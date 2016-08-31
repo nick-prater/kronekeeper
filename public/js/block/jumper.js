@@ -94,7 +94,7 @@ define([
 		events: {
 			'input' : 'highlight_change',
 			'change' : 'jumper_change',
-			'keypress' : 'handle_keypress',
+			'keydown' : 'handle_keydown',
 			'dblclick' : 'handle_double_click',
 			'hashchange' : 'handle_hash_change'
 		},
@@ -123,7 +123,7 @@ define([
 			$(window).on("click", function(e) {
 				view.remove_highlighting(e);
 			});
-			$(window).on("keypress", function(e) {
+			$(window).on("keydown", function(e) {
 				view.remove_highlighting(e);
 			});
 		},
@@ -144,7 +144,7 @@ define([
 			}
 		},
 
-		handle_keypress: function(e) {
+		handle_keydown: function(e) {
 
 			switch(e.keyCode) {
 
