@@ -404,11 +404,13 @@ div.credits.container {
 	margin: 5px;
 }
 
-.choose_jumper_type .option_group div:hover.option_item {
+.choose_jumper_type .option_group div:hover.option_item,
+.choose_jumper_type .option_group div.selected.option_item {
 	background: #999;
 }
 
-.choose_jumper_type .option_group div:hover.option_item table {
+.choose_jumper_type .option_group div:hover.option_item table,
+.choose_jumper_type .option_group div.selected.option_item table {
 	border: 1px solid black;
 }
 

@@ -21,10 +21,12 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 define([
+	'block/dialog_hotkeys',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
+	hotkeys
 ) {
         'use strict';
 
@@ -49,6 +51,7 @@ define([
 		modal: true,
 		buttons: [cancel_button],
 		close: function(event) {
+			hotkeys.close();
 			if(close_success_flag) {
 				console.log("close dialog - success");
 				close_success_flag = false;
@@ -67,6 +70,9 @@ define([
 		console.log("display()");
 		cancel_action = args.cancel_action;
 		success_action = args.success_action;
+		hotkeys.initialise({
+			element: "#jumper_connection_dialog"
+		});
 
 		/* Reset buttons to initial state */
 		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button]);
@@ -131,6 +137,7 @@ define([
 
 		/* Set buttons - as a side-effect this re-centres the dialog */
 		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button]);
+		hotkeys.enable_selection();
 
 		/* Set up events on dynamically loaded content */
 		$("#simple_jumper_button").on("click", handle_simple_jumper_click);
@@ -181,6 +188,7 @@ define([
 
 		/* Set buttons - as a side-effect this re-centres the dialog */
 		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button]);
+		hotkeys.enable_selection();
 
 		/* Set up events on dynamically loaded content */
 		$(".choose_jumper_template .option_group div.option_item").on("click", handle_jumper_template_click);
@@ -308,6 +316,7 @@ define([
 
 
 	console.log("jumper_select module loaded");
+
 
 	/* Export public methods */
 	return {
