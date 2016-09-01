@@ -438,7 +438,7 @@ define([
 			 */
 
 			var data = (response.changes ? response.changes
-			                             : model.changedAttributes
+			                             : model.changedAttributes()
 			);
 
 			console.log("model synced id:", model.id);
