@@ -147,6 +147,8 @@ define([
 			jumper_id: this_view.model.id,
 			destination_circuit_id: sessionStorage.jumpering_from_circuit_id
 		});
+		sessionStorage.removeItem("jumpering_from_circuit_id");
+		sessionStorage.removeItem("jumpering_from_frame_id");
 	}
 
 
