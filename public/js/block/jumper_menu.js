@@ -55,12 +55,14 @@ define([
 
 		/* Clicking outside the menu closes it */
 		$(document).on("click", hide_menu);
+		$(document).on("keypress", hide_menu);
 	}
 
 
 	function hide_menu() {
 		$el.hide();
 		$(document).off("click");
+		$(document).off("keypress");
 	}
 
 
