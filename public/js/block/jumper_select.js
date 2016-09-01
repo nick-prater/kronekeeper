@@ -36,6 +36,7 @@ define([
 	var cancel_action;
 	var success_action;
 	var close_success_flag;
+	var jumper_data;
 
 	/* Initialise dialog */
 	var cancel_button = {
@@ -158,44 +159,15 @@ define([
 	function handle_simple_jumper_click(event) {
 
 		/* Load jumper selection */
-		console.log("simple jumper selected");
-
-		/* Reset buttons and show 'loading' message */
-		$("#jumper_connection_dialog").html($("#loading_message_template").html());
-		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button]);
-
-		var request_data = {
-			wire_count: window.jumper_state.a_pins.length,
-			a_designation: window.jumper_state.a_circuit.full_designation,
-			b_designation: window.jumper_state.b_circuit.full_designation,
-		};
-
-		console.log("displaying jumper wire choices for:", request_data);
-
-		$("#jumper_connection_dialog").load(
-			'/jumper/wire_choice',
-			request_data,
-			function(response, status, xhr) {
-				if(status=="success") {
-					console.log("loaded wire choices OK");
-					handle_wire_choice_load_success();
-				}
-				else {
-					var error_code = xhr.status + " " + xhr.statusText;
-					display_load_error(error_code);
-				}
-			}
-		);
-	}
-
-
-	function handle_wire_choice_load_success() {
+		console.log("simple jumper selected, showing wire choices");
+		$("#choose_jumper_type_div").hide();
+		$("#choose_jumper_template_div").show();
 
 		/* Set buttons - as a side-effect this re-centres the dialog */
 		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button]);
 		hotkeys.enable_selection();
 
-		/* Set up events on dynamically loaded content */
+		/* Set up events on jumper options */
 		$(".choose_jumper_template .option_group div.option_item").on("click", handle_jumper_template_click);
 	}
 
@@ -270,41 +242,71 @@ define([
 			}
 		});
 
-		var data = {
+		jumper_data = {
+			jumper_type: 'custom',
 			a_circuit_id: window.jumper_state.a_circuit.id, 
 			b_circuit_id: window.jumper_state.b_circuit.id,
 			replacing_jumper_id: window.jumper_state.replacing_jumper_id,
 			connections: connections
 		};
-		
-		add_jumper("/api/jumper/add_custom_jumper", data);
+		add_jumper();
 	}
 
 
 	function handle_jumper_template_click(event) {
 		console.log("jumper_template_click");
-		$("#jumper_connection_dialog").html($("#creating_jumper_message_template").html());
-		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button]);
 
-		var data = {
+		jumper_data = {
+			jumper_type: 'simple',
 			a_circuit_id: window.jumper_state.a_circuit.id, 
 			b_circuit_id: window.jumper_state.b_circuit.id,
 			jumper_template_id: event.currentTarget.getAttribute("data-jumper_template_id"),
 			replacing_jumper_id: window.jumper_state.replacing_jumper_id
 		};
-
-		add_jumper("/api/jumper/add_simple_jumper", data);
+		add_jumper();
 	}
 
 
-	function add_jumper(url, data) {
-		
-		console.log("adding jumper: ", data);
+	function add_jumper() {
+	
+		/* Takes data from global jumper_data variable */
+
+		/* All circuits linked by a jumper take on the same name. If
+		 * we are adding a jumper and the existing circuit names conflict,
+		 * we need to pick one or the other to use for both ends of the
+		 * jumper.
+		 */
+		if(
+			window.jumper_state.a_circuit.name &&
+			window.jumper_state.b_circuit.name &&
+			window.jumper_state.a_circuit.name != window.jumper_state.b_circuit.name
+		) {
+			pick_circuit_name();
+			return false; /* Cannot proceed until conflict is resolved */
+		}
+		else {
+			/* Use the name from whichever circuit has one or fallback to empty string */
+			jumper_data.circuit_name = (
+				window.jumper_state.a_circuit.name ||
+				window.jumper_state.b_circuit.name ||
+				""
+			);
+		}
+
+		$("#jumper_connection_dialog").html($("#creating_jumper_message_template").html());
+		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button]);
+
+		var url = (
+			jumper_data.jumper_type == 'simple' ? '/api/jumper/add_simple_jumper'
+			                                    : '/api/jumper/add_custom_jumper'
+		);
+
+		console.log("adding jumper: ", jumper_data);
 		$.ajax({
 			url: url,
 			type: "POST",
 			contentType: 'application/json; charset=utf-8',
-			data: JSON.stringify(data),
+			data: JSON.stringify(jumper_data),
 			dataType: "json",
 			success: function(json) {
 				console.log("updated jumper OK");
@@ -318,6 +320,31 @@ define([
 			}
 		});
 	}
+
+
+	function pick_circuit_name() {
+		$("#choose_jumper_template_div").hide();
+		$("#choose_jumper_connections_div").hide();
+		$("#choose_circuit_name_div").show();
+		$("#jumper_connection_dialog").dialog("option",	"buttons", [cancel_button]);
+		$(".choose_circuit_name .option_group div.option_item").on("click", handle_circuit_name_click);
+		hotkeys.enable_selection();
+	}
+
+
+	function handle_circuit_name_click(e) {
+
+		var source = e.currentTarget.getAttribute("data-name_source");
+		if(source == 'from') {
+			window.jumper_state.b_circuit.name = window.jumper_state.a_circuit.name;
+		}
+		else {
+			window.jumper_state.a_circuit.name = window.jumper_state.b_circuit.name;
+		}
+
+		add_jumper();
+	}
+
 
 
 	console.log("jumper_select module loaded");

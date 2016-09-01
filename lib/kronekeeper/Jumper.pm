@@ -162,6 +162,9 @@ prefix '/jumper' => sub {
 			$offer_simple_jumper = 0;
 		}
 
+		# Send suitable jumper templates, but only needed for simple jumpers
+		my $jumper_templates = $offer_simple_jumper ? get_jumper_templates($max_pin_count) : [];
+
 		template(
 			'jumper/choose_connection',
 			{
@@ -173,38 +176,11 @@ prefix '/jumper' => sub {
 				replacing_jumper_id => param("replacing_jumper_id"),
 				colours => get_colours(),
 				offer_simple_jumper => $offer_simple_jumper,
+				jumper_templates => $jumper_templates
 			},
 			{ layout => undef }
 		);
 	};
-
-
-	post '/wire_choice' => require_login sub {
-
-		debug("wire_choice");
-		debug( request->body);
-
-		# Use the specified wire_count to determine which jumper
-		# templates to present.
-		my $wire_count = param("wire_count");
-		$wire_count && $wire_count =~ m/^\d+$/ or do {
-			error "wire_count is missing or not an integer";
-			send_error('wire_count parameter is missing or not an integer.' => 400);
-		};
-
-		my $jumper_templates = get_jumper_templates($wire_count);
-
-		template(
-			'jumper/choose_wire',
-			{
-				jumper_templates => $jumper_templates,
-				a_designation => param("a_designation"),
-				b_designation => param("b_designation"),
-			},
-			{ layout => undef }
-		);
-	}
-
 };
 
 

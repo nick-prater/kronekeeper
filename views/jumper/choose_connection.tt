@@ -91,6 +91,66 @@
 </div>
 
 
+<!-- Step 2 if the Simple Jumper option is selected -->
+<div
+	class="choose_jumper_type choose_jumper_template"
+	id="choose_jumper_template_div"
+	hidden="hidden"
+>
+
+	<h2>Jumpering <span class="designation">[% a_circuit.full_designation | html %]</span>
+	    &rarr; <span class="designation">[% b_circuit.full_designation | html %]</span>
+	</h2>
+
+	<div class="option_group">
+	    [% FOREACH template IN jumper_templates %]
+		<div class="option_item" data-jumper_template_id="[% template.id %]">
+			<h1>[%- template.name | html %]</h1>
+			<table class="wire_colours">
+				<tr>
+				    [% FOREACH wire in template.wires %]
+					<td style="background: [%- wire.html_colour %]">
+						<span class="legend" style="color: [% wire.contrasting_html_colour %]">[%- wire.colour_name | html %]</span>
+					</td>
+				    [% END %]
+				</tr>
+			</table>
+		</div>
+	    [% END %]
+	</div>
+
+	<div class="message">Select jumper wire</div>
+</div>
+
+
+<!-- Step 3 - Needed only if there's a circuit name conflict -->
+<div
+	class="choose_jumper_type choose_circuit_name"
+	id="choose_circuit_name_div"
+	hidden="hidden"
+>
+
+	<h2>Jumpering <span class="designation">[% a_circuit.full_designation | html %]</span>
+	    &rarr; <span class="designation">[% b_circuit.full_designation | html %]</span>
+	</h2>
+
+	<div class="option_group">
+		<div class="option_item" data-name_source="from">
+			<h1>[%- a_circuit.name | html %]</h1>
+		</div>
+		<div class="option_item" data-name_source="to">
+			<h1>[%- b_circuit.name | html %]</h1>
+		</div>
+	</div>
+
+	<div class="message">Choose circuit name</div>
+</div>
+
+
+
+
+
+
 <!-- Global state variables -->
 <script type="text/javascript">
 window.jumper_state = {
