@@ -71,11 +71,13 @@ define([
 			this_view.model.id
 		);
 		enable_menu_action_if_true(
+			"jumper_to_here",
+			sessionStorage.jumpering_from_circuit_id && sessionStorage.jumpering_from_circuit_id != this_view.model.id
+		);
+		enable_menu_action_if_true(
 			"show_destination",
 			this_view.model.id
 		);
-
-
 	}
 
 
@@ -97,24 +99,36 @@ define([
 
 		e.stopPropagation();
 		console.log(e.currentTarget.dataset.action, "action clicked");
+		hide_menu();
 
 		switch(e.currentTarget.dataset.action) {
 
 			case "clear" :
-				hide_menu();
 				this_view.jumper_remove();
 				break;
 			case "jumper_from_here" :
-				$("#block_menu").menu().hide();
+				jumper_from_here();
 				break;
 			case "jumper_to_here" :
-				$("#block_menu").menu().hide();
+				jumper_to_here();
 				break;
 			case "show_destination" :
-				hide_menu();
 				this_view.trigger("show_destination");
 				break;
 		}
+	}
+
+
+	function jumper_from_here() {
+		console.log("setting jumper source to:", this_view.model.circuit.id);
+		sessionStorage.jumpering_from_circuit_id = this_view.model.circuit.id;
+	}
+
+
+	function jumper_to_here() {
+
+
+
 	}
 
 

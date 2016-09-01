@@ -99,7 +99,7 @@ define([
 			'keydown' : 'handle_keydown',
 			'dblclick' : 'show_destination',
 			'hashchange' : 'handle_hash_change',
-			'click' : 'handle_show_menu'
+			'click .menu_button' : 'handle_show_menu'
 		},
 
 		initialize: function(attributes) {
@@ -238,21 +238,21 @@ define([
 
 				function propagate_circuit_changes(wires) {
 
-						/* Build list of changed circuits, so we only trigger one event for each */
-						var changed_circuits = [];
-						wires.forEach(function(wire) {
+					/* Build list of changed circuits, so we only trigger one event for each */
+					var changed_circuits = [];
+					wires.forEach(function(wire) {
 
-							/* Don't trigger an event on ourselves */
-							if(wire.b_circuit_id != wire.a_circuit_id) {
-								changed_circuits[wire.b_circuit_id] = true;
-							}
-						});
+						/* Don't trigger an event on ourselves */
+						if(wire.b_circuit_id != wire.a_circuit_id) {
+							changed_circuits[wire.b_circuit_id] = true;
+						}
+					});
 
-						/* Trigger an event for each affected circuit, so they can reload their jumper models */
-						changed_circuits.forEach(function(changed, circuit_id) {
-							console.log("propagating jumper change for circuit_id ", circuit_id);
-							jumper_view.model.circuit.collection.trigger("circuit_jumper_change",circuit_id);
-						});
+					/* Trigger an event for each affected circuit, so they can reload their jumper models */
+					changed_circuits.forEach(function(changed, circuit_id) {
+						console.log("propagating jumper change for circuit_id ", circuit_id);
+						jumper_view.model.circuit.collection.trigger("circuit_jumper_change",circuit_id);
+					});
 				}
 			}
 		},
@@ -314,7 +314,6 @@ define([
 		},
 
 		remove_highlighting: function(e) {
-			console.log("remove_highlighting()");
 			this.$el.removeClass("highlight");
 			if(window.location.hash == ("#jumper_id=" + this.model.id)) {
 				window.location.hash = "";
