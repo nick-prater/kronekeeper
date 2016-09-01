@@ -92,6 +92,7 @@ BEGIN
 	SELECT json_agg(v) FROM (
 		SELECT
 			block.id AS block_id,
+			vertical.frame_id AS frame_id,
 			circuit.id AS circuit_id,
 			circuit.designation,
 			circuit.name,
@@ -115,6 +116,7 @@ BEGIN
 			) AS jumpers
 		FROM block
 		JOIN circuit ON (circuit.block_id = block.id)
+		JOIN vertical ON (block.vertical_id = vertical.id)
 		WHERE block.id = p_block_id
 		ORDER BY block_id ASC, block.position ASC, circuit.position ASC
 	) AS v;
