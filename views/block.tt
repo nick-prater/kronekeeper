@@ -24,6 +24,14 @@
 
 </div>
 
+<!-- Menus -->	
+<ul class="context_menu" id="jumper_menu">
+	<li data-action="clear"><div>Clear</div></li>
+	<li data-action="jumper_from_here"><div>Jumper From Here</div></li>
+	<li data-action="jumper_to_here"><div>Jumper To Here</div></li>
+	<li data-action="show_destination"><div>Show Destination</div></li>
+</ul>
+
 
 <!-- Dialogs hidden on page load -->
 <div id="jumper_connection_dialog" title="Jumper connection" class="dialog">
@@ -46,20 +54,25 @@
 </script>
 
 <script type="text/template" id="active_jumper_cell_template">
-<input type="text" value="<%- designation %>" />
-  <div class="wires">
-  <% wires.forEach(function(wire) { %>
-	<div class="wire" style="background: <%- wire.html_colour %>; color: <%- wire.contrasting_html_colour %>;">
-	    <% if(is_simple_jumper) { %>
-		&nbsp;
-	    <% } else { %>
-		<%- wire.a_pin_designation %>
-		&rarr;
-		<%- wire.b_pin_designation %>
-	    <% } %>
+<div class="container">
+	<input type="text" value="<%- designation %>" />
+	  <div class="wires">
+	  <% wires.forEach(function(wire) { %>
+		<div class="wire" style="background: <%- wire.html_colour %>; color: <%- wire.contrasting_html_colour %>;">
+		    <% if(is_simple_jumper) { %>
+			&nbsp;
+		    <% } else { %>
+			<%- wire.a_pin_designation %>
+			&rarr;
+			<%- wire.b_pin_designation %>
+		    <% } %>
+		</div>
+	  <% }) %>
+	  </div>
+	<div class="menu_button">
+		<a class="jumper_menu_button" title="menu" href="javascript:void(0)" tabindex="-1">&#9776;</a>
 	</div>
-  <% }) %>
-  </div>
+</div>
 </script>
 
 <script type="text/template" id="loading_message_template">

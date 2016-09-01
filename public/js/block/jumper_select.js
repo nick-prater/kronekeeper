@@ -83,9 +83,14 @@ define([
 
 		var request_data = {
 			a_circuit_id: args.circuit_id,
-			b_designation: args.destination_designation,
 			replacing_jumper_id: args.jumper_id
 		};
+		if(args.destination_designation) {
+			request_data.b_designation = args.destination_designation;
+		}
+		else if(args.destination_circuit_id) {
+			request_data.b_circuit_id = args.destination_circuit_id;
+		}
 
 		console.log("displaying jumper connection choices for:", request_data);
 

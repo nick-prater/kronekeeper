@@ -64,25 +64,47 @@ prefix '/jumper' => sub {
 		# a_circuit_id is the starting point for this jumper - required parameter
 		validate_parameter("circuit_id", param("a_circuit_id"), "a_circuit_id");
 		my $a_circuit_info = circuit_info(param("a_circuit_id"));
-		
-		# b_designation is the human readable destination circuit - required parameter
-		unless(defined param("b_designation")) {
-			send_error('Missing b_designation parameter.' => 400);
+
+		# either b_designation or b_circuit_id must be supplied, but not both
+		# b_designation is the human readable destination circuit
+		if(defined param("b_designation") && defined param("b_circuit_id")) {
+			send_error('Both b_designation and b_circuit_id parameters are supplied - can only use on or the other.' => 400);
 		}
-		my $b_circuit_info = circuit_info_from_designation(
-			param("b_designation"),
-			$a_circuit_info->{frame_id},
-		) or do {
-			error('b_designation parameter is not a valid circuit on this frame');
-			return template(
-				'jumper/invalid',
-				{
-					error_code => 'INVALID_CIRCUIT',
-					b_designation => prettify_designation(param("b_designation")),
-				},
-				{ layout => undef }
-			);
-		};
+		unless(defined param("b_designation") || defined param("b_circuit_id")) {
+			send_error('Both b_designation and b_circuit_id parameters are missing - must supply one.' => 400);
+		}
+
+		my $b_circuit_info;
+		if(defined param("b_designation")) {
+			$b_circuit_info = circuit_info_from_designation(
+				param("b_designation"),
+				$a_circuit_info->{frame_id},
+			) or do {
+				error('b_designation parameter is not a valid circuit on this frame');
+				return template(
+					'jumper/invalid',
+					{
+						error_code => 'INVALID_CIRCUIT',
+						b_designation => prettify_designation(param("b_designation")),
+					},
+					{ layout => undef }
+				);
+			};
+		}
+		else {
+			$b_circuit_info = circuit_info(param("b_circuit_id"));
+			unless($b_circuit_info && $b_circuit_info->{frame_id} == $a_circuit_info->{frame_id}) {
+				error('b_circuit_id parameter is not a valid circuit on this frame');
+					return template(
+						'jumper/invalid',
+						{
+							error_code => 'INVALID_CIRCUIT',
+							b_designation => prettify_designation(param("b_designation")),
+						},
+						{ layout => undef }
+					);
+			}
+		}
 
 		debug("considering jumper linking circuit_id $a_circuit_info->{id} -> $b_circuit_info->{id}");
 		my $connections = get_connection_count(
