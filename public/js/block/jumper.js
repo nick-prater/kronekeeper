@@ -118,6 +118,11 @@ define([
 				'show_destination',
 				this.show_destination
 			);
+			this.listenTo(
+				this,
+				'add_jumper',
+				this.jumper_add
+			);
 
 			/* Bind to window events to handle highlighting. If
 			 * this view is ever destroyed, we need to take care to
@@ -201,59 +206,67 @@ define([
 			}
 			else {
 				console.log("jumper changed");
-				var jumper_view = this;
-				jumper_select.display({
+				this.trigger("add_jumper", {
 					circuit_id: this.model.circuit.id,
 					jumper_id: this.model.id,
-					destination_designation: e.target.value,
-					cancel_action: function() {
-						console.log("cancel action");
-						e.target.value = jumper_view.model.get("designation");
-						jumper_view.el.classList.remove('change_pending');
-						jumper_view.$el.effect("highlight", {}, highlight.duration);
-					},
-					success_action: function(data) {
-						console.log("success action: ", data);
+					destination_designation: e.target.value
+				});
+			}
+		},
 
-						if(data.deleted_jumper_id) {
-							/* Propagate deletion to other jumpers displayed on this block */
-							jumper_view.model.circuit.collection.trigger("jumper_deleted", data.deleted_jumper_id);
-						}
+		jumper_add: function(request_data) {
 
-						/* Update our own model and re-render */
-						jumper_view.model.set(
-							jumper_view.model.parse({
-								data: data.jumper_info
-							})
-						);
+			console.log("jumper_add:", request_data);
 
-						jumper_view.el.classList.remove('change_pending');
-						jumper_view.render();
-						jumper_view.$el.effect("highlight", highlight.green, highlight.duration);
+			var jumper_view = this;
+			request_data.cancel_action = function() {
+				console.log("cancel action");
+				jumper_view.$el.find("input").val(jumper_view.model.get("designation"));
+				jumper_view.el.classList.remove('change_pending');
+				jumper_view.$el.effect("highlight", {}, highlight.duration);
+			};
+			request_data.success_action = function(data) {
+				console.log("success action: ", data);
 
-						/* Trigger update and re-render for other affected circuits */
-						propagate_circuit_changes(data.jumper_info.wires);
+				if(data.deleted_jumper_id) {
+					/* Propagate deletion to other jumpers displayed on this block */
+					jumper_view.model.circuit.collection.trigger("jumper_deleted", data.deleted_jumper_id);
+				}
+
+				/* Update our own model and re-render */
+				jumper_view.model.set(
+					jumper_view.model.parse({
+						data: data.jumper_info
+					})
+				);
+
+				jumper_view.el.classList.remove('change_pending');
+				jumper_view.render();
+				jumper_view.$el.effect("highlight", highlight.green, highlight.duration);
+
+				/* Trigger update and re-render for other affected circuits */
+				propagate_circuit_changes(data.jumper_info.wires);
+			}
+
+			jumper_select.display(request_data);
+
+			function propagate_circuit_changes(wires) {
+
+				/* Build list of changed circuits, so we only trigger one event for each */
+				var changed_circuits = [];
+				wires.forEach(function(wire) {
+
+					/* Don't trigger an event on ourselves */
+					if(wire.b_circuit_id != wire.a_circuit_id) {
+						changed_circuits[wire.b_circuit_id] = true;
 					}
 				});
 
-				function propagate_circuit_changes(wires) {
-
-					/* Build list of changed circuits, so we only trigger one event for each */
-					var changed_circuits = [];
-					wires.forEach(function(wire) {
-
-						/* Don't trigger an event on ourselves */
-						if(wire.b_circuit_id != wire.a_circuit_id) {
-							changed_circuits[wire.b_circuit_id] = true;
-						}
-					});
-
-					/* Trigger an event for each affected circuit, so they can reload their jumper models */
-					changed_circuits.forEach(function(changed, circuit_id) {
-						console.log("propagating jumper change for circuit_id ", circuit_id);
-						jumper_view.model.circuit.collection.trigger("circuit_jumper_change",circuit_id);
-					});
-				}
+				/* Trigger an event for each affected circuit, so they can reload their jumper models */
+				changed_circuits.forEach(function(changed, circuit_id) {
+					console.log("propagating jumper change for circuit_id ", circuit_id);
+					jumper_view.model.circuit.collection.trigger("circuit_jumper_change",circuit_id);
+				});
 			}
 		},
 
