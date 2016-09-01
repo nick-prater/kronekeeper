@@ -72,11 +72,24 @@ define([
 		);
 		enable_menu_action_if_true(
 			"jumper_to_here",
-			sessionStorage.jumpering_from_circuit_id && sessionStorage.jumpering_from_circuit_id != this_view.model.id
+			valid_jumper_destination()
 		);
 		enable_menu_action_if_true(
 			"show_destination",
 			this_view.model.id
+		);
+	}
+
+	function valid_jumper_destination() {
+
+		/* Returns true if this is valid as a "jumper to here" destination.
+		 * Note this only allows us to jumper within the same frame.
+		 */
+		return (
+			sessionStorage.jumpering_from_circuit_id &&
+			(sessionStorage.jumpering_from_circuit_id != this_view.model.circuit.id) &&
+			sessionStorage.jumpering_from_frame_id &&
+			(sessionStorage.jumpering_from_frame_id == this_view.model.circuit.get("frame_id"))
 		);
 	}
 
@@ -122,13 +135,16 @@ define([
 	function jumper_from_here() {
 		console.log("setting jumper source to:", this_view.model.circuit.id);
 		sessionStorage.jumpering_from_circuit_id = this_view.model.circuit.id;
+		sessionStorage.jumpering_from_frame_id = this_view.model.circuit.get("frame_id");
 	}
 
 
 	function jumper_to_here() {
-
-
-
+		this_view.trigger("add_jumper", {
+			circuit_id: this_view.model.circuit.id,
+			jumper_id: this_view.model.id,
+			destination_circuit_id: sessionStorage.jumpering_from_circuit_id
+		});
 	}
 
 
