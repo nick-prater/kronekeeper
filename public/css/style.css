@@ -76,6 +76,7 @@ a:hover {
 .container {
 	width: 90%;
 	margin: auto;
+	position: relative;
 }
 
 .content {
@@ -208,6 +209,12 @@ div.credits.container {
 	width: 100%;
 	height: 100%;
 }
+.block div.container {
+	width: 100%;
+	margin: 0px;
+}
+
+
 
 .frame .block div.label,
 .frame .block span.name {
@@ -245,13 +252,15 @@ div.credits.container {
 
 
 /* The menu button is overlaid in the top right corner */
-.frame .block div.menu_button {
+.frame .block div.menu_button,
+.block div.menu_button {
 	position: absolute;
 	top: 0px;
 	right: 0px;
 	text-align: right;
 }
-.frame .menu_button a {
+.frame .menu_button a,
+.block .menu_button a {
 	right: 0px;
 	border-radius: 1px;
 	background: #dddddd;
@@ -259,7 +268,12 @@ div.credits.container {
 	text-decoration: none;
 	color: black;
 }
-.frame .menu_button a:hover {
+.block .menu_button a {
+	font-size: 6pt;
+	background: inherit;
+}
+.frame .menu_button a:hover,
+.block .menu_button a:hover {
         color: white;
         background: #aaaaaa;
 	border-color: black;
@@ -304,6 +318,7 @@ div.credits.container {
 
 .block td.jumper {
 	width: 4em;
+	vertical-align: top;
 }
 
 .block td.jumper.inactive {
