@@ -21,12 +21,14 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 define([
 	'block/jumper_select',
+	'block/jumper_menu',
 	'block/highlight',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
 	jumper_select,
+	jumper_menu,
 	highlight
 ) {
         'use strict';
@@ -95,8 +97,9 @@ define([
 			'input' : 'highlight_change',
 			'change' : 'jumper_change',
 			'keydown' : 'handle_keydown',
-			'dblclick' : 'handle_double_click',
-			'hashchange' : 'handle_hash_change'
+			'dblclick' : 'show_destination',
+			'hashchange' : 'handle_hash_change',
+			'click' : 'handle_show_menu'
 		},
 
 		initialize: function(attributes) {
@@ -110,13 +113,17 @@ define([
 				'sync',
 				this.model_synced
 			);
-
-			var view = this;
+			this.listenTo(
+				this,
+				'show_destination',
+				this.show_destination
+			);
 
 			/* Bind to window events to handle highlighting. If
 			 * this view is ever destroyed, we need to take care to
 			 * unbind them
 			 */
+			var view = this;
 			$(window).on("hashchange", function(e) {
 				view.handle_hash_change(e);
 			});
@@ -164,6 +171,11 @@ define([
 					this.move_focus(e, "down");
 					break;
 			}
+		},
+
+		handle_show_menu(e) {
+			e.stopPropagation();
+			jumper_menu.show(this);
 		},
 
 		move_focus: function(e, direction) {
@@ -282,23 +294,27 @@ define([
 			this.$el.effect("highlight", highlight.green, highlight.duration);
 		},
 
-		handle_double_click: function(e) {
-			/* Load and highlight the other end of the double-clicked jumper. */
+		show_destination: function() {
+			/* Load and highlight ithe other end of the double-clicked jumper. */
+			console.log("show_destination");
 			if(this.model.id) {
 				window.location.href = (
 					"/block/" + this.model.get("destination_block_id") +
-				        "#jumper_id=" + this.model.id
+					"#jumper_id=" + this.model.id
 				);
+				console.log("current href is now:", window.location.href);
 			}
 		},
 
 		handle_hash_change: function(e) {
+			this.$el.removeClass("highlight");
 			if(window.location.hash == ("#jumper_id=" + this.model.id)) {
 				this.$el.addClass("highlight");
 			}
 		},
 
 		remove_highlighting: function(e) {
+			console.log("remove_highlighting()");
 			this.$el.removeClass("highlight");
 			if(window.location.hash == ("#jumper_id=" + this.model.id)) {
 				window.location.hash = "";

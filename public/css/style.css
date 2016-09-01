@@ -480,8 +480,8 @@ div.credits.container {
 }
 
 
-/* Set width of per-block context-menu in frame view */
-.frame .context_menu {
+/* Set width of per-block/per-jumper context-menu */
+.context_menu {
 	width: auto;
 	position: absolute;
 	display: none;
