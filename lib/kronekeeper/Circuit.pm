@@ -37,6 +37,8 @@ our @EXPORT_OK = qw(
 	circuit_pins
 	circuit_id_valid_for_account
 	circuit_info_from_designation
+	update_name_cascade
+	connected_circuits
 );
 
 my $al = kronekeeper::Activity_Log->new();
@@ -350,7 +352,7 @@ sub update_name_cascade {
 
 	# Update Activity Log
 	my $note = sprintf(
-		'circuit %s name changed to "%s" (was "%s")',
+		'circuit %s and connected circuits name changed to "%s" (was "%s")',
 		$info->{full_designation},
 		$name,
 		$info->{name} || '',

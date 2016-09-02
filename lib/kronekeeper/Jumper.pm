@@ -35,6 +35,8 @@ use kronekeeper::Circuit qw(
 	circuit_info_from_designation
 	circuit_pins
 	circuit_id_valid_for_account
+	update_name_cascade
+	connected_circuits
 );
 use List::Util qw(max);
 use Exporter qw(import);
@@ -243,11 +245,19 @@ prefix '/api/jumper' => sub {
 			send_error("failed to add jumper");
 		};
 
+		if($data->{circuit_name}) {
+			update_name_cascade(
+				circuit_info($data->{a_circuit_id}),
+				$data->{circuit_name},
+			);
+		}
+
 		database->commit;
 
 		return to_json {
 			jumper_info => get_jumper_info($new_jumper_id, $data->{a_circuit_id}),
 			deleted_jumper_id => $data->{"replacing_jumper_id"},
+			connected_circuits => connected_circuits($data->{a_circuit_id}),
 		};
 	};
 
@@ -300,13 +310,21 @@ prefix '/api/jumper' => sub {
 			function     => 'kronekeeper::Jumper::add_custom_jumper',
 			frame_id     => $connections[0]->{a_pin_info}->{frame_id},
 			note         => $note,
-		});
+		});	
+
+		if($data->{circuit_name}) {
+			update_name_cascade(
+				circuit_info($data->{a_circuit_id}),
+				$data->{circuit_name},
+			);
+		}
 
 		database->commit;
 
 		return to_json {
 			jumper_info => get_jumper_info($new_jumper_id, $data->{a_circuit_id}),
 			deleted_jumper_id => $data->{"replacing_jumper_id"},
+			connected_circuits => connected_circuits($data->{a_circuit_id}),
 		};
 	};
 
