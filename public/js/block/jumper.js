@@ -123,6 +123,12 @@ define([
 				'add_jumper',
 				this.jumper_add
 			);
+			this.listenTo(
+				this.model,
+				'change',
+				this.model_changed
+			);
+
 
 			/* Bind to window events to handle highlighting. If
 			 * this view is ever destroyed, we need to take care to
@@ -245,7 +251,6 @@ define([
 
 				jumper_view.el.classList.remove('change_pending');
 				jumper_view.render();
-				jumper_view.$el.effect("highlight", highlight.green, highlight.duration);
 
 				/* Trigger update and re-render for other affected circuits */
 				propagate_circuit_changes(data);
@@ -298,12 +303,18 @@ define([
 			}
 		},
 
-		model_synced: function(model, response, options) {
+		model_synced: function() {
 			/* Clear field highlighting and flash green to indicate successful save
 			 * Server returns the changed fields to confirm which have been updated
 			 */
-			console.log("jumper model synced");
+			console.log("jumper model synced:", this.model.circuit.id, this.model.id);
 			this.$el.removeClass('change_pending');
+			this.$el.effect("highlight", highlight.green, highlight.duration);
+		},
+
+		model_changed: function() {
+			/* Could we use this to trigger render instead of current convoluted system? */
+			console.log("jumper model changed:", this.model.circuit.id, this.model.id);
 			this.$el.effect("highlight", highlight.green, highlight.duration);
 		},
 
