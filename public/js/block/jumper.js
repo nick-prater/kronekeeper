@@ -149,10 +149,10 @@ define([
 
 		highlight_change: function(e) {
 			if(e.target.value != this.model.get("designation")) {
-				e.target.parentNode.classList.add('change_pending');
+				this.$el.addClass("change_pending");
 			}
 			else {
-				e.target.parentNode.classList.remove('change_pending');
+				this.$el.removeClass("change_pending");
 			}
 		},
 
@@ -162,8 +162,8 @@ define([
 
 				case 27:
 					// Escape - reset to original value
+					this.$el.removeClass("change_pending");
 					e.target.value = this.model.get("designation");
-					e.target.parentNode.classList.remove('change_pending');
 					break;
 
 				case 38:
@@ -245,28 +245,25 @@ define([
 				jumper_view.$el.effect("highlight", highlight.green, highlight.duration);
 
 				/* Trigger update and re-render for other affected circuits */
-				propagate_circuit_changes(data.jumper_info.wires);
+				propagate_circuit_changes(data);
 			}
 
 			jumper_select.display(request_data);
 
-			function propagate_circuit_changes(wires) {
-
-				/* Build list of changed circuits, so we only trigger one event for each */
-				var changed_circuits = [];
-				wires.forEach(function(wire) {
-
-					/* Don't trigger an event on ourselves */
-					if(wire.b_circuit_id != wire.a_circuit_id) {
-						changed_circuits[wire.b_circuit_id] = true;
-					}
-				});
+			function propagate_circuit_changes(data) {
 
 				/* Trigger an event for each affected circuit, so they can reload their jumper models */
-				changed_circuits.forEach(function(changed, circuit_id) {
+				data.connected_circuits.forEach(function(circuit_id) {
+
 					console.log("propagating jumper change for circuit_id ", circuit_id);
-					jumper_view.model.circuit.collection.trigger("circuit_jumper_change",circuit_id);
+					if(circuit_id != jumper_view.model.circuit.id) {
+						/* Don't need to update our own jumper */
+						jumper_view.model.circuit.collection.trigger("circuit_jumper_change", circuit_id);
+					}
+					jumper_view.model.circuit.collection.trigger("circuit_change", circuit_id);
 				});
+
+			
 			}
 		},
 
