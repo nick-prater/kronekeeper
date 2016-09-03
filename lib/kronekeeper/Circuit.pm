@@ -340,6 +340,11 @@ sub update_name_cascade {
 	my $info = shift;
 	my $name = shift;
 
+	my $changed_names = connected_circuit_different_names(
+		$info->{id},
+		$name,
+	);
+
 	my $q = database->prepare("SELECT update_circuit_name_cascade(?, ?)");
 
 	$q->execute(
@@ -351,20 +356,22 @@ sub update_name_cascade {
 	};
 
 	# Update Activity Log
-	my $note = sprintf(
-		'circuit %s and connected circuits name changed to "%s" (was "%s")',
-		$info->{full_designation},
-		$name,
-		$info->{name} || '',
-	);
+	foreach my $circuit(@{$changed_names}) {
+		my $note = sprintf(
+			'circuit %s name changed to "%s" (was "%s")',
+			$circuit->{full_designation},
+			$name,
+			$circuit->{name} || '',
+		);
 
-	$al->record({
-		function     => 'kronekeeper::Circuit::update_name_cascade',
-		frame_id     => $info->{frame_id},
-		block_id_a   => $info->{block_id},
-		circuit_id_a => $info->{id},
-		note         => $note,
-	});
+		$al->record({
+			function     => 'kronekeeper::Circuit::update_name_cascade',
+			frame_id     => $circuit->{frame_id},
+			block_id_a   => $circuit->{block_id},
+			circuit_id_a => $circuit->{id},
+			note         => $note,
+		});
+	}
 }
 
 
@@ -383,5 +390,25 @@ sub connected_circuits {
 
 	return \@rv;
 }
+
+
+sub connected_circuit_different_names {
+
+	# Returns an array of circuit_info for all circuits
+	# connected via (possibly multiple) jumpers to the given cicuit_id.
+	my $circuit_id = shift;
+	my $name = shift;
+	my $q = database->prepare("
+		SELECT *
+		FROM circuit_info
+		WHERE id IN (
+        		SELECT connected_circuit_ids FROM connected_circuit_ids(?)
+		)
+		AND name != ?
+	");
+	$q->execute($circuit_id, $name);
+	return $q->fetchall_arrayref({});	
+}
+
 
 1;
