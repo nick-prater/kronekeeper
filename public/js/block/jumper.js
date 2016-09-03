@@ -249,9 +249,6 @@ define([
 					})
 				);
 
-				jumper_view.el.classList.remove('change_pending');
-				jumper_view.render();
-
 				/* Trigger update and re-render for other affected circuits */
 				propagate_circuit_changes(data);
 			}
@@ -298,8 +295,7 @@ define([
 			if(deleted_jumper_id == this.model.id) {
 				console.log("jumper_deleted on circuit_id:", this.model.circuit.id, "jumper_id:", this.model.id);
 				this.model.set(this.model.defaults());
-				this.render();
-				this.model_synced();
+				// This will trigger a change event, causing re-render and green flash
 			}
 		},
 
@@ -315,6 +311,8 @@ define([
 		model_changed: function() {
 			/* Could we use this to trigger render instead of current convoluted system? */
 			console.log("jumper model changed:", this.model.circuit.id, this.model.id);
+			this.el.classList.remove('change_pending');
+			this.render();
 			this.$el.effect("highlight", highlight.green, highlight.duration);
 		},
 
