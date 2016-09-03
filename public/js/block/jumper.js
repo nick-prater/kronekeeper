@@ -164,16 +164,19 @@ define([
 					// Escape - reset to original value
 					this.$el.removeClass("change_pending");
 					e.target.value = this.model.get("designation");
+					e.preventDefault();
 					break;
 
 				case 38:
 					// Up Arrow
 					this.move_focus(e, "up");
+					e.preventDefault();
 					break;
 
 				case 40:
 					// Down Arrow
 					this.move_focus(e, "down");
+					e.preventDefault();
 					break;
 			}
 		},

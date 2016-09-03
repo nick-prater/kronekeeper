@@ -375,6 +375,7 @@ define([
 
 		handle_keydown: function(e, attribute_name) {
 
+
 			var row_selector = "td." + attribute_name;
 			switch(e.keyCode) {
 
@@ -382,16 +383,19 @@ define([
 					// Escape
 					e.target.value = this.model.get(attribute_name);
 					e.target.parentNode.classList.remove('change_pending');
+					e.preventDefault();
 					break;
 
 				case 38:
 					// Up Arrow
 					$(e.target).closest("tr").prev().find(row_selector).find("input").focus();
+					e.preventDefault();
 					break;
 
 				case 40:
 					// Down Arrow
 					$(e.target).closest("tr").next().find(row_selector).find("input").focus();
+					e.preventDefault();
 					break;
 			}
 		},
