@@ -435,6 +435,19 @@ div.credits.container {
 	margin-bottom: 1em;
 	background: white;
 }
+.choose_jumper_type .option_item table.wire_list,
+.choose_jumper_type .option_group div.selected.option_item table.wire_list {
+	margin: 0px;
+	border: 0px;
+}
+.choose_jumper_type .option_item .wire_list td {
+	padding: 0px;
+}
+.choose_jumper_type .option_group div:hover.option_item table.wire_list {
+	border: none;
+}
+
+
 
 .choose_jumper_type .message {
 	font-size: 150%;
