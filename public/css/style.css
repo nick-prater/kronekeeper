@@ -21,6 +21,20 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
+/* Styling to allow use of Ligature Symbol font
+ * See: http://kudakurage.com/ligature_symbols/
+ */
+@font-face {
+	font-family: 'LigatureSymbols';
+	src: url('/css/LigatureSymbols-2.11.woff');
+	font-weight: normal;
+	font-style: normal;
+}
+.lsf {
+	font-family: 'LigatureSymbols';
+}
+
+
 body {
 	background-color: #ddd;
 	background-image: url("/images/watermark-400px.png");
@@ -378,13 +392,13 @@ div.credits.container {
 .block td.circuit_buttons {
 	background: inherit;
 	border: none;
-	padding-left: 1em;
+	padding-left: 0.5em;
+	vertical-align: middle;
 }
 
 .block .circuit_buttons a {
 	text-decoration: none;
 	color: black;
-	font-size: 80%;
 	border-radius: 3px;
 }
 
@@ -393,6 +407,17 @@ div.credits.container {
         background: #aaaaaa;
 	border-color: black;
 }
+.block a.notes_button {
+	font-size: 16pt;
+	color: #999;
+}
+.block a.add_jumper {
+	font-size: 8pt;
+	position: relative;
+	padding: 4pt;
+	top: -3pt;
+}
+
 
 .designation {
 	background: #eeeeee;
@@ -525,8 +550,8 @@ div.credits.container {
 }
 
 .credits dt {
-	max-width: 10em;
-	width: 10em;
+	max-width: 14em;
+	width: 14em;
 	float: left;
 	text-align: right;
 }

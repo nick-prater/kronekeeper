@@ -6,7 +6,7 @@
 	</p>
 	<p>
 	Initial development of Kronekeeper was supported by <a href="http://www.thisisglobal.com/radio/">Global Radio</a>.
-	Special thanks go to the team there, especially Jon Crew, David Holroyd, Simon Price and Matt Gray for
+	Special thanks go to the team there, especially Jon Crew, David Holroyd, Simon Price, Matt Gray and Hirji Rabadia for
 	their inspiration, support, testing and suggestions.
 	</p>
 	<p>
@@ -55,6 +55,14 @@
 			<a href="https://github.com/jashkenas/underscore/blob/master/LICENSE">MIT licence</a>
 			<a href="https://github.com/jashkenas/underscore">source code</a>
 		</dd>
+
+		<dt>
+			<a href="http://kudakurage.com/ligature_symbols/">Ligature Symbols font</a>
+		</dt>
+		<dd>
+			<a href="http://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL">SIL Open Font Licence</a>
+		</dd>
+
 	</dl>
 	<p>
 	Contributions, support, bug reports, pull requests and suggestions are gratefully received.
