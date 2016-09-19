@@ -98,6 +98,7 @@ BEGIN
 			circuit.name,
 			circuit.cable_reference,
 			circuit.connection,
+			circuit.note,
 			(
 				SELECT json_agg(u) FROM (
 					SELECT

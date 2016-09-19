@@ -25,7 +25,6 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
 use warnings;
-use feature 'switch';
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
@@ -93,20 +92,22 @@ prefix '/api/circuit' => sub {
 		# at a time, as updates are triggered by change
 		# events on each field in the user interface.
 		foreach my $field(keys %{$data}) {
-			given($field) {
-				when(/^(name)$/) {
+			for($field) {
+				/^(name)$/ and do {
 					update_name_cascade($circuit_info, $data->{$field});
 					$changes->{$field} = $data->{$field};
 					$changes->{connected_circuits} = connected_circuits($id);
+					last;
 				};
-				when(/^(cable_reference|connection)$/) {
+				/^(cable_reference|connection|note)$/ and do {
 					update_field($circuit_info, $field, $data->{$field});
 					$changes->{$field} = $data->{$field};
+					last;
 				};
-				default {
+				do {
 					error "failed to update unrecognised circuit field '$field'";
 				};					
-			};
+			}
 		};
 
 		database->commit;
@@ -294,7 +295,7 @@ sub update_field {
 	my $value = shift;
 
 	# This variable is used to construct sql command, so limit to acceptable values
-	$field =~ m/^(cable_reference|name|connection)$/ or do {
+	$field =~ m/^(cable_reference|name|connection|note)$/ or do {
 		database->rollback;
 		send_error("invalid field name");
 	};

@@ -39,11 +39,18 @@ define([
 		element.effect("highlight", highlight_green, highlight_duration);
 	}
 
+	function highlight_link(jq_context, selector) {
+		var original_background_colour = jq_context.find(selector).css("background-color");
+		jq_context.find(selector)
+		          .css("background-color", highlight_green.color)
+		          .animate({backgroundColor: original_background_colour}, highlight_duration);
+	}
 
 	console.log("loaded highlight.js");
 
 	return {
 		element_change_applied: highlight_element_change_applied,
+		link_change_applied: highlight_link,
 		green: highlight_green,
 		duration: highlight_duration
 	};

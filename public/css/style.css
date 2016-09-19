@@ -398,6 +398,7 @@ div.credits.container {
 
 .block .circuit_buttons a {
 	text-decoration: none;
+	outline: none;
 	color: black;
 	border-radius: 3px;
 }
@@ -410,6 +411,10 @@ div.credits.container {
 .block a.notes_button {
 	font-size: 16pt;
 	color: #999;
+}
+.block a.notes_button.has_note {
+	font-size: 16pt;
+	color: black;
 }
 .block a.add_jumper {
 	font-size: 8pt;
@@ -486,6 +491,11 @@ div.credits.container {
 	height: 12pt;
 }
 
+#circuit_note_dialog .message {
+	margin-top: 1em;
+	font-style: italic;
+	text-align: center; 
+}
 
 
 

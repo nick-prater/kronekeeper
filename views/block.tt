@@ -37,6 +37,12 @@
 <div id="jumper_connection_dialog" title="Jumper connection" class="dialog">
 </div>
 
+<div id="circuit_note_dialog" title="Circuit note" class="dialog">
+	<textarea>
+	</textarea>
+	<div class="message"></div>
+</div>
+
 
 <!-- Templates for dynamic content -->
 <script type="text/template" id="row_template">
@@ -46,8 +52,30 @@
 				<td class="connection"><input type="text" value="<%- connection %>" /></td>
 				<td class="jumper"></td>
 				<td class="jumper"></td>
-				<td class="circuit_buttons"><a class="add_jumper" href="javascript:void(0)" title="Add another jumper field to this circuit">+</a></td>
+				<td class="circuit_buttons">
+					<span>
+					<a class="add_jumper lsf" href="javascript:void(0)" title="Add jumper field">add</a>
+					</span>
+					<span>
+		    			<% if(note) { %>
+					<a class="notes_button lsf has_note" href="javascript:void(0)" tabindex="-1" title="Notes">comments</a>
+		    			<% } else  { %>
+					<a class="notes_button lsf" href="javascript:void(0)" tabindex="-1" title="Notes">comments</a>
+		    			<% } %>
+					</span>
+				</td>
 </script>
+
+<script type="text/template" id="saving_note_message">
+Saving note...
+</script>
+<script type="text/template" id="saved_note_message">
+Note saved.
+</script>
+<script type="text/template" id="failed_saving_note_message">
+Failed to save note.
+</script>
+
 
 <script type="text/template" id="inactive_jumper_cell_template">
 <td class="jumper inactive"></td>
@@ -70,7 +98,7 @@
 	  <% }) %>
 	  </div>
 	<div class="menu_button">
-		<a class="jumper_menu_button" title="menu" href="javascript:void(0)" tabindex="-1">&#9776;</a>
+		<a class="jumper_menu_button" title="Menu" href="javascript:void(0)" tabindex="-1">&#9776;</a>
 	</div>
 </div>
 </script>

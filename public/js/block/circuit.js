@@ -23,12 +23,14 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 define([
 	'block/jumper',
 	'block/highlight',
+	'block/notes',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
 	jumper,
-	highlight
+	highlight,
+	notes
 ) {
         'use strict';
 
@@ -259,6 +261,7 @@ define([
 
 		events: {
 			'click a.add_jumper'              : 'add_jumper',
+			'click a.notes_button'            : 'show_notes',
 			'input .name input'               : function(e) {this.highlight_change(e, 'name')},
 			'input .cable_reference input'    : function(e) {this.highlight_change(e, 'cable_reference')},
 			'input .connection input'         : function(e) {this.highlight_change(e, 'connection')},
@@ -373,6 +376,12 @@ define([
 			this.render_jumpers();
 		},
 
+		show_notes: function(e) {
+			notes.display({
+				model: this.model
+			});
+		},
+
 		handle_keydown: function(e, attribute_name) {
 
 
@@ -453,10 +462,31 @@ define([
 			 * successful save.
 			 */
 			var element = this.$el;
-			$.each(data, function(index, value) {
-				element.find("." + index + " input").val(model.get(index));
-				highlight.element_change_applied(element, ("td." + index));
+			var view = this;
+			$.each(data, function(field, value) {
+				if(field == "note") {
+					highlight.link_change_applied(element, "a.notes_button");
+					view.update_note_status();
+				}
+				else {
+					element.find("." + field + " input").val(model.get(field));
+					highlight.element_change_applied(element, ("td." + field));
+				}
 			});
+		},
+
+		update_note_status: function() {
+
+			/* Set class on Note link depending on whether the note has any content */
+			var note = this.model.get("note");
+			if(note.length) {
+				console.log("add note");
+				this.$el.find("a.notes_button").addClass("has_note");
+			}
+			else {
+				console.log("remove note");
+				this.$el.find("a.notes_button").removeClass("has_note");
+			}
 		},
 
 		provision_jumper_fields: function(required_count) {

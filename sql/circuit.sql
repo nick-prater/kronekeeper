@@ -23,6 +23,7 @@ SELECT
 	circuit.id,
 	circuit.name,
 	circuit.cable_reference,
+	circuit.note,
 	block.id AS block_id,
 	block.name AS block_name,
 	vertical.designation AS vertical_designation,
