@@ -47,19 +47,19 @@
 		      [% IF block.is_free  # -- Block position is unused -- %]
 			<td class="block is_free" data-block_id="[% id %]">
 		      [% ELSE  # -- Block position is in use -- %]
-			<td class="block in_use" data-block_id="[% id %]">
+			<td class="block in_use" data-block_id="[% id %]" style="background:[% block.html_colour %]">
 		      [% END %]
 				<div class="container">
 					<a class="link" href="[% url %]" title="[% title | html %]">
 						<span class="name">
-							[% frame_blocks.$vertical_position.blocks.$block_position.name | html | truncate(50) %]
+							[% block.name | html | truncate(50) %]
 						</span>
 					</a>
 					<div class="label">
 						unused
 					</div>
 					<div class="block_type" title="block type">
-						237A
+						[% block.block_type_name | html %]
 					</div>
 					<div class="menu_button">
 						<a title="menu" href="javascript:void(0)">&#9776;</a>

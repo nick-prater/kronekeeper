@@ -422,17 +422,21 @@ sub frame_blocks {
 	my $verticals = verticals($frame_id);
 	my $q = database->prepare("
 		SELECT  
-			id,
-			vertical_id,
-			position,
-			designation,
-			name,
-			block_is_free(id) AS is_free
+			block.id,
+			block.vertical_id,
+			block.position,
+			block.designation,
+			block.name,
+			block_is_free(block.id) AS is_free,
+			block_type.name AS block_type_name,
+			CONCAT('#', ENCODE(colour_html_code, 'hex')) AS html_colour
 		FROM block
+		JOIN block_type ON (block_type.id = block.block_type_id)
 		WHERE vertical_id = ?
 		ORDER BY position ASC
 	");
-	
+
+	# Query blocks vertical at a time	
 	foreach my $vertical_position(keys %{$verticals}) {
 		my $vertical = $verticals->{$vertical_position};
 		$q->execute($vertical->{id});

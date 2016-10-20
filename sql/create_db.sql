@@ -100,8 +100,19 @@ UNIQUE USING INDEX vertical_frame_designation_idx
 DEFERRABLE INITIALLY IMMEDIATE;
 
 
+CREATE TABLE block_type(
+	id SERIAL NOT NULL PRIMARY KEY,
+	account_id INTEGER NOT NULL REFERENCES account(id),
+	name TEXT NOT NULL,
+	colour_html_code BYTEA NOT NULL,
+	circuit_count INTEGER NOT NULL,
+	circuit_pin_count INTEGER NOT NULL
+);
+
+
 CREATE TABLE block(
 	id SERIAL NOT NULL PRIMARY KEY,
+	block_type_id NOT NULL REFERENCES block_type(id),
 	vertical_id INTEGER NOT NULL REFERENCES vertical(id),
 	position INTEGER NOT NULL CHECK(position > 0),
 	designation TEXT,
@@ -293,6 +304,16 @@ CREATE INDEX connection_pin_idx ON connection(pin_id);
 
 GRANT SELECT, INSERT, DELETE, UPDATE ON ALL TABLES IN SCHEMA public TO kkdancer;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO kkdancer;
+
+
+/* Adding an account */
+-- insert initial block types
+-- insert initial jumper templates
+-- INSERT INTO block_type(account_id, name, colour_html_code, circuit_count, circuit_pin_count) VALUES (2, '237A', E'\\xfffacd', 10, 2);
+-- INSERT INTO block_type(account_id, name, colour_html_code, circuit_count, circuit_pin_count) VALUES (2, '237B', E'\\xd6dddd', 10, 2);
+-- INSERT INTO block_type(account_id, name, colour_html_code, circuit_count, circuit_pin_count) VALUES (2, 'EARTH', E'\\xffcccc', 10, 2);
+-- INSERT INTO block_type(account_id, name, colour_html_code, circuit_count, circuit_pin_count) VALUES (2, 'ABS', E'\\xd6dddd', 6, 3);
+
 
 
 
