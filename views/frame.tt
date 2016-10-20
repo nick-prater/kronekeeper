@@ -58,10 +58,13 @@
 					<div class="label">
 						unused
 					</div>
+					<div class="block_type" title="block type">
+						237A
+					</div>
 					<div class="menu_button">
 						<a title="menu" href="javascript:void(0)">&#9776;</a>
 					</div>
-					<div class="designation">
+					<div class="designation" title="block designation">
 						[% "$vertical.designation$block.designation" | html %]
 					</div>
 				</div>

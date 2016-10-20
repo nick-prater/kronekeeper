@@ -302,6 +302,27 @@ div.credits.container {
 	border: 0px;
 	background: inherit; 
 }
+/*
+.frame div.block_type {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	text-align: left;
+	font-size: 6pt;
+	border: 0px;
+	background: inherit;
+}
+*/
+.frame div.block_type {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	text-align: right;
+	font-size: 6pt;
+	border: 0px;
+	background: inherit;
+}
+
 
 
 .block table {
