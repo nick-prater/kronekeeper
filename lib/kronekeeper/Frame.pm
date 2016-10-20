@@ -167,6 +167,7 @@ prefix '/frame' => sub {
 		template('frame', {
 			frame_info   => $frame_info,
 			frame_blocks => frame_blocks($frame_id),
+			block_types  => block_types(),
 		});
 	};
 
@@ -235,16 +236,14 @@ prefix '/api/frame' => sub {
 		block_id_valid_for_account($data->{block_id}) or do {
 			send_error("block_id invalid or not permitted" => 403);
 		};
-
 		block_is_free($data->{block_id}) or do {
 			send_error("block is not free" => 400);
 		};
-
-		$data->{block_type} && $data->{block_type} =~ m/^(237A|ABS)$/ or do {
-			send_error("block_type invalid" => 400);
+		block_type_id_valid_for_account($data->{block_type}) or do {
+			send_error("block_type invalid or forbidden" => 400);
 		};
 
-		debug("adding $data->{block_type} block as block_id $data->{block_id}");
+		debug("adding block type $data->{block_type} as block_id $data->{block_id}");
 		my $placed_block_id = place_block(
 			$data->{block_id},
 			$data->{block_type},
@@ -258,7 +257,7 @@ prefix '/api/frame' => sub {
 		my $info = block_info($placed_block_id);
 		my $note = sprintf(
 			'placed %s block at %s',
-			$data->{block_type},
+			$info->{block_type_name},
 			$info->{full_designation},
 		);
 
@@ -379,7 +378,6 @@ sub frame_id_valid_for_account {
 		return undef;
 	};
 
-
 	my $q = database->prepare("
 		SELECT 1
 		FROM frame
@@ -394,7 +392,6 @@ sub frame_id_valid_for_account {
 
 	return $q->fetchrow_hashref;
 }
-
 
 
 sub frame_info {
@@ -431,7 +428,7 @@ sub frame_blocks {
 			block_type.name AS block_type_name,
 			CONCAT('#', ENCODE(colour_html_code, 'hex')) AS html_colour
 		FROM block
-		JOIN block_type ON (block_type.id = block.block_type_id)
+		LEFT JOIN block_type ON (block_type.id = block.block_type_id)
 		WHERE vertical_id = ?
 		ORDER BY position ASC
 	");
@@ -447,26 +444,55 @@ sub frame_blocks {
 }
 
 
+sub block_types {
+	my $account_id = shift || session('account')->{id};
+	my $q = database->prepare("
+		SELECT id, name
+		FROM block_type
+		WHERE block_type.account_id = ?
+		ORDER BY name ASC
+	");
+	$q->execute($account_id);
+	return $q->fetchall_arrayref({});
+}
+
+
+sub block_type_id_valid_for_account {
+	my $block_type_id = shift;
+	my $account_id = shift || session('account')->{id};
+
+	$block_type_id && $block_type_id =~ m/^\d+$/ or do {
+		error "block_type_id is not an integer: [$block_type_id]";
+		return undef;
+	};
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM block_type
+		WHERE block_type.account_id = ?
+		AND block_type.id = ?
+	");
+	$q->execute(
+		$account_id,
+		$block_type_id
+	);
+
+	return $q->fetchall_arrayref({});
+}
+
+
 sub place_block {
 
 	my $block_id = shift;
 	my $block_type = shift;
 
-	my %block_commands = (
-		'237A' => 'place_237A_block',
-		'ABS'  => 'place_ABS_block',
-	);
-
-	my $block_command = $block_commands{$block_type} or do {
-		error("place_block called with unknows block type: $block_type");
-		die;
-	};
-
-	my $q = database->prepare(sprintf(
-		'SELECT %s(?) AS placed_block_id',
-		$block_command
-	));
-	$q->execute($block_id) or do {
+	my $q = database->prepare("
+		SELECT place_generic_block_type(?,?) AS placed_block_id
+	");
+	$q->execute(
+		$block_id,
+		$block_type
+	) or do {
 		error("ERROR running database command to place block");
 		database->rollback;
 		die;

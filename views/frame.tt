@@ -105,8 +105,9 @@
 		<li data-action="place_submenu">
 			<div>Add Block</div>
 			<ul>
-				<li data-action="place" data-block_type="237A"><div>237A</div></li>
-				<li data-action="place" data-block_type="ABS"><div>ABS</div></li>
+			[% FOREACH block_type IN block_types %]
+				<li data-action="place" data-block_type="[% block_type.id %]"><div>[% block_type.name | html %]</div></li>
+			[% END %]
 			</ul>
 		</li>
 		<li data-action="remove"><div>Remove Block</div></li>

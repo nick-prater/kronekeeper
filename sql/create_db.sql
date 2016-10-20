@@ -112,7 +112,7 @@ CREATE TABLE block_type(
 
 CREATE TABLE block(
 	id SERIAL NOT NULL PRIMARY KEY,
-	block_type_id NOT NULL REFERENCES block_type(id),
+	block_type_id REFERENCES block_type(id),
 	vertical_id INTEGER NOT NULL REFERENCES vertical(id),
 	position INTEGER NOT NULL CHECK(position > 0),
 	designation TEXT,

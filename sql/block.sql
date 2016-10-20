@@ -63,10 +63,13 @@ SELECT
 	block.name,
 	CONCAT(vertical.designation, block.designation) AS full_designation,
 	frame.id AS frame_id,
-	frame.name AS frame_name
+	frame.name AS frame_name,
+	block_type.id AS block_type_id,
+	block_type.name AS block_type_name
 FROM block
 JOIN vertical ON (vertical.id = block.vertical_id)
-JOIN frame ON (frame.id = vertical.frame_id);
+JOIN frame ON (frame.id = vertical.frame_id)
+LEFT JOIN block_type ON (block_type.id = block.block_type_id);
 
 
 
@@ -147,8 +150,9 @@ BEGIN
 	/* Setting a block's name to NULL means it
 	 * is considered as an available position
 	 */
-	UPDATE block
-	SET name = NULL
+	UPDATE block SET
+		name = NULL,
+		block_type_id = NULL
 	WHERE block.id = p_block_id;
 
 	RETURN FOUND;

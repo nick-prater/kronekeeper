@@ -20,28 +20,44 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 
-
-/* Initialises a regular, 237A block in the specified position
- * creating the appropriate circuits and pins.
- * 
- * Returns the id of the placed block.
- */
-CREATE OR REPLACE FUNCTION place_237A_block(
-	p_block_id INTEGER
+CREATE OR REPLACE FUNCTION place_generic_block_type(
+	p_block_id INTEGER,
+	p_block_type_id INTEGER
 )
 RETURNS INTEGER AS $$
 DECLARE p_circuit_id INTEGER;
+DECLARE p_circuit_count INTEGER;
+DECLARE p_circuit_pin_count INTEGER;
 BEGIN
-	
-	IF NOT block_is_free(p_block_id) THEN
-		RAISE EXCEPTION 'Cannot place block for id % - it is already in use', p_block_id;
-	END IF;
 
-	UPDATE block
-	SET name = ''
+	/* Get parameters for the block we are placing */
+	SELECT
+		circuit_count, circuit_pin_count
+		INTO p_circuit_count, p_circuit_pin_count
+	FROM block_type
+	WHERE block_type.id = p_block_type_id;
+
+	/* Validation */
+	CASE
+		WHEN NOT block_is_free(p_block_id) THEN
+			RAISE EXCEPTION 'Cannot place block for id % - it is already in use', p_block_id;
+		WHEN p_circuit_count IS NULL OR p_circuit_count < 0 THEN
+			RAISE EXCEPTION 'Invalid block_type_id (yielded invalid circuit_count)';
+		WHEN p_circuit_count > 1 AND (p_circuit_pin_count IS NULL OR p_circuit_pin_count  < 1) THEN
+			RAISE EXCEPTION 'when circuit_count > 1, circuit_pin_count cannot be null or less than 1';
+		WHEN p_circuit_pin_count > 3 THEN
+			RAISE EXCEPTION 'circuit_pin_count > 3 is not currently supported as further pin designations are not yet defined';
+		ELSE -- validation OK
+	END CASE;
+
+
+	UPDATE block SET
+		name = '',
+		block_type_id = p_block_type_id
 	WHERE id = p_block_id;
 
-	FOR p_circuit_position IN 1..10 LOOP
+
+	FOR p_circuit_position IN 1..p_circuit_count LOOP
 
 		INSERT INTO circuit(block_id, position, designation)
 		VALUES(
@@ -51,57 +67,7 @@ BEGIN
 		)
 		RETURNING id INTO p_circuit_id;
 
-		FOR p_pin_position IN 1..2 LOOP
-			INSERT INTO pin(circuit_id, position, designation)
-			VALUES(
-				p_circuit_id,
-				p_pin_position,
-				CASE
-					WHEN p_pin_position = 1 THEN 'a'
-					ELSE 'b' 
-				END
-			);
-		END LOOP;
-	END LOOP;
-
-	RETURN p_block_id;
-END
-$$ LANGUAGE plpgsql;
-
-
-
-/* Initialises a regular, ABS block in the specified position
- * creating the appropriate circuits and pins.
- * 
- * Returns the id of the placed block.
- */
-
-CREATE OR REPLACE FUNCTION place_ABS_block(
-	p_block_id INTEGER
-)
-RETURNS INTEGER AS $$
-DECLARE p_circuit_id INTEGER;
-BEGIN
-	
-	IF NOT block_is_free(p_block_id) THEN
-		RAISE EXCEPTION 'Cannot place block for id % - it is already in use', p_block_id;
-	END IF;
-
-	UPDATE block
-	SET name = ''
-	WHERE id = p_block_id;
-
-	FOR p_circuit_position IN 1..10 LOOP
-
-		INSERT INTO circuit(block_id, position, designation)
-		VALUES(
-			p_block_id,
-			p_circuit_position,
-			RIGHT(CAST(p_circuit_position AS TEXT), 1)
-		)
-		RETURNING id INTO p_circuit_id;
-
-		FOR p_pin_position IN 1..3 LOOP
+		FOR p_pin_position IN 1..p_circuit_pin_count LOOP
 			INSERT INTO pin(circuit_id, position, designation)
 			VALUES(
 				p_circuit_id,
