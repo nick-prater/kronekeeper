@@ -120,8 +120,10 @@ require([
 					block_id: jq_block.data("block_id"),
 					success: function () {
 						jq_block.removeClass("in_use");
+						jq_block.removeAttr("style");
 						jq_block.addClass("is_free");
 						jq_block.find("span.name").first().text("unused");
+						jq_block.find("div.block_type").first().text("");
 						console.log("finished removing block");
 					}
 				});
