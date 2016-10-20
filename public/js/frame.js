@@ -153,6 +153,8 @@ require([
 				jq_block.removeClass("is_free");
 				jq_block.addClass("in_use");
 				jq_block.find("span.name").first().text("");
+				jq_block.find("div.block_type").first().text(json.block_type_name);
+				jq_block.attr("style", "background:" + json.html_colour);
 			},
 			error: function(xhr, status) {
 				var error_code = xhr.status + " " + xhr.statusText;

@@ -270,9 +270,7 @@ prefix '/api/frame' => sub {
 
 		database->commit;
 
-		return to_json {
-			block_id => $placed_block_id,
-		};
+		return to_json $info;
 	};
 
 
