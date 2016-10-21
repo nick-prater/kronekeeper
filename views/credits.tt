@@ -12,7 +12,7 @@
 	<p>
 	Kronekeeper makes use of a number of other open-source components, including the
 	<a href="http://perldancer.org/">Dancer2</a> web framework, the <a href="https://www.perl.org/">Perl</a>
-	programming language and a number of javascript libraries:
+	programming language, <a href="https://www.postgresql.org/">PostgreSQL</a> database and various javascript libraries:
 	</p>
 	<dl>
 
