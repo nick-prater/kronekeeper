@@ -41,15 +41,15 @@ Description=VNC Server for Kronekeeper
 Type=forking
 User=$user
 WorkingDirectory=/home/$user
-ExecStart=/usr/bin/vnc4server  :1  -localhost  -geometry 640x480  -pixelformat BGR233  -depth 8
+ExecStart=/usr/bin/vnc4server  :1  -localhost  -geometry 640x480  -depth 16
 
 [Install]
 WantedBy=multi-user.target
 END_OF_SERVICE
 
 # Enable and Launch service
-systemd enable vncserver
-systemd start vncserver
+systemctl enable vncserver
+systemctl start vncserver
 
 
 We can now fire up a VNC client and connect to the new desktop, which will at this point 
@@ -75,7 +75,7 @@ apt-get install wine32
 # to accept the Microsoft licence agreements).
 # Click 'Cancel' if wine prompts to install a missing Mono package - we don't need it
 export DISPLAY=:1
-expot WINEARCH=win32
+export WINEARCH=win32
 wine32 ~/kronekeeper/KRNtoCSV/MDAC27/mdac_typ.exe
 wine32 ~/kronekeeper/KRNtoCSV/Jet40SP8/Jet40SP8_9xNT.exe
 
