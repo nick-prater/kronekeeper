@@ -1,0 +1,110 @@
+==== Installation on Headless Debian 8 Jessie 64-bit Server ====
+
+
+=== Prerequisites ===
+It's assumed that the Kronekeeper source code has been downloaded and is 
+available at ~/kronekeeper. For these instructions, only the
+/kronekeeper/KRNtoCSV directory is actually needed.
+
+One way to obtain the source code is by cloning the Kronekeeper git repository:
+
+$ git clone https://github.com/nick-prater/kronekeeper.git
+
+
+=== Add virtual desktop display ===
+
+# Install needed packages
+# This installs 93MB on a clean Debian 8 machine
+sudo apt-get install vnc4server
+
+# As normal user, set an empty configuration file.
+# This prevents a default config being created, which
+# contains things we don't want - no need to automatically
+# start a window manager or terminal for example
+mkdir ~/.vnc
+touch ~/.vnc/xstartup
+
+# Set password for vnc authentication
+vnc4passwd
+
+
+=== Start Vnc Server on Boot ===
+
+# As root, configure VNC Service
+# Create systemd service file
+export user=[VALID USER NAME]
+cat <<END_OF_SERVICE  > /etc/systemd/system/vncserver.service
+[Unit]
+Description=VNC Server for Kronekeeper
+
+[Service]
+Type=forking
+User=$user
+WorkingDirectory=/home/$user
+ExecStart=/usr/bin/vnc4server  :1  -localhost  -geometry 640x480  -pixelformat BGR233  -depth 8
+
+[Install]
+WantedBy=multi-user.target
+END_OF_SERVICE
+
+# Enable and Launch service
+systemd enable vncserver
+systemd start vncserver
+
+
+We can now fire up a VNC client and connect to the new desktop, which will at this point 
+show just a blank grey screen. As we are using display :1, the vnc server will be
+listening on port 5901.
+
+To enhance security, the configuration here will accept connections only from localhost. We must
+therefore use an ssh tunnel when connecting from a remote host.
+
+
+=== Install wine on the server ===
+The Visual Basic application is a 32-bit application, and doesn't play well on 64-bit wine, 
+so we need to enable multiarch and install 32-bit wine.
+
+# As root
+# This installs 340MB on a clean Debian 8 install
+dpkg --add-architecture i386
+apt-get update
+apt-get install wine32
+
+# As normal user - start a terminal window, we'll run commands, output from
+# which which will be shown on the vnc desktop (so we can click
+# to accept the Microsoft licence agreements).
+# Click 'Cancel' if wine prompts to install a missing Mono package - we don't need it
+export DISPLAY=:1
+expot WINEARCH=win32
+wine32 ~/kronekeeper/KRNtoCSV/MDAC27/mdac_typ.exe
+wine32 ~/kronekeeper/KRNtoCSV/Jet40SP8/Jet40SP8_9xNT.exe
+
+# Install Visual Basic 6 runtime DLL
+cp ~/kronekeeper/KRNtoCSV/msvbvm60.dll ~/.wine/drive_c/windows/system32/
+wine32 regsvr32 ~/.wine/drive_c/windows/system32/msvbvm60.dll
+
+
+=== Test It! ===
+
+# As normal user
+# This should result in a bunch of CSV files containing data from the source KRN file
+mkdir /tmp/krntocsv
+cd /tmp/krntocsv
+DISPLAY=:1 wine32 ~/kronekeeper/KRNtoCSV/KRNtoCSV.exe ~/kronekeeper/KRNtoCSV/EXAMPLE.KRN
+
+
+=== Stopping the vnc server ===
+Visual basic persists in wanting a display available, even if it displays no dialogs.
+Its therefore recommended to keep the vnc-server running at all times. But if desired,
+it can be stopped by running:
+
+$ systemctl stop vncserver
+
+
+=== Alternative to vnc ===
+Once the Microsoft components are installed, one could use the Xdummy display driver,
+or Xvfb instead of vncserver. Interaction with the display is only required to install
+the Microsoft components into the .wine directory. Internally this could be distributed
+with the components pre-configured, but the Microsoft licences forbid distribution to 
+third parties in this way.
+
