@@ -1,0 +1,34 @@
+The files in this directory are only needed if you wish to import
+.KRN files created by the Clyde Electronics KRIS software. Otherwise
+they are not needed and can be safely ignored or deleted.
+
+The file KRNtoCSV.exe is tested to work under Linux using Wine. The
+Visual Basic 6 project files and source code are provided, comprising:
+
+KRNtoCSV.vbp
+KRNtoCSV.vbw
+Main.bas
+
+Example usage (on Linux, under wine):
+DISPLAY=:1 wine32 KRNtoCSV.exe [path to KRN file]
+
+The software reads the supplied KRN file and extracts all its data
+tables to CSV files in the current directory.
+
+There is no graphical output (or debugging/log information), however
+being visual basic, some kind of graphical display is needed. On a
+headless server, Xvnc, Xvfb or the Xdummy display driver are good
+solutions. 
+
+The software depends on three Microsoft redistributable components,
+which are provided in case they are not already installed in your
+Wine directory.
+
+Microsoft Data Access Components
+Microsoft Jet
+Microsoft Visual Basic 6.0 Runtime DLL
+
+These items are packaged alongside KRNtoCSV as required components
+in accordance with Microsoft's licensing terms. Please see their individual
+LICENSE files for copyright information and licence terms.
+

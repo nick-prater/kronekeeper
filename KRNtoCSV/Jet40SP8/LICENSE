@@ -1,0 +1,99 @@
+MICROSOFT CORPORATION END-USER LICENSE AGREEMENT 
+
+Microsoft Jet 4.0 Service Pack 8
+
+IMPORTANT-READ CAREFULLY: This End-User License Agreement ("EULA") is a legal agreement between you (either an individual or a single entity) and Microsoft Corporation for the Microsoft software product identified above, which includes computer software and may include associated media, printed materials, and "online" or electronic documentation ("Product").  An amendment or addendum to this EULA may accompany the Product.  YOU AGREE TO BE BOUND BY THE TERMS OF THIS EULA BY INSTALLING, COPYING, OR OTHERWISE USING THE PRODUCT. IF YOU DO NOT AGREE, DO NOT INSTALL OR USE THE PRODUCT; YOU MAY RETURN IT TO YOUR PLACE OF PURCHASE FOR A FULL REFUND.
+
+1.	GRANT OF LICENSE. Microsoft grants you the following rights provided that you comply with all terms and conditions of this EULA:
+
+a.	Installation and Use. 
+
+You may install and use an unlimited number of copies of the Product only for your internal use on your premises.  You may make an unlimited number of copies (either in hard copy or electronic form) of any electronic documents included with the Product only for your internal use on your premises.  
+
+b.	Storage/Network Use. 
+
+You may also store or install a copy of the Product on a storage device, such as a network server, used only to install or run the Product on your other computers over an internal network.
+
+c.	Performance or Benchmark Testing. 
+
+You may not disclose the results of any benchmark test using the Product to any third party without Microsoft's prior written approval.
+
+d.	Redistribution Rights and Requirements.
+
+Microsoft grants you a non-exclusive, royalty-free right to reproduce and distribute the .DLL files located in the Product ("Redistributables"), solely in object code form, provided you agree to the following:
+(i) 	you shall not alter the Redistributables;
+(ii)	you shall distribute the Redistributables only in conjunction with and as part of the installation setup of the software application created by you that adds significant and primary functionality to the Product ("Application");
+(iii) 	you shall not use Microsoft's name, logo, or trademarks to market your Application without the prior written consent of Microsoft;
+       (iv) 	you shall include a valid copyright notice in your name or on your behalf with your Application;
+(v) 	you shall indemnify, hold harmless, and defend Microsoft from and against any claims or lawsuits, including attorneys fees, that arise or result from the use or distribution of your Application;
+(vi) 	you shall distribute your Application containing the Redistributables pursuant to an end-user license agreement (which may be "break-the-seal", "click-wrap" or signed), with terms no less protective than those contained herein;
+(vii) 	you shall not permit further distribution of the Redistributables by end users of your Application;
+(viii) 	your Application shall not substantially duplicate the capabilities of Microsoft Access or, in the reasonable opinion of Microsoft, compete with it; and 
+(ix) 	unless your Application requires your end users to license Microsoft Access in order to operate, you may not reproduce or use any of the Redistributables for commercial distribution in conjunction with a general purpose word processing, spreadsheet or database management software product, or an integrated work or product suite whose components include a general purpose word processing, spreadsheet, or database management software product except for the exclusive use of importing data to the various formats supported by Microsoft Access.  Note:  A product that includes limited word processing, spreadsheet or database components along with other components which provide significant and primary value, such as an accounting product with limited spreadsheet capability, is not considered to be a "general purpose" product. 
+
+You may direct your Application end users who desire to obtain Product redistribution rights to: http://www.microsoft.com/data.  Microsoft reserves the right to delete the Product download and to change, move, or remove this web page at any time, at its sole option.
+
+e.	Reservation of Rights. 
+
+Microsoft reserves all rights not expressly granted to you in this EULA.
+
+2.	UPGRADES.
+
+To use a Product identified as an upgrade, you must first be licensed for the product identified by Microsoft as eligible for the upgrade.  After upgrading, you may no longer use the product that formed the basis for your upgrade eligibility.
+
+3.	ADDITIONAL SOFTWARE.  
+
+This EULA applies to updates or supplements to the original Product provided by Microsoft, unless we provide other terms along with the update or supplement.   
+
+4.	TRANSFER.  
+
+Transfer to Third Party.  The initial user of the Product may make a one-time transfer of the Product to another end user.  The transfer has to include all component parts, media, printed materials, this EULA, and if applicable, the Certificate of Authenticity.  The transfer may not be an indirect transfer, such as a consignment.  Prior to the transfer, the end user receiving the transferred Product must agree to all the EULA terms.  No Rental.  You may not rent, lease, or lend the Product. 
+
+5.	LIMITATION ON REVERSE ENGINEERING, DECOMPILATION, AND DISASSEMBLY. 
+
+You may not reverse engineer, decompile, or disassemble the Product, except and only to the extent that it is expressly permitted by applicable law notwithstanding this limitation.  
+
+6.	TERMINATION.
+
+Without prejudice to any other rights, Microsoft may cancel this EULA if you do not abide by the terms and conditions of this EULA, in which case you must destroy all copies of the Product and all of its component parts.
+
+7.	CONSENT TO USE OF DATA. 
+
+You agree that Microsoft and its affiliates may collect and use technical information you provide as a part of support services related to the Product.  Microsoft agrees not to use this information in a form that personally identifies you.   
+
+8.	EXPORT RESTRICTIONS.
+
+You acknowledge that the Product is subject to U.S. export jurisdiction.  You agree to comply with all applicable international and national laws that apply to the Product, including the U.S. Export Administration Regulations, as well as end-user, end-use and destination restrictions issued by U.S. and other governments. For additional information, see http://www.microsoft.com/exporting/.
+
+9.	DISCLAIMER OF WARRANTIES. 
+
+To the maximum extent permitted by applicable law, Microsoft and its suppliers provide the Product and support services (if any) AS IS AND WITH ALL FAULTS, and hereby disclaim all other warranties and conditions, either express, implied or statutory, including, but not limited to, any (if any) implied warranties, duties or conditions of merchantability, of fitness for a particular purpose, of accuracy or completeness of responses, of results, of workmanlike effort, of lack of viruses, and of lack of negligence, all with regard to the Product, and the provision of or failure to provide support services.  ALSO, THERE IS NO WARRANTY OR CONDITION OF TITLE, QUIET ENJOYMENT, QUIET POSSESSION, CORRESPONDENCE TO DESCRIPTION OR NON-INFRINGEMENT WITH REGARD TO THE PRODUCT. 
+
+10.	EXCLUSION OF INCIDENTAL, CONSEQUENTIAL AND CERTAIN OTHER DAMAGES.  
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL MICROSOFT OR ITS SUPPLIERS BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, BUT NOT LIMITED TO, DAMAGES FOR LOSS OF PROFITS OR CONFIDENTIAL OR OTHER INFORMATION, FOR BUSINESS INTERRUPTION, FOR PERSONAL INJURY, FOR LOSS OF PRIVACY, FOR FAILURE TO MEET ANY DUTY INCLUDING OF GOOD FAITH OR OF REASONABLE CARE, FOR NEGLIGENCE, AND FOR ANY OTHER PECUNIARY OR OTHER LOSS WHATSOEVER) ARISING OUT OF OR IN ANY WAY RELATED TO THE USE OF OR INABILITY TO USE THE PRODUCT, THE PROVISION OF OR FAILURE TO PROVIDE SUPPORT SERVICES, OR OTHERWISE UNDER OR IN CONNECTION WITH ANY PROVISION OF THIS EULA, EVEN IN THE EVENT OF THE FAULT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY, BREACH OF CONTRACT OR BREACH OF WARRANTY OF MICROSOFT OR ANY SUPPLIER, AND EVEN IF MICROSOFT OR ANY SUPPLIER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. 
+
+11.	LIMITATION OF LIABILITY AND REMEDIES. 
+
+Notwithstanding any damages that you might incur for any reason whatsoever (including, without limitation, all damages referenced above and all direct or general damages), the entire liability of Microsoft and any of its suppliers under any provision of this EULA and your exclusive remedy for all of the foregoing shall be limited to the greater of the amount actually paid by you for the Product or U.S.$5.00.  The foregoing limitations, exclusions and disclaimers (including Sections 9 and 10 above) shall apply to the maximum extent permitted by applicable law, even if any remedy fails its essential purpose.
+
+12.	NOTE ON JAVA SUPPORT. 
+
+THE PRODUCT MAY CONTAIN SUPPORT FOR PROGRAMS WRITTEN IN JAVA. JAVA TECHNOLOGY IS NOT FAULT TOLERANT AND IS NOT DESIGNED, MANUFACTURED, OR INTENDED FOR USE OR RESALE AS ONLINE CONTROL EQUIPMENT IN HAZARDOUS ENVIRONMENTS REQUIRING FAIL-SAFE PERFORMANCE, SUCH AS IN THE OPERATION OF NUCLEAR FACILITIES, AIRCRAFT NAVIGATION OR COMMUNICATION SYSTEMS, AIR TRAFFIC CONTROL, DIRECT LIFE SUPPORT MACHINES, OR WEAPONS SYSTEMS, IN WHICH THE FAILURE OF JAVA TECHNOLOGY COULD LEAD DIRECTLY TO DEATH, PERSONAL INJURY, OR SEVERE PHYSICAL OR ENVIRONMENTAL DAMAGE.  Sun Microsystems, Inc. has contractually obligated Microsoft to make this disclaimer.
+
+13.	U.S. GOVERNMENT LICENSE RIGHTS. 
+
+All Product provided to the U.S. Government pursuant to solicitations issued on or after December 1, 1995 is provided with the commercial license rights and restrictions described elsewhere herein.  All Product provided to the U.S. Government pursuant to solicitations issued prior to December 1, 1995 is provided with "Restricted Rights" as provided for in FAR, 48 CFR 52.227-14 (JUNE 1987) or DFAR, 48 CFR 252.227-7013 (OCT 1988), as applicable. 
+
+14.	APPLICABLE LAW.  
+
+If you acquired this Product in the United States, this EULA is governed by the laws of the State of Washington.  If you acquired this Product in Canada, unless expressly prohibited by local law, this EULA is governed by the laws in force in the Province of Ontario, Canada; and, in respect of any dispute which may arise hereunder, you consent to the jurisdiction of the federal and provincial courts sitting in Toronto, Ontario. If this Product was acquired outside the United States, then local law may apply.
+
+15.	COPYRIGHT.  
+
+The Product is protected by copyright and other intellectual property laws and treaties. Microsoft or its suppliers own the title, copyright, and other intellectual property rights in the Product.  The Product is licensed, not sold.
+
+16.	ENTIRE AGREEMENT.  
+
+This EULA, including any addendum or amendment to this EULA which is included with the Product, are the entire agreement between you and Microsoft relating to the Product and the support services (if any), and they supersede all prior or contemporaneous oral or written communications, proposals and representations with respect to the Product or any other subject matter covered by this EULA.  To the extent the terms of any Microsoft policies or programs for support services conflict with the terms of this EULA, the terms of this EULA shall control.
+
