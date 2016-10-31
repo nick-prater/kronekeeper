@@ -65,7 +65,10 @@ prefix '/frame' => sub {
 
 		my $f = $q->fetchall_arrayref({});
 
-		template('frames', { frames => $f });
+		template('frames', {
+			frames => $f,
+			can_import => user_has_role('import'),
+		});
 	};	
 
 	get '/add' => sub {

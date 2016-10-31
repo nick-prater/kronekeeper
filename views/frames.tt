@@ -4,6 +4,9 @@
 
 	<div class="menu">
 		<a href="add">add frame</a>
+		[% IF can_import %]
+		<a href="import/kris/">import</a>
+		[% END %]
 	</div>
 
 	<table>

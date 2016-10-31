@@ -64,6 +64,11 @@ CREATE TABLE activity_log(
 	circuit_id_B INTEGER REFERENCES circuit(id)
 );
 
+/* Initialise Roles */
+INSERT INTO role(role) VALUES ('edit');
+INSERT INTO role(role) VALUES ('view_activity_log');
+INSERT INTO role(role) VALUES ('import');
+
 
 
 /*--------------------------------------------------------------------------*/
@@ -298,12 +303,38 @@ CREATE INDEX connection_pin_idx ON connection(pin_id);
 /* TODO: add constraint/trigger so a jumper wire has exactly two connections */
 
 
+
+
+/*--------------------------------------------------------------------------*/
+/* KRIS IMPORT */
+/*--------------------------------------------------------------------------*/
+
+/* The tables in this schema are only required to enable import of data from KRIS data files */
+CREATE SCHEMA kris;
+
+CREATE TABLE kris.jumper_type(
+	id SERIAL NOT NULL PRIMARY KEY,
+	account_id INTEGER NOT NULL REFERENCES public.account(id),
+	kris_wiretype_id INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	a_wire_colour_code BYTEA NOT NULL,
+	b_wire_colour_code BYTEA NOT NULL,
+	jumper_template_id INTEGER REFERENCES public.jumper_template(id)
+);
+
+CREATE UNIQUE INDEX kris_jumper_type_account_wiretype_idx ON kris.jumper_type(account_id, kris_wiretype_id);
+
+
+
 /*--------------------------------------------------------------------------*/
 /* PERMISSIONS */
 /*--------------------------------------------------------------------------*/
 
+GRANT USAGE ON SCHEMA kris TO kkdancer;
 GRANT SELECT, INSERT, DELETE, UPDATE ON ALL TABLES IN SCHEMA public TO kkdancer;
+GRANT SELECT, INSERT, DELETE, UPDATE ON ALL TABLES IN SCHEMA kris TO kkdancer;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO kkdancer;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA kris TO kkdancer;
 
 
 /* Adding an account */
@@ -313,6 +344,7 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO kkdancer;
 -- INSERT INTO block_type(account_id, name, colour_html_code, circuit_count, circuit_pin_count) VALUES (2, '237B', E'\\xd6dddd', 10, 2);
 -- INSERT INTO block_type(account_id, name, colour_html_code, circuit_count, circuit_pin_count) VALUES (2, 'EARTH', E'\\xffcccc', 10, 2);
 -- INSERT INTO block_type(account_id, name, colour_html_code, circuit_count, circuit_pin_count) VALUES (2, 'ABS', E'\\xd6dddd', 6, 3);
+
 
 
 

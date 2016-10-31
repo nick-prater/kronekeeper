@@ -1,0 +1,43 @@
+
+<div class="container add_frame import kris">
+	<h1>Import from KRIS</h1>
+
+
+
+	<div class="kris_jumper_colours">
+
+		<h2>Jumper Colours</h2>
+
+		<p>
+			In KRIS, jumper colours are defined on a system-wide basis for each installation of the software. Individual .KRN
+			files do not define wire colours, but refer to the system definitions by id. Before importing a .KRN file from KRIS,
+			we must therefore define the mapping between KRIS jumper definitions and Kronekeeper jumper templates.
+		</p>
+		<p>
+			In Kronekeeper, the jumper wire colour mapping for KRIS imports is defined on a per-account basis. 
+			Changing the colour mapping here will affect other users on this account. The mapping only affects future data imports
+			and will not change previously imported	frames.
+		</p>
+		<p>
+			On a KRIS system, the file <span class="filename">wiretype.def</span> holds jumper colour definitions. Uploading it
+			here will populate the mapping table, overwriting any existing mappings.
+		</p>
+
+
+
+		<form action="wiretype" method="POST" enctype="multipart/form-data">
+
+			<fieldset>
+				<legend>Upload Wiretype Definition</legend>
+				<input type="file" name="file" required="required">
+				<input type="submit" name="submit" value="Upload">
+			</fieldset>
+		</form>
+
+
+
+
+	</div>
+
+
+</div>

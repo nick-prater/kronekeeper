@@ -33,6 +33,7 @@ use kronekeeper::Circuit;
 use kronekeeper::Jumper;
 use kronekeeper::User;
 use kronekeeper::Activity_Log;
+use kronekeeper::Frame::Import::KRIS;
 
 my $al = kronekeeper::Activity_Log->new();
 
