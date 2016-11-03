@@ -21,6 +21,9 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
+
+
+
 /* Styling to allow use of Ligature Symbol font
  * See: http://kudakurage.com/ligature_symbols/
  */
@@ -363,7 +366,8 @@ div.credits.container {
 .block .jumper div.wires {
 }
 
-.block .jumper div.wire {
+.block .jumper div.wire,
+.wiretype div.wire {
 	border: 1px solid black;
 	float: left;
 	width: 45%;
@@ -606,7 +610,70 @@ div.credits.container {
 }
 
 
+.wiretype td.colours {
+	width: 4em;
+}
+.wiretype div.wire {
+	height: 2em;
+}
 
+
+/* Custom drop-down select styling, which allows rich html options
+ * this is used to display and select jumper template options for the
+ * KRIS import process.
+ * Inspired by:
+ *   http://jsfiddle.net/6zcRk/ and
+ *   http://stackoverflow.com/questions/9548618/custom-drop-down-panel-with-jquery
+ *   http://www.jankoatwarpspeed.com/reinventing-a-drop-down-with-css-and-jquery/
+ */
+.custom-select {
+	position: relative;
+	display: inline-block;
+}
+
+.custom-select span {
+	display: inline-block;
+	min-width: 180px;
+	cursor: pointer;
+	border: 1px solid black;
+	border-radius: 3px;
+}
+
+.custom-select ul {
+	position: absolute;
+	display: none;
+	border: 1px solid #333;
+	width: 99%;
+	max-height: 200px;
+	overflow: auto;
+	z-index: 10000;
+	list-style: none;
+}
+
+.custom-select ul li {
+	padding: 5px;
+	border-bottom: 1px solid black;
+	cursor: pointer;
+}
+
+.custom-select ul li:hover {
+	background-color: #666;
+	color: #FFF;
+}
+
+.custom-select ul li:last-child {
+	border-bottom: none;
+}
+
+.custom-select div.wire {
+	border: 1px solid black;
+	width: 4em;
+	font-size: 50%;
+	font-weight: 600;
+	text-align: center;
+	height: 2em;
+	float: left;
+}
 
 
 

@@ -42,8 +42,15 @@ prefix '/frame/import/kris' => sub {
 			send_error('forbidden' => 403);
 		};
 
-		template('import/kris', {
-		});
+		my $data = {
+			wiretypes => wiretypes(),
+			jumper_templates => jumper_templates(),
+		};
+
+use Data::Dumper;
+debug Dumper $data;
+
+		template('import/kris', $data);
 	};	
 
 
@@ -211,6 +218,98 @@ sub store_wiretypes {
 		};
 	}	
 }
+
+
+
+sub wiretypes {
+
+	# Note that KRIS wiretypes are always two-wire pairs
+	my $account_id = session('account')->{id};
+	my $q = database->prepare("
+		SELECT
+			jumper_type.id,
+			jumper_type.kris_wiretype_id,
+			jumper_type.name AS kris_wiretype_name,
+			CONCAT('#', ENCODE(jumper_type.a_wire_colour_code, 'hex')) AS kris_colour_a,
+			CONCAT('#', ENCODE(jumper_type.b_wire_colour_code, 'hex')) AS kris_colour_b,
+			jumper_template.id AS jumper_template_id
+		FROM kris.jumper_type
+		LEFT JOIN jumper_template ON (
+			jumper_template.id = jumper_template_id
+			AND jumper_template_wire_count(jumper_template.id) = 2
+		)
+		WHERE jumper_type.account_id = ?
+		ORDER BY kris_wiretype_id
+	");
+	$q->execute($account_id);
+	return $q->fetchall_arrayref({});
+}
+
+
+
+sub jumper_templates {
+
+	# KRIS jumpers are always two-wire pairs
+	# This returns two-wire jumper templates for this specific purpose
+	my $account_id = session('account')->{id};
+	my $q = database->prepare("
+		SELECT 
+			jumper_template.id,
+			jumper_template.name,
+
+			a_colour.name AS a_colour_name,
+			CONCAT('#', ENCODE(a_colour.html_code, 'hex')) AS a_colour_code,
+			CONCAT('#', ENCODE(a_colour.contrasting_html_code, 'hex')) AS a_contrasting_colour_code,
+
+			b_colour.name AS b_colour_name,
+			CONCAT('#', ENCODE(b_colour.html_code, 'hex')) AS b_colour_code,
+			CONCAT('#', ENCODE(b_colour.contrasting_html_code, 'hex')) AS b_contrasting_colour_code
+
+		FROM jumper_template
+		JOIN jumper_template_wire AS a_wire ON (
+			a_wire.jumper_template_id = jumper_template.id
+			AND a_wire.position = 1
+		)
+		JOIN colour AS a_colour ON (
+			a_colour.id = a_wire.colour_id
+		)
+		JOIN jumper_template_wire AS b_wire ON (
+			b_wire.jumper_template_id = jumper_template.id
+			AND b_wire.position = 2
+		)
+		JOIN colour AS b_colour ON (
+			b_colour.id = b_wire.colour_id
+		)
+		WHERE jumper_template.account_id = ?
+		AND jumper_template_wire_count(jumper_template.id) = 2 
+	");
+	$q->execute($account_id);
+	return $q->fetchall_arrayref({});
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

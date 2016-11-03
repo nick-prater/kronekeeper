@@ -1,3 +1,4 @@
+[% USE JSON %]
 
 <div class="container add_frame import kris">
 	<h1>Import from KRIS</h1>
@@ -34,6 +35,20 @@
 			</fieldset>
 		</form>
 
+		<table>
+			<thead>
+				<tr>
+					<th>KRIS id</th>
+					<th colspan="2">KRIS Wiretype</th>
+					<th></th>
+					<th>Kronekeeper Jumper Template</th>
+				</tr>
+			</thead>
+			<tbody id="wiretype_table_body">
+				<tr class="empty_table"><td colspan="4">No wiretype mappings defined...</td></tr>
+			</tbody>
+		</table>
+
 
 
 
@@ -41,3 +56,80 @@
 
 
 </div>
+
+
+<div class="custom-select">
+	<span>Select Option</span>
+	<ul>
+[% FOREACH template IN jumper_templates %]
+		<li data-jumper_template_id="[% template.id %]">
+			<div
+				class="wire"
+				style="background:[% template.a_colour_code | html %]; color:[% template.a_contrasting_colour_code | html %];"
+			>
+				&nbsp;
+			</div>
+ 			<div
+				class="wire"
+				style="background:[% template.b_colour_code | html %]; color:[% template.b_contrasting_colour_code | html %];"
+			>
+				&nbsp;			
+			</div> 
+			[% template.name | html %]
+		</li>
+[% END %]
+	</ul>
+</div>
+
+
+
+
+<!-- Template for Wiretype mapping table row -->
+<script type="text/template" id="row_template">
+				<td class="id NP"><%- kris_wiretype_id %></td>
+				<td class="name"><%- kris_wiretype_name %></td>
+				<td class="colours">
+					<div class="wires">
+						<div class="wire" style="background: <%- kris_colour_a %>;">
+							&nbsp;
+						</div>
+						<div class="wire" style="background: <%- kris_colour_b %>;">
+							&nbsp;
+						</div>
+	  				</div>
+				</td>
+				<td>&rarr;</td>
+				<td class="jumper_template">
+				</td>
+</script>
+
+
+<!-- Data -->
+<script type="text/javascript">
+var jumper_templates = [% jumper_templates.json %];
+var wiretypes = [% wiretypes.json %];
+</script>
+
+
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/import/kris.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
