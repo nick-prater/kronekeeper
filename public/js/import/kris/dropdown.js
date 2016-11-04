@@ -38,66 +38,67 @@ define([
 	 */
 
 
-	function initialise(selector) {
+	/* Initialises a custom drop-down select widget. Pass a jquery reference to the containing div */
+	function initialise(container, initial_value) {
 
-		$(selector).each(function() {
+		var list = container.find('ul');
+		var selection = container.find("div.selection");
+		var selection_label = selection.find("span.option");
 
-			var container = $(this);
-			var list = container.find('ul');
-			var selection = container.find("div.selection");
-			var selection_label = selection.find("span.option");
+		selection.click(function(e) {
 
-			selection.click(function(e) {
+			e.stopPropagation();
+
+			if(list.is(":hidden")) {
+
+				list.show();
+
+				/* Add event handlers */
+				list.find('li').on("click", handle_select);
+				$(document).on("click", handle_document_click);
+				$(document).on("keydown", handle_keydown);
+			}
+
+			function hide_dropdown() {
+
+				list.hide();
+
+				/* Clean-up event handlers */
+				list.find('li').off("click", handle_select);
+				$(document).off("click", handle_document_click);
+				$(document).off("keydown", handle_keydown);
+			}
+
+			function handle_keydown(e) {
+
+				if(e.which == 27) {
+					hide_dropdown();
+				}		
+			}
+
+			function handle_select(e) {
 
 				e.stopPropagation();
+				selection_label.html(e.currentTarget.innerHTML);
+				selection_label.data("value", e.currentTarget.dataset.value);
 
-				if(list.is(":hidden")) {
+				console.log("selected " + selection_label.data("value"));
+				hide_dropdown();
+			}
 
-					list.show();
-
-					/* Add event handlers */
-					list.find('li').on("click", handle_select);
-					$(document).on("click", handle_document_click);
-					$(document).on("keydown", handle_keydown);
-				}
-
-				function hide_dropdown() {
-
-					list.hide();
-
-					/* Clean-up event handlers */
-					list.find('li').off("click", handle_select);
-					$(document).off("click", handle_document_click);
-					$(document).off("keydown", handle_keydown);
-				}
-
-				function handle_keydown(e) {
-
-					if(e.which == 27) {
-						hide_dropdown();
-					}		
-				}
-
-				function handle_select(e) {
-
-					e.stopPropagation();
-					selection_label.html(e.currentTarget.innerHTML);
-					selection_label.data("value", e.currentTarget.dataset.value);
-	
-					console.log("selected " + selection_label.data("value"));
-					hide_dropdown();
-				}
-
-				function handle_document_click(e) {
-					
-					e.stopPropagation();
-					hide_dropdown();
-				}
-
-			});
+			function handle_document_click(e) {
+				
+				e.stopPropagation();
+				hide_dropdown();
+			}
 
 		});
 
+		if(initial_value) {
+			selection_label.html(
+				list.find("li[data-value='" + initial_value + "']").first().html()
+			);
+		}
 	}
 
 

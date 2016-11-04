@@ -22,16 +22,11 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 require([
 	'import/kris/wiretype',
-	'import/kris/dropdown'
 
 ], function (
-	wiretype,
-	dropdown
+	wiretype
 ) {
         'use strict';
-
-	dropdown.initialise("div.custom-select");
-
 
 
 	console.log("loaded import/kris.js"); 

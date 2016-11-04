@@ -20,10 +20,12 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 define([
+	'import/kris/dropdown',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
+	dropdown
 ) {
         'use strict';
 
@@ -63,6 +65,13 @@ define([
 			var json = this.model.toJSON();
 			console.log(json);
 			this.$el.html(this.template(json));
+
+			/* Select jumper template */
+			dropdown.initialise(
+				this.$el.find("div.custom-select"),
+				this.model.get("jumper_template_id")
+			);
+
 			return this;
 		}
 	});

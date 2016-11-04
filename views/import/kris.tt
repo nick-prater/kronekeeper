@@ -61,39 +61,6 @@
 
 
 
-<!-- Template for jumper template selection dropdown -->
-<script type="text/template" id="jumper_template_dropdown_template">
-
-	<div class="custom-select">
-		<div class="selection">
-			<span class="option">Select Option</span>
-			<span class="arrow">&#9660;</span>
-		</div>
-		<ul>
-	[% FOREACH template IN jumper_templates %]
-			<li data-value="[% template.id %]">
-				<div
-					class="wire wire_a"
-					style="background:[% template.a_colour_code | html %]; color:[% template.a_contrasting_colour_code | html %];"
-				>
-					&nbsp;
-				</div>
-				<div
-					class="wire wire_b"
-					style="background:[% template.b_colour_code | html %]; color:[% template.b_contrasting_colour_code | html %];"
-				>
-					&nbsp;			
-				</div> 
-				[% template.name | html %]
-			</li>
-	[% END %]
-		</ul>
-	</div>
-
-</script>
-
-
-
 <!-- Template for Wiretype mapping table row -->
 <script type="text/template" id="row_template">
 				<td class="id NP"><%- kris_wiretype_id %></td>
@@ -108,11 +75,11 @@
 						</div>
 	  				</div>
 				</td>
-				<td>&rarr;</td>
+				<td class="arrow">&rarr;</td>
 				<td class="jumper_template">
 					<div class="custom-select">
 						<div class="selection">
-							<span class="option">Select Option</span>
+							<span class="option">Select jumper template</span>
 							<span class="arrow">&#9660;</span>
 						</div>
 						<ul>
