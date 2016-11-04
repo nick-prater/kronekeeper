@@ -47,9 +47,6 @@ prefix '/frame/import/kris' => sub {
 			jumper_templates => jumper_templates(),
 		};
 
-use Data::Dumper;
-debug Dumper $data;
-
 		template('import/kris', $data);
 	};	
 
@@ -68,27 +65,47 @@ debug Dumper $data;
 		};
 
 		my $upload = request->upload('file') or do {
-			send_error('missing file upload' => 400);
+			error("ERROR: no file uploaded");
+			return wiretype_error('ERROR_NO_FILE', 400);
 		};
 		$upload->size or do {
-			send_error('uploaded file has zero size' => 400);
+			error("ERROR: uploaded file has zero size");
+			return wiretype_error('ERROR_ZERO_SIZE', 400);
 		};
 		$upload->size <= $max_upload_bytes or do {
-			send_error("uploaded file exceeds limit of $max_upload_bytes bytes" => 413);
+			error("uploaded file exceeds limit of $max_upload_bytes bytes");
+			return wiretype_error('ERROR_TOO_BIG', 413);
 		};
 
-		my $wiretypes = parse_wiretype($upload->content);
+		my $wiretypes = parse_wiretype($upload->content) or do {
+			return wiretype_error('ERROR_BAD_FORMAT', 415);
+		};
 		store_wiretypes($wiretypes);
 
 		database->commit;
 
-		use Data::Dumper;
-		return Dumper $wiretypes;
+		return wiretype_error('SUCCESS');
 	};
 
 
 };
 
+
+
+sub wiretype_error {
+
+	my $wiretype_error_code = shift;
+	my $http_status = shift;
+
+	my $data = {
+		wiretypes => wiretypes(),
+		wiretype_error_code => $wiretype_error_code,
+		jumper_templates => jumper_templates(),
+	};
+
+	$http_status and status($http_status);
+	return template('import/kris', $data);
+}
 
 
 
@@ -109,10 +126,8 @@ sub parse_wiretype {
 	# First line should be record count
 	my $record_count = shift(@lines);
 	$record_count && $record_count =~ m/^\d+$/ or do {
-		send_error(
-			"Invalid file format - expected integer record count in first row",
-			415
-		);
+		error("Invalid file format - expected integer record count in first row");
+		return undef;
 	};
 
 	# Each record is assigned an id in sequence, starting
@@ -132,20 +147,15 @@ sub parse_wiretype {
 		my $name = shift(@lines);
 
 		my $a_colour = parse_colour(shift(@lines)) or do {
-			send_error(
-				"Invalid file format. Failed to read a-wire colour for wiretype record $id",
-				415
-			);
+			error("Invalid file format. Failed to read a-wire colour for wiretype record $id");
+			return undef;
 		};
 
 		my $b_colour = parse_colour(shift(@lines)) or do {
-			send_error(
-				"Invalid file format. Failed to read b-wire colour for wiretype record $id",
-				415
-			);
+			error("Invalid file format. Failed to read b-wire colour for wiretype record $id");
+			return undef;
 		};
 
-		#debug "$id :: $name : $a_colour : $b_colour";
 		push(@rv, {
 			id => $id,
 			name => $name,
@@ -177,7 +187,6 @@ sub parse_colour {
 	$hex =~ s/(..)(..)(..)/$3$2$1/;
 
 	return $hex;
-
 }
 
 
@@ -214,7 +223,8 @@ sub store_wiretypes {
 			$wiretype->{a_colour},
 			$wiretype->{b_colour},
 		) or do {
-			error("ERROR writing wiretype record to database");
+			database->rollback;
+			send_error("ERROR writing wiretype record to database");
 		};
 	}	
 }

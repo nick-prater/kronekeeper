@@ -26,12 +26,22 @@
 
 
 
-		<form action="wiretype" method="POST" enctype="multipart/form-data">
-
+		<form action="wiretype" method="POST" enctype="multipart/form-data" id="wiretype_upload_form">
 			<fieldset>
-				<legend>Upload Wiretype Definition</legend>
-				<input type="file" name="file" required="required">
-				<input type="submit" name="submit" value="Upload">
+				<legend>Import Wiretype Definition File</legend>
+				[% IF wiretype_error_code == 'ERROR_ZERO_SIZE' %]
+					<p class="error">ERROR: Uploaded file has zero size. Please try again.</p>
+				[% ELSIF wiretype_error_code == 'ERROR_NO_FILE' %]
+					<p class="error">ERROR: No file was Uploaded. Please try again.</p>
+				[% ELSIF wiretype_error_code == 'ERROR_TOO_BIG' %]
+					<p class="error">ERROR: Uploaded file is bigger than maximum size allowed. Please try again.</p>
+				[% ELSIF wiretype_error_code == 'ERROR_BAD_FORMAT' %]
+					<p class="error">ERROR: The format of the uploaded file is invalid. Please try again.</p>
+				[% ELSIF wiretype_error_code == 'SUCCESS' %]
+					<p class="success">File uploaded OK.</p>
+				[% END %]
+				<p class="error" id="wiretype_too_big_message" hidden="hidden">ERROR: The selected file is bigger than the maximum size allowed. Please try again.</p>
+				<input id="wiretype_file" type="file" name="file" required="required" />
 			</fieldset>
 		</form>
 
@@ -50,14 +60,24 @@
 		</table>
 
 
-
-
 	</div>
 
 
 </div>
 
 
+<!-- Dialogs hidden on page load -->
+<div id="confirm_wiretype_upload_dialog" title="KRIS Wiretype Upload" class="dialog" hidden="hidden">
+	<p>
+		<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		Uploading this Wiretype definition will clear any existing mapping between KRIS jumper wiretypes
+		and Kronekeeper jumper templates.
+	</p>
+	<p>
+		This will not change previously imported data, but the new
+		mapping will be used for future KRIS frame imports.
+	</p>
+</div>
 
 
 

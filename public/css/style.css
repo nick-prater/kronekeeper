@@ -625,6 +625,17 @@ td.arrow {
 	font-weight: bold;
 }
 
+#wiretype_upload_form p.error {
+	margin: 0px;
+	color: red;
+	font-weight: bold;
+}
+#wiretype_upload_form p.success {
+	margin: 0px;
+	color: green;
+	font-weight: bold;
+}
+
 
 /* Custom drop-down select styling, which allows rich html options
  * this is used to display and select jumper template options for the
