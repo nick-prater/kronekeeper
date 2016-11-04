@@ -328,20 +328,25 @@ div.credits.container {
 
 
 
-.block table {
+.block table,
+.kris_jumper_colours table {
 	border-collapse: collapse;
 }
 
 .block td,
-.block th {
+.block th,
+.kris_jumper_colours td,
+.kris_jumper_colours th {
 	border: 1px solid black;
 }
 
-.block th {
+.block th,
+.kris_jumper_colours th {
 	background: #aaaaaa;
 }
 
-.block td {
+.block td,
+.kris_jumper_colours td {
 	background: white;
 	height: 10pt;
 }
@@ -610,15 +615,54 @@ div.credits.container {
 }
 
 
-.wiretype td.colours {
+.kris_jumper_colours table {
+	margin-left: auto;
+	margin-right: auto;
 }
+.kris_jumper_colours th,
+.kris_jumper_colours tr {
+	height: 2em;
+
+}
+.kris_jumper_colours td:nth-child(1) {
+	text-align: center;
+}
+.kris_jumper_colours td:nth-child(2) {
+	border-right: none;
+}
+.kris_jumper_colours td:nth-child(3) {
+	border-left: none;
+}
+.kris_jumper_colours td:nth-child(4),
+.kris_jumper_colours th:nth-child(3) {
+	background: inherit;
+	border: none;
+	width: 2em;
+	text-align: center;
+}
+
+.kris_jumper_colours td:nth-child(5) {
+	width: 20em;
+}
+
+.kris_jumper_colours .empty_table td {
+	font-style: italic;
+	font-size: 80%;
+	background: inherit;
+	text-align: center;
+}
+
+
+
 .wiretype div.wire {
 	height: 2em;
 	width: 4em;
 	margin-top: 1px;
+	font-size: 50%;
 }
 .wiretype div.wire_b {
 	border-left: 0px;
+	margin-right: 0.5em;
 }
 
 td.arrow {
@@ -637,6 +681,13 @@ td.arrow {
 }
 
 
+
+
+
+
+
+
+
 /* Custom drop-down select styling, which allows rich html options
  * this is used to display and select jumper template options for the
  * KRIS import process.
@@ -652,10 +703,13 @@ td.arrow {
 
 .custom-select div.selection {
 	display: inline-block;
-	width: 15em;
+	width: 20em;
 	cursor: pointer;
+/*
 	border: 1px solid black;
 	border-radius: 3px;
+*/
+	background: #fff;
 }
 
 .custom-select .selection span.arrow {

@@ -55,7 +55,7 @@
 				</tr>
 			</thead>
 			<tbody id="wiretype_table_body">
-				<tr class="empty_table"><td colspan="4">No wiretype mappings defined...</td></tr>
+				<tr class="empty_table"><td colspan="5">No wiretype mappings defined. Please upload a Wiretype Definition file.</td></tr>
 			</tbody>
 		</table>
 
