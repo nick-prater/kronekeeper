@@ -47,9 +47,14 @@ define([
 
 		selection.click(function(e) {
 
-			e.stopPropagation();
-
 			if(list.is(":hidden")) {
+
+				e.stopPropagation();
+
+				/* If any other custom-select dropdowns are showing, hide them
+				 * by triggering a click event, so the event handlers are cleaned-up
+				 */
+				$("div.custom-select").has("li:visible").trigger("click");
 
 				list.show();
 
@@ -88,7 +93,6 @@ define([
 
 			function handle_document_click(e) {
 				
-				e.stopPropagation();
 				hide_dropdown();
 			}
 
