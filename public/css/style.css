@@ -616,6 +616,10 @@ div.credits.container {
 .wiretype div.wire {
 	height: 2em;
 }
+.wiretype div.wire_b {
+	border-left: 0px;
+}
+
 
 
 /* Custom drop-down select styling, which allows rich html options
@@ -631,23 +635,31 @@ div.credits.container {
 	display: inline-block;
 }
 
-.custom-select span {
+.custom-select div.selection {
 	display: inline-block;
-	min-width: 180px;
+	width: 15em;
 	cursor: pointer;
 	border: 1px solid black;
 	border-radius: 3px;
+}
+
+.custom-select .selection span.arrow {
+	margin-right: 0.25em;
+	float: right;
 }
 
 .custom-select ul {
 	position: absolute;
 	display: none;
 	border: 1px solid #333;
-	width: 99%;
-	max-height: 200px;
+	width: 15em;
+	max-height: 300px;
 	overflow: auto;
 	z-index: 10000;
 	list-style: none;
+	padding: 0px;
+	margin-top: 1px;
+	background: #fff; 
 }
 
 .custom-select ul li {
@@ -658,7 +670,7 @@ div.credits.container {
 
 .custom-select ul li:hover {
 	background-color: #666;
-	color: #FFF;
+	color: #fff;
 }
 
 .custom-select ul li:last-child {
@@ -673,6 +685,11 @@ div.credits.container {
 	text-align: center;
 	height: 2em;
 	float: left;
+}
+
+.custom-select div.wire_b {
+	margin-right: 1em;
+	border-left: 0px;
 }
 
 

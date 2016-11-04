@@ -59,18 +59,21 @@
 
 
 <div class="custom-select">
-	<span>Select Option</span>
+	<div class="selection">
+		<span class="option">Select Option</span>
+		<span class="arrow">&#9660;</span>
+	</div>
 	<ul>
 [% FOREACH template IN jumper_templates %]
-		<li data-jumper_template_id="[% template.id %]">
+		<li data-value="[% template.id %]">
 			<div
-				class="wire"
+				class="wire wire_a"
 				style="background:[% template.a_colour_code | html %]; color:[% template.a_contrasting_colour_code | html %];"
 			>
 				&nbsp;
 			</div>
  			<div
-				class="wire"
+				class="wire wire_b"
 				style="background:[% template.b_colour_code | html %]; color:[% template.b_contrasting_colour_code | html %];"
 			>
 				&nbsp;			
@@ -83,17 +86,16 @@
 
 
 
-
 <!-- Template for Wiretype mapping table row -->
 <script type="text/template" id="row_template">
 				<td class="id NP"><%- kris_wiretype_id %></td>
 				<td class="name"><%- kris_wiretype_name %></td>
 				<td class="colours">
 					<div class="wires">
-						<div class="wire" style="background: <%- kris_colour_a %>;">
+						<div class="wire wire_a" style="background: <%- kris_colour_a %>;">
 							&nbsp;
 						</div>
-						<div class="wire" style="background: <%- kris_colour_b %>;">
+						<div class="wire wire_b" style="background: <%- kris_colour_b %>;">
 							&nbsp;
 						</div>
 	  				</div>

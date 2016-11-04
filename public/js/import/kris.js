@@ -25,10 +25,12 @@ require([
 	'import/kris/dropdown'
 
 ], function (
-	wiretype
+	wiretype,
+	dropdown
 ) {
         'use strict';
 
+	dropdown.initialise("div.custom-select");
 
 
 

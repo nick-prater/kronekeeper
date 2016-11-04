@@ -37,40 +37,76 @@ define([
 	 *   http://www.jankoatwarpspeed.com/reinventing-a-drop-down-with-css-and-jquery/
 	 */
 
-	var lists = $('.custom-select');
 
-	/* Handle click on the dropdown list */
-	lists.on('click', function(e) {
+	function initialise(selector) {
 
-		e.stopPropagation();
+		$(selector).each(function() {
 
-		lists.not(this).find('ul:visible').hide();
-		$(this).find('ul').slideToggle(0);
-		
+			var container = $(this);
+			var list = container.find('ul');
+			var selection = container.find("div.selection");
+			var selection_label = selection.find("span.option");
 
-		/* Clicked target may be a child element, rather than the list item iteslf */
-		var li = $(e.target).parentsUntil('ul').find('li').first();
+			selection.click(function(e) {
 
-		console.log("size: " + li.length);
+				e.stopPropagation();
 
-		if (li) {
+				if(list.is(":hidden")) {
 
-			console.log(li);
+					list.show();
 
-			li = $(e.target);
-			/* Set html of top position to match the selected item */
-			$(this).find('span').html(li.html());
+					/* Add event handlers */
+					list.find('li').on("click", handle_select);
+					$(document).on("click", handle_document_click);
+					$(document).on("keydown", handle_keydown);
 
-			console.log("selected " + li.data('jumper_template_id'));
-		}
-	});
+				}
 
-	/* Collapse dropdown if user clicks anywhere else on the page */
-	/* TODO: react the same way on escape */
-	$(document).click(function(e) {
-		lists.find('ul:visible').hide();
-	});
+				function hide_dropdown() {
+
+					list.hide();
+
+					/* Clean-up event handlers */
+					list.find('li').off("click", handle_select);
+					$(document).off("click", handle_document_click);
+					$(document).off("keydown", handle_keydown);
+				}
+
+				function handle_keydown(e) {
+
+					if(e.which == 27) {
+						hide_dropdown();
+					}		
+				}
+
+				function handle_select(e) {
+
+					e.stopPropagation();
+					selection_label.html(e.currentTarget.innerHTML);
+					selection_label.data("value", e.currentTarget.dataset.value);
+	
+					console.log("selected " + selection_label.data("value"));
+					hide_dropdown();
+				}
+
+				function handle_document_click(e) {
+					
+					e.stopPropagation();
+					hide_dropdown();
+				}
+
+			});
+
+		});
+
+	}
+
 
 
 	console.log("loaded import/kris/dropdown.js");
+
+	/* Our Exports */
+	return {
+		initialise: initialise
+	};
 });
