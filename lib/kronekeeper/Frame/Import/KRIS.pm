@@ -280,8 +280,11 @@ sub jumper_templates {
 		JOIN colour AS b_colour ON (
 			b_colour.id = b_wire.colour_id
 		)
+
 		WHERE jumper_template.account_id = ?
 		AND jumper_template_wire_count(jumper_template.id) = 2 
+
+		ORDER BY jumper_template.name	
 	");
 	$q->execute($account_id);
 	return $q->fetchall_arrayref({});

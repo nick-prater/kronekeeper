@@ -59,7 +59,6 @@ define([
 					list.find('li').on("click", handle_select);
 					$(document).on("click", handle_document_click);
 					$(document).on("keydown", handle_keydown);
-
 				}
 
 				function hide_dropdown() {

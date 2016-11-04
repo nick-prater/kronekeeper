@@ -611,10 +611,11 @@ div.credits.container {
 
 
 .wiretype td.colours {
-	width: 4em;
 }
 .wiretype div.wire {
 	height: 2em;
+	width: 4em;
+	margin-top: 1px;
 }
 .wiretype div.wire_b {
 	border-left: 0px;
@@ -685,6 +686,11 @@ div.credits.container {
 	text-align: center;
 	height: 2em;
 	float: left;
+	margin-top: 1px;
+}
+
+.custom-select div.wire_a {
+	margin-left: 0.5em;
 }
 
 .custom-select div.wire_b {
