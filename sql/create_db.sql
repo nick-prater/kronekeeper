@@ -270,12 +270,13 @@ $$ LANGUAGE plpgsql;
 
 /* Insert Basic Jumper Templates 
  * This needs re-work now that we've made the templates per-account
-SELECT create_jumper_template('Analogue Right', 'R', ARRAY['blu','y']);
-SELECT create_jumper_template('Analogue Left',  'L', ARRAY['blu','red']);
-SELECT create_jumper_template('Analogue Mono',  'M', ARRAY['red','white']);
-SELECT create_jumper_template('DC', 'DC', ARRAY['green','yellow']);
-SELECT create_jumper_template('AES/EBU', 'AES', ARRAY['blue','white']);
-SELECT create_jumper_template(2, 'ABS', 'ABS', ARRAY['black','red','green']);
+SELECT create_jumper_template(2, 'Analogue Right', 'R',     ARRAY['blu','y']);
+SELECT create_jumper_template(2, 'Analogue Left',  'L',     ARRAY['blu','red']);
+SELECT create_jumper_template(2, 'Analogue Mono',  'M',     ARRAY['red','white']);
+SELECT create_jumper_template(2, 'DC',             'DC',    ARRAY['green','yellow']);
+SELECT create_jumper_template(2, 'AES/EBU',        'AES',   ARRAY['blue','white']);
+SELECT create_jumper_template(2, 'Communications', 'COMMS', ARRAY['green','red']);
+SELECT create_jumper_template(2, 'ABS',            'ABS',   ARRAY['black','red','green']);
  */
 
 
