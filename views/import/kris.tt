@@ -83,7 +83,7 @@
 
 <!-- Template for Wiretype mapping table row -->
 <script type="text/template" id="row_template">
-				<td class="id NP"><%- kris_wiretype_id %></td>
+				<td class="id"><%- kris_wiretype_id %></td>
 				<td class="name"><%- kris_wiretype_name %></td>
 				<td class="colours">
 					<div class="wires">

@@ -629,6 +629,7 @@ div.credits.container {
 }
 .kris_jumper_colours td:nth-child(2) {
 	border-right: none;
+	padding-left: 0.5em;
 }
 .kris_jumper_colours td:nth-child(3) {
 	border-left: none;
@@ -642,6 +643,7 @@ div.credits.container {
 }
 
 .kris_jumper_colours td:nth-child(5) {
+	padding-left: 0.5em;
 	width: 20em;
 }
 
@@ -705,10 +707,6 @@ td.arrow {
 	display: inline-block;
 	width: 20em;
 	cursor: pointer;
-/*
-	border: 1px solid black;
-	border-radius: 3px;
-*/
 	background: #fff;
 }
 
@@ -755,10 +753,6 @@ td.arrow {
 	height: 2em;
 	float: left;
 	margin-top: 1px;
-}
-
-.custom-select div.wire_a {
-	margin-left: 0.5em;
 }
 
 .custom-select div.wire_b {
