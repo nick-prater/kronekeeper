@@ -26,13 +26,13 @@
 
 
 
-		<form action="wiretype" method="POST" enctype="multipart/form-data" id="wiretype_upload_form">
+		<form action="/frame/import/kris/wiretype" method="POST" enctype="multipart/form-data" id="wiretype_upload_form">
 			<fieldset>
 				<legend>Import Wiretype Definition File</legend>
 				[% IF wiretype_error_code == 'ERROR_ZERO_SIZE' %]
 					<p class="error">ERROR: Uploaded file has zero size. Please try again.</p>
 				[% ELSIF wiretype_error_code == 'ERROR_NO_FILE' %]
-					<p class="error">ERROR: No file was Uploaded. Please try again.</p>
+					<p class="error">ERROR: No file was uploaded. Please try again.</p>
 				[% ELSIF wiretype_error_code == 'ERROR_TOO_BIG' %]
 					<p class="error">ERROR: Uploaded file is bigger than maximum size allowed. Please try again.</p>
 				[% ELSIF wiretype_error_code == 'ERROR_BAD_FORMAT' %]
@@ -60,6 +60,33 @@
 		</table>
 
 
+		<h2>Import Krone Frame</h2>
+
+		<p>
+			Once the jumper types have been mapped, a .KRN file may be uploaded here, to import a frame from KRIS into Kronekeeper. The name of the
+			imported frame will be automatically extracted from the file. A successful import will always create a new frame within Kronekeeper.
+			Existing frames will not be overwritten, even when they share the same name.
+		</p>
+
+		<form action="/frame/import/kris/krn" method="POST" enctype="multipart/form-data" id="krn_upload_form">
+			<fieldset>
+				<legend>Upload KRN file</legend>
+				[% IF krn_error_code == 'ERROR_ZERO_SIZE' %]
+					<p class="error">ERROR: Uploaded file has zero size. Please try again.</p>
+				[% ELSIF krn_error_code == 'ERROR_NO_FILE' %]
+					<p class="error">ERROR: No file was uploaded. Please try again.</p>
+				[% ELSIF krn_error_code == 'ERROR_TOO_BIG' %]
+					<p class="error">ERROR: Uploaded file is bigger than maximum size allowed. Please try again.</p>
+				[% ELSIF krn_error_code == 'ERROR_FAILED_IMPORT' %]
+					<p class="error">ERROR: Failed to import the uploaded file.</p>
+				[% ELSIF wiretype_error_code == 'SUCCESS' %]
+					<p class="success">File uploaded OK.</p>
+				[% END %]
+				<p class="error" id="krn_too_big_message" hidden="hidden">ERROR: The selected file is bigger than the maximum size allowed. Please try again.</p>
+				<input id="krn_file" type="file" name="file" required="required" />
+			</fieldset>
+		</form>
+
 	</div>
 
 
@@ -76,6 +103,14 @@
 	<p>
 		This will not change previously imported data, but the new
 		mapping will be used for future KRIS frame imports.
+	</p>
+</div>
+
+<div id="confirm_krn_upload_dialog" title="KRN Import" class="dialog" hidden="hidden">
+	<p>
+		<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		You are about to create a new frame in Kronekeeper and fill it with data from the KRN file
+		you are uploading.
 	</p>
 </div>
 

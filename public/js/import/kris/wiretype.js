@@ -63,7 +63,6 @@ define([
 
 		render: function() {
 			var json = this.model.toJSON();
-			console.log(json);
 			this.$el.html(this.template(json));
 
 			/* Select jumper template */

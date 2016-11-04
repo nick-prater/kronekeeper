@@ -671,12 +671,14 @@ td.arrow {
 	font-weight: bold;
 }
 
-#wiretype_upload_form p.error {
+#wiretype_upload_form p.error,
+#krn_upload_form p.error {
 	margin: 0px;
 	color: red;
 	font-weight: bold;
 }
-#wiretype_upload_form p.success {
+#wiretype_upload_form p.success,
+#krn_upload_form p.success {
 	margin: 0px;
 	color: green;
 	font-weight: bold;

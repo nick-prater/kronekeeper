@@ -29,6 +29,9 @@ use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
 use kronekeeper::Activity_Log;
+use File::Temp;
+use File::Path qw(remove_tree);
+use Cwd;
 our $VERSION = '0.01';
 
 my $al = kronekeeper::Activity_Log->new();
@@ -49,6 +52,37 @@ prefix '/frame/import/kris' => sub {
 
 		template('import/kris', $data);
 	};	
+
+
+	post '/krn' => require_login sub {
+
+		# The largest frame encountered at Global Radio is 4.7MB
+		# We'll therefore set a limit of 10MB
+		my $max_upload_bytes = 10_485_760;
+
+		user_has_role('import') or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $upload = request->upload('file') or do {
+			error("ERROR: no file uploaded");
+			return krn_error('ERROR_NO_FILE', 400);
+		};
+		$upload->size or do {
+			error("ERROR: uploaded file has zero size");
+			return krn_error('ERROR_ZERO_SIZE', 400);
+		};
+		$upload->size <= $max_upload_bytes or do {
+			error("uploaded file exceeds limit of $max_upload_bytes bytes");
+			return krn_error('ERROR_TOO_BIG', 413);
+		};
+
+		import_krn($upload->tempname);
+
+
+		return krn_error('ERROR_FAILED_IMPORT', 500);
+		return krn_error('SUCCESS');
+	};
 
 
 	post '/wiretype' => require_login sub {
@@ -89,6 +123,23 @@ prefix '/frame/import/kris' => sub {
 
 
 };
+
+
+
+sub krn_error {
+
+	my $krn_error_code = shift;
+	my $http_status = shift;
+
+	my $data = {
+		wiretypes => wiretypes(),
+		krn_error_code => $krn_error_code,
+		jumper_templates => jumper_templates(),
+	};
+
+	$http_status and status($http_status);
+	return template('import/kris', $data);
+}
 
 
 
@@ -302,7 +353,51 @@ sub jumper_templates {
 
 
 
+sub import_krn {
 
+	my $filename = shift;
+	debug("Received KRN file: $filename");
+
+	# We need to create a temporary directory to extract the KRN file tables
+	my $temp = File::Temp->newdir();
+	my $original_dir = cwd();
+	my $dir = $temp->dirname;
+	debug("Original working dir: $original_dir");
+	debug("Using tempdir: $dir");
+
+	chdir($dir) or do {
+		error("ERROR changing to temporary working directory");
+		goto CLEANUP;
+	};
+
+	# Build krn2csv command
+	my $command = sprintf(
+		"DISPLAY=:1 wine32 %s %s",
+		config->{krn_to_csv},
+		$filename,
+	);
+	debug("using command: $command");
+
+	# Run krn2csv command
+	system $command and do {
+		error("ERROR running krn_to_csv command");
+		goto CLEANUP;
+	};
+
+
+	# We now have a directory of CSV files...
+
+
+	CLEANUP:	
+	chdir($original_dir) or do {
+		error("ERROR changing back to original working directory $!");
+	};
+
+	remove_tree($dir) or do {
+		error("ERROR: failed to remove temporary diretory $dir $!");
+	};
+
+}
 
 
 
