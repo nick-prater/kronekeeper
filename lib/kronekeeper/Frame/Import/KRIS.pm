@@ -577,6 +577,7 @@ sub validate_wiretype_mapping {
 			SELECT 1 FROM kris.jumper_type
 			WHERE kris.jumper_type.kris_wiretype_id = kris_jumpers.Wire
 			AND kris.jumper_type.account_id = ?
+			AND kris.jumper_type.jumper_template_id IS NOT NULL
 		)
 	");
 	$q->execute(
@@ -584,7 +585,7 @@ sub validate_wiretype_mapping {
 	);
 	my $result = $q->fetchall_hashref('wiretype');
 
-	if($result) {
+	if(keys(%{$result})) {
 		error(sprintf(
 			"ERROR: Found KRIS Wiretypes %s without Kronekeeper jumper_template mappings",
 			join(",", keys(%{$result}))
