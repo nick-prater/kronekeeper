@@ -553,6 +553,8 @@ sub import_jumpers {
 
 	debug("read $count jumpers from $file");
 
+	dump_wiretypes();
+
 	validate_wiretype_mapping() or do {
 		database->rollback;
 		return 0;
@@ -596,7 +598,19 @@ sub validate_wiretype_mapping {
 }
 
 
+sub dump_wiretypes {
 
+	debug("analysing Wiretypes...");
+	my $q = database->prepare("
+		SELECT Wire AS w, COUNT(*) AS c
+		FROM kris_jumpers
+		GROUP BY w
+	");
+	$q->execute;
+	while(my $r = $q->fetchrow_hashref) {
+		debug("Wiretype $r->{w} used by $r->{c} jumpers");
+	}
+}
 
 
 
