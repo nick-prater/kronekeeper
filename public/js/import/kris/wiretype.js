@@ -62,21 +62,20 @@ define([
 		},
 
 		render: function() {
+			var model = this.model;
 			var json = this.model.toJSON();
 			this.$el.html(this.template(json));
 
 			/* Select jumper template */
 			dropdown.initialise(this.$el.find("div.custom-select"), {
 				initial_value: this.model.get("jumper_template_id"),
-				on_change: this.handle_jumper_template_change
+				on_change: function(value) {
+					model.set("jumper_template_id", value);
+				}
 			});
 
 			return this;
-		},
-
-		handle_jumper_template_change: function(value) {
-			this.model.set("jumper_template_id", value);
-		},
+		}
 	});
 
 	

@@ -64,6 +64,7 @@ prefix '/frame/import/kris' => sub {
 			send_error('forbidden' => 403);
 		};
 
+		# Validate parameters
 		my $upload = request->upload('file') or do {
 			error("ERROR: no file uploaded");
 			return krn_error('ERROR_NO_FILE', 400);
@@ -77,8 +78,26 @@ prefix '/frame/import/kris' => sub {
 			return krn_error('ERROR_TOO_BIG', 413);
 		};
 
-		import_krn($upload->tempname);
 
+		# If we have wiretype mappings, commit these to database before processing
+		# the KRN file. If there's an error in the KRN processing, at least the
+		# wiretype mapping will have been saved and won't have to be re-entered.
+		if(param('wiretype_data')) {
+			my $wiretype_data = from_json(param('wiretype_data')) or do {
+				error("supplied wiretype data is invalid");
+				return krn_error('ERROR_INVALID_WIRETYPE_DATA');
+			};
+			store_wiretypes($wiretype_data) or do {
+				error("Failed saving wiretype data mapping");
+				return krn_error('ERROR_INVALID_WIRETYPE_DATA');
+			};
+			database->commit;
+		}
+		else {
+			debug("No wiretype data received, using mapping from database");
+		}
+
+		import_krn($upload->tempname);
 
 		return krn_error('ERROR_FAILED_IMPORT', 500);
 		return krn_error('SUCCESS');
@@ -208,10 +227,10 @@ sub parse_wiretype {
 		};
 
 		push(@rv, {
-			id => $id,
-			name => $name,
-			a_colour => $a_colour,
-			b_colour => $b_colour,
+			kris_wiretype_id => $id,
+			kris_wiretype_name => $name,
+			kris_colour_a => $a_colour,
+			kris_colour_b => $b_colour,
 		});
 
 		$id ++;
@@ -261,23 +280,72 @@ sub store_wiretypes {
 			kris_wiretype_id,
 			name,
 			a_wire_colour_code,
-			b_wire_colour_code
+			b_wire_colour_code,
+			jumper_template_id
 		)
-		VALUES (?,?,?,DECODE(?, 'hex'),DECODE(?, 'hex'))
+		VALUES (?,?,?,DECODE(?, 'hex'),DECODE(?, 'hex'),?)
 	");
 
 	foreach my $wiretype(@{$wiretypes}) {
-		$q->execute(
+
+		# If specified, confirm jumper_template_id is valid for this account
+		if($wiretype->{jumper_template_id}) {
+			jumper_template_id_valid_for_account(
+				$wiretype->{jumper_template_id}
+			) or do {
+				database->rollback;
+				error("jumper_template_id is not valid for this account");
+				send_error("jumper_template_id is not valid for this account");
+			};
+		}	
+
+		# Strip any leading '#' from the colour codes
+		my $colour_a = $wiretype->{kris_colour_a} =~ s/^#//;
+		my $colour_b = $wiretype->{kris_colour_b} =~ s/^#//;
+
+		my @values = (
 			$account_id,
-			$wiretype->{id},
-			$wiretype->{name},
-			$wiretype->{a_colour},
-			$wiretype->{b_colour},
-		) or do {
+			$wiretype->{kris_wiretype_id},
+			$wiretype->{kris_wiretype_name},
+			$wiretype->{kris_colour_a},
+			$wiretype->{kris_colour_b},
+			$wiretype->{jumper_template_id},
+		);
+
+		$q->execute(@values) or do {
 			database->rollback;
+			error("ERROR writing wiretype record to database");
 			send_error("ERROR writing wiretype record to database");
 		};
-	}	
+	}
+
+	return 1;
+}
+
+
+
+sub jumper_template_id_valid_for_account {
+
+	my $jumper_template_id = shift;
+	my $account_id = shift || session('account')->{id};
+
+	$jumper_template_id && $jumper_template_id =~ m/^\d+$/ or do {
+		error "jumper_template_id is not an integer: [$jumper_template_id]";
+		return undef;
+	};
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM jumper_template
+		WHERE jumper_template.account_id = ?
+		AND jumper_template.id = ?
+	");
+	$q->execute(
+		$account_id,
+		$jumper_template_id
+	);
+
+	return $q->fetchall_arrayref({});
 }
 
 

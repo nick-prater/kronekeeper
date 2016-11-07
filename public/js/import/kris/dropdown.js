@@ -99,8 +99,8 @@ define([
 					/* Selection has changed */
 					selection_label.data("value", clicked_value);
 					console.log("selection changed:", clicked_value);
-					if(options.callback) {
-						options.callback(clicked_value);
+					if(options.on_change) {
+						options.on_change(clicked_value);
 					}
 				}
 
