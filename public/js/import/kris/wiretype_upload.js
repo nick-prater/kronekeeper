@@ -89,6 +89,9 @@ define([
 	}
 
 
+	/* Clear file selection on load */
+	reset_wiretype_upload_form();
+
 	console.log("loaded import/kris/wiretype_upload.js"); 
 });
 

@@ -66,13 +66,17 @@ define([
 			this.$el.html(this.template(json));
 
 			/* Select jumper template */
-			dropdown.initialise(
-				this.$el.find("div.custom-select"),
-				this.model.get("jumper_template_id")
-			);
+			dropdown.initialise(this.$el.find("div.custom-select"), {
+				initial_value: this.model.get("jumper_template_id"),
+				on_change: this.handle_jumper_template_change
+			});
 
 			return this;
-		}
+		},
+
+		handle_jumper_template_change: function(value) {
+			this.model.set("jumper_template_id", value);
+		},
 	});
 
 	
@@ -108,6 +112,8 @@ define([
 
 	console.log("loaded import/kris/wiretype.js");
 	console.log(wiretype_collection.length + " wiretypes initialised");
+
+	return wiretype_collection;
 });
 
 

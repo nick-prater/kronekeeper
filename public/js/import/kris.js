@@ -21,7 +21,6 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 require([
-	'import/kris/wiretype',
 	'import/kris/wiretype_upload',
 	'import/kris/krn_upload',
 

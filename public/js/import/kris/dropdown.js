@@ -39,7 +39,15 @@ define([
 
 
 	/* Initialises a custom drop-down select widget. Pass a jquery reference to the containing div */
-	function initialise(container, initial_value) {
+	function initialise(container, options) {
+
+		/* Options:
+		 *   initial_value: Optional - selects this item from the list on initialisation
+		 *   on_change: Optional callback, called when selection changes
+		 */
+		if(!options) {
+			options = {};
+		}
 
 		var list = container.find('ul');
 		var selection = container.find("div.selection");
@@ -85,9 +93,17 @@ define([
 
 				e.stopPropagation();
 				selection_label.html(e.currentTarget.innerHTML);
-				selection_label.data("value", e.currentTarget.dataset.value);
+				var clicked_value = e.currentTarget.dataset.value;
 
-				console.log("selected " + selection_label.data("value"));
+				if(selection_label.data("value") != clicked_value) {
+					/* Selection has changed */
+					selection_label.data("value", clicked_value);
+					console.log("selection changed:", clicked_value);
+					if(options.callback) {
+						options.callback(clicked_value);
+					}
+				}
+
 				hide_dropdown();
 			}
 
@@ -98,9 +114,9 @@ define([
 
 		});
 
-		if(initial_value) {
+		if(options.initial_value) {
 			selection_label.html(
-				list.find("li[data-value='" + initial_value + "']").first().html()
+				list.find("li[data-value='" + options.initial_value + "']").first().html()
 			);
 		}
 	}

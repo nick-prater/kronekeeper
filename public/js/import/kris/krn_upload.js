@@ -21,10 +21,12 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 define([
+	'import/kris/wiretype',
 	'jquery',
 	'jqueryui'
 
 ], function (
+	wiretype
 ) {
         'use strict';
 
@@ -76,6 +78,8 @@ define([
 			return;
 		}
 
+		var json_string = JSON.stringify(wiretype);
+		$("#wiretype_data").val(json_string);
 		$("#confirm_krn_upload_dialog").dialog("open");
 	});
 
@@ -88,6 +92,10 @@ define([
 		document.getElementById("krn_upload_form").submit();
 	}
 
+
+
+	/* Clear file selection on load */
+	reset_krn_upload_form();
 
 	console.log("loaded import/kris/krn_upload.js"); 
 });
