@@ -605,6 +605,7 @@ sub dump_wiretypes {
 		SELECT Wire AS w, COUNT(*) AS c
 		FROM kris_jumpers
 		GROUP BY w
+		ORDER BY w
 	");
 	$q->execute;
 	while(my $r = $q->fetchrow_hashref) {
