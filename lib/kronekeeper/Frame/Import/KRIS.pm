@@ -551,13 +551,49 @@ sub import_jumpers {
 		$count ++;
 	};
 
-
 	debug("read $count jumpers from $file");
+
+	validate_wiretype_mapping() or do {
+		database->rollback;
+		return 0;
+	};
+
 	return 1;
 }
 
 
 
+sub validate_wiretype_mapping {
+
+	debug("checking KRIS Wiretypes are mapped to a Kronekeeper jumper_template");
+
+	# Locate any KRIS Wiretypes without Kronekeeper jumper template mapping
+	my $q = database->prepare("
+		SELECT DISTINCT Wire AS wiretype
+		FROM kris_jumpers
+		WHERE NOT EXISTS (
+			SELECT 1 FROM kris.jumper_type
+			WHERE kris.jumper_type.kris_wiretype_id = kris_jumpers.Wire
+			AND kris.jumper_type.account_id = ?
+		)
+	");
+	$q->execute(
+		session('account')->{id}
+	);
+	my $result = $q->fetchall_hashref('wiretype');
+
+	if($result) {
+		error(sprintf(
+			"ERROR: Found KRIS Wiretypes %s without Kronekeeper jumper_template mappings",
+			join(",", keys(%{$result}))
+		));
+		return 0;
+	}
+
+	# Otherwise all OK
+	debug("all KRIS Wiretypes are mapped to a Kronekeeper jumper_template");
+	return 1;
+}
 
 
 
