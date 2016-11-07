@@ -202,11 +202,11 @@ sub parse_wiretype {
 	};
 
 	# Each record is assigned an id in sequence, starting
-	# with 1. These ids are referred to by all KRN files
+	# with 0. These ids are referred to by all KRN files
 	# on a given installation.
-	my $id = 1;
+	my $id = 0;
 
-	while($id <= $record_count) {
+	while($id < $record_count) {
 
 		# Each record comprises three lines:
 		#  1) Description of the jumper type
