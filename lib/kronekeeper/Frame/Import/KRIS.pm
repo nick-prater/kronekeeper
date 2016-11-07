@@ -32,6 +32,7 @@ use kronekeeper::Activity_Log;
 use File::Temp;
 use File::Path qw(remove_tree);
 use Cwd;
+use Parse::CSV;
 our $VERSION = '0.01';
 
 my $al = kronekeeper::Activity_Log->new();
@@ -454,13 +455,24 @@ sub import_krn {
 
 
 	# We now have a directory of CSV files...
+	# Load CSV data into temporary database tables
+	import_jumpers($dir) or do {
+		error("ERROR loading KRIS CSV data into database");
+		database->rollback;
+		goto CLEANUP;
+	};
+
+	# Before we get carried away, make sure we can map every KRIS wiretype,
+	# which is essential for a successful import. The check is quick to do
+	# and allows us to bail-out early if we don't have the information we need.
 
 
-	CLEANUP:	
+
+
+	CLEANUP:
 	chdir($original_dir) or do {
 		error("ERROR changing back to original working directory $!");
 	};
-
 	remove_tree($dir) or do {
 		error("ERROR: failed to remove temporary diretory $dir $!");
 	};
@@ -468,7 +480,81 @@ sub import_krn {
 }
 
 
+sub import_jumpers {
 
+	my $dir = shift;
+	my $file = "$dir/Jumpers.csv";
+	my $count = 0;
+	debug("importing $file...");
+
+	database->do("
+		CREATE TEMPORARY TABLE kris_jumpers (
+			SRC_CCT      INTEGER,       --references Circuits.Circuit_Number
+			DEST_CCT     INTEGER,       --references Circuits.Circuit_Number
+			Created      TIMESTAMP,     --ignored by Kronekeeper
+			CE_Create    BOOLEAN,       --ignored by Kronekeeper, indicates if Clyde Electronics made this jumper entry
+			Jumper_Num   INTEGER,       --incrementing Primary Key
+			Other_Way    INTEGER,       --references 'reverse' row Jumpers.JumperNum
+			SRC_Block    TEXT,          --Block full designation, references Blocks.BlockRef
+			DEST_Block   TEXT,          --Block full designation, references Blocks.BlockRef
+			CCT_Title    TEXT,          --always NULL?
+			Insert_Processed BOOLEAN,   --normally True - flag indicates if jumper been physically wired
+			CCT_Title_LU INTEGER,       --ignored by Kronekeeper, references CCTLU.CCT Title Ref
+			Split        INTEGER,       --normally 0, otherwise code indicates wire split - a>a a>b etc...
+			Wire         INTEGER,       --references jumper colour defined in external wiretype.def file
+			Defer_Group  INTEGER        --always -1
+		)
+		ON COMMIT DROP
+	") or do {
+		error("ERROR creating temporary table kris_jumpers");
+		database->rollback;
+		return 0;
+	};
+
+	# It would be faster for postgresql to directly import the csv file, but
+	# that gets us a world of permissions grief. Much easier instead to read
+	# csv file from perl and pass line-by-line to the database.
+
+	my $q = database->prepare("
+		INSERT INTO kris_jumpers(
+			SRC_CCT,
+			DEST_CCT,
+			Created,
+			CE_Create,
+			Jumper_Num,
+			Other_Way,
+			SRC_Block,
+			DEST_Block,
+			CCT_Title,
+			Insert_Processed,
+			CCT_Title_LU,
+			Split,
+			Wire,
+			Defer_Group
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+	");
+
+	my $csv = Parse::CSV->new(
+		file => $file
+	) or do {
+		error("ERROR opening $file");
+		database->rollback;
+		return 0;
+	};
+
+	while(my $data = $csv->fetch) {
+		$q->execute(@{$data}) or do {
+			error("ERROR writing kris_jumper data to database", join(":", @{$data}));
+			database->rollback;
+			return 0;
+		};
+		$count ++;
+	};
+
+
+	debug("read $count jumpers from $file");
+	return 1;
+}
 
 
 
