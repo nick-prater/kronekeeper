@@ -100,7 +100,6 @@ prefix '/frame/import/kris' => sub {
 
 		import_krn($upload->tempname);
 
-		return krn_error('ERROR_FAILED_IMPORT', 500);
 		return krn_error('SUCCESS');
 	};
 
@@ -455,20 +454,26 @@ sub import_krn {
 
 
 	# We now have a directory of CSV files...
+	my $info = read_kris_info($dir) or do {
+		goto CLEANUP;
+	};
+
 	# Load CSV data into temporary database tables
+	import_circuits($dir)      and
+	import_blocks($dir, $info) and
 	import_jumpers($dir) or do {
 		error("ERROR loading KRIS CSV data into database");
 		database->rollback;
 		goto CLEANUP;
 	};
 
-	# Before we get carried away, make sure we can map every KRIS wiretype,
-	# which is essential for a successful import. The check is quick to do
-	# and allows us to bail-out early if we don't have the information we need.
-
-
-
-
+	# Create Kronekeeper entities from imported data
+	create_entities($info) or do {
+		error("Failed creating Kronekeeper entities from imported KRN data");
+		database->rollback;
+		goto CLEANUP;
+	};
+	
 	CLEANUP:
 	chdir($original_dir) or do {
 		error("ERROR changing back to original working directory $!");
@@ -476,7 +481,209 @@ sub import_krn {
 	remove_tree($dir) or do {
 		error("ERROR: failed to remove temporary diretory $dir $!");
 	};
+}
 
+
+
+sub read_kris_info {
+
+	my $dir = shift;
+	my $file = "$dir/Info.csv";
+	debug("importing $file...");
+
+	my $csv = Parse::CSV->new(
+		file => $file,
+		names => [
+			'columns',
+			'blocks',
+			'col_alpha',
+			'block_alpha',
+			'job_num',
+			'job_title',
+			'area',
+			'software_revision',
+			'lock',
+			'lock_pass',
+		],
+	) or do {
+		return error_and_rollback("ERROR opening $file");
+	};
+
+	my $info = $csv->fetch or do {
+		return error_and_rollback("failed reading KRIS info record");
+	};
+
+	# Validation and sanity checks...
+	debug("        job_title: $info->{job_title}");
+	debug("       job_number: $info->{job_num}");
+	debug("             area: $info->{area}");
+	debug("          columns: $info->{columns}");
+	debug("           blocks: $info->{blocks}");
+	debug("software revision: $info->{software_revision}");
+
+	$info->{col_alpha}   and warning("SURPRISE: KRIS col_alpha is not false [$info->{col_alpha}]");
+	$info->{block_alpha} and warning("SURPRISE: KRIS block_alpha is not false [$info->{col_alpha}]");
+	$info->{lock}        and warning("SURPRISE: KRIS frame is marked as locked - proceeding anyway");
+
+	unless($info->{columns} && $info->{columns} =~ m/^[1-9]\d*$/) {
+		error_and_rollback("column count is invalid: [$info->{columns}]");
+	}
+	unless($info->{blocks} && $info->{blocks} =~ m/^[1-9]\d*$/) {
+		error_and_rollback("column count is invalid: [$info->{blocks}]");
+	}
+
+	return $info;
+}
+
+
+# It would be faster for postgresql to directly import the csv files, but
+# that gets us a world of permissions grief. Much easier instead to read
+# csv files from perl and pass line-by-line to the database.
+
+
+sub import_circuits {
+
+	my $dir = shift;
+	my $file = "$dir/Circuits.csv";
+	my $count = 0;
+	debug("importing $file...");
+
+	database->do("
+		CREATE TEMPORARY TABLE kris_circuits (
+			Circuit_Number INTEGER PRIMARY KEY,
+			Title          TEXT,     --always NULL?
+			Cable          TEXT,     --maps to Kronekeeper circuit.cable field
+			Connection     TEXT,     --maps to Kronekeeper circuit.connection field
+			TempLevel      INTEGER   --always NULL?
+		)
+		ON COMMIT DROP
+	") or do {
+		return error_and_rollback("ERROR creating temporary table kris_jumpers");
+	};
+
+	my $q = database->prepare("
+		INSERT INTO kris_circuits (
+			Circuit_Number,
+			Title,
+			Cable,
+			Connection,
+			TempLevel
+		) VALUES (?,?,?,?,?)
+	");
+
+	my $csv = Parse::CSV->new(
+		file => $file
+	) or do {
+		return error_and_rollback("ERROR opening $file");
+	};
+
+	while(my $data = $csv->fetch) {
+		# TempLevel is an integer field, but if it's NULL appears as empty string in
+		# the CSV file. We therefore translate empty string into NULL before importing
+		# into the database, otherwise it will choke on a non-integer value.
+		defined $$data[4] && $$data[4] eq "" and $$data[4] = undef;
+
+		# In all the KRN files we've examined, TempLevel has been NULL. Raise a warning
+		# if this condition isn't met, so we can investigate a new twist to the file format
+		defined $$data[4] and do {
+			warning("UNEXPECTED: KRIS Circuits.TempLevel field is NOT NULL");
+		};
+
+		$q->execute(@{$data}) or do {
+			return error_and_rollback("ERROR writing kris_circuits data to database", join(":", @{$data}));
+		};
+		$count ++;
+	};
+
+	debug("read $count circuits from $file");
+	return 1;
+}
+
+
+sub import_blocks {
+
+	my $dir = shift;
+	my $info = shift;
+	my $file = "$dir/Blocks.csv";
+	my $count = 0;
+	debug("importing $file...");
+
+	database->do("
+		CREATE TEMPORARY TABLE kris_blocks (
+			Block_Ref   TEXT,          --maps to kronekeeper designation e.g. 'A01'
+			Block_Title TEXT,          --maps to kronekeeper block.name
+			CCT1        INTEGER REFERENCES kris_circuits(Circuit_Number),
+			CCT2        INTEGER REFERENCES kris_circuits(Circuit_Number),
+			CCT3        INTEGER REFERENCES kris_circuits(Circuit_Number),
+			CCT4        INTEGER REFERENCES kris_circuits(Circuit_Number),
+			CCT5        INTEGER REFERENCES kris_circuits(Circuit_Number),
+			CCT6        INTEGER REFERENCES kris_circuits(Circuit_Number),
+			CCT7        INTEGER REFERENCES kris_circuits(Circuit_Number),
+			CCT8        INTEGER REFERENCES kris_circuits(Circuit_Number),
+			CCT9        INTEGER REFERENCES kris_circuits(Circuit_Number),
+			CCT0        INTEGER REFERENCES kris_circuits(Circuit_Number),
+			Block_Num   INTEGER,       --indicating groupings?
+			Block_Of    INTEGER,       --indicating groupings?
+			Link_File   TEXT,          --always NULL?
+			Link_Block  TEXT           --always NULL?
+		)
+		ON COMMIT DROP
+	") or do {
+		return error_and_rollback("ERROR creating temporary table kris_jumpers");
+	};
+
+	my $q = database->prepare("
+		INSERT INTO kris_blocks (
+			Block_Ref,
+			Block_Title,
+			CCT1,
+			CCT2,
+			CCT3,
+			CCT4,
+			CCT5,
+			CCT6,
+			CCT7,
+			CCT8,
+			CCT9,
+			CCT0,
+			Block_Num,
+			Block_Of,
+			Link_File,
+			Link_Block
+		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+	");
+
+	my $csv = Parse::CSV->new(
+		file => $file
+	) or do {
+		return error_and_rollback("ERROR opening $file");
+	};
+
+	while(my $data = $csv->fetch) {
+		debug(join(':', @{$data}));
+
+		# Still trying to work out the purpose of Link_File and Link_Block fields
+		# they are numeric, but can sometimes be NULL. In the CSV file, NULL numbers
+		# are encoded as "", so we need to translate those to NULL before inserting
+		# into the database
+		defined $$data[12] && $$data[12] eq "" and $$data[12] = undef;
+		defined $$data[13] && $$data[13] eq "" and $$data[13] = undef;
+
+		$q->execute(@{$data}) or do {
+			return error_and_rollback("ERROR writing kris_block data to database", join(":", @{$data}));
+		};
+		$count ++;
+	};
+
+	debug("read $count blocks from $file");
+
+	# KRN files allocate every block position - there is no concept of an 'empty' frame position
+	my $expected_block_count = $info->{blocks} * $info->{columns};
+	unless($count == $expected_block_count) {
+		return error_and_rollback("block count does not match frame size");
+	}
+	
+	return 1;
 }
 
 
@@ -489,8 +696,8 @@ sub import_jumpers {
 
 	database->do("
 		CREATE TEMPORARY TABLE kris_jumpers (
-			SRC_CCT      INTEGER,       --references Circuits.Circuit_Number
-			DEST_CCT     INTEGER,       --references Circuits.Circuit_Number
+			SRC_CCT      INTEGER REFERENCES kris_circuits(Circuit_Number),
+			DEST_CCT     INTEGER REFERENCES kris_circuits(Circuit_Number),
 			Created      TIMESTAMP,     --ignored by Kronekeeper
 			CE_Create    BOOLEAN,       --ignored by Kronekeeper, indicates if Clyde Electronics made this jumper entry
 			Jumper_Num   INTEGER,       --incrementing Primary Key
@@ -506,14 +713,8 @@ sub import_jumpers {
 		)
 		ON COMMIT DROP
 	") or do {
-		error("ERROR creating temporary table kris_jumpers");
-		database->rollback;
-		return 0;
+		return error_and_rollback("ERROR creating temporary table kris_jumpers");
 	};
-
-	# It would be faster for postgresql to directly import the csv file, but
-	# that gets us a world of permissions grief. Much easier instead to read
-	# csv file from perl and pass line-by-line to the database.
 
 	my $q = database->prepare("
 		INSERT INTO kris_jumpers(
@@ -537,16 +738,12 @@ sub import_jumpers {
 	my $csv = Parse::CSV->new(
 		file => $file
 	) or do {
-		error("ERROR opening $file");
-		database->rollback;
-		return 0;
+		return error_and_rollback("ERROR opening $file");
 	};
 
 	while(my $data = $csv->fetch) {
 		$q->execute(@{$data}) or do {
-			error("ERROR writing kris_jumper data to database", join(":", @{$data}));
-			database->rollback;
-			return 0;
+			return error_and_rollback("ERROR writing kris_jumper data to database", join(":", @{$data}));
 		};
 		$count ++;
 	};
@@ -556,8 +753,7 @@ sub import_jumpers {
 	dump_wiretypes();
 
 	validate_wiretype_mapping() or do {
-		database->rollback;
-		return 0;
+		return error_and_rollback("failed validation of wiretype mapping");
 	};
 
 	return 1;
@@ -599,6 +795,16 @@ sub validate_wiretype_mapping {
 }
 
 
+sub create_entities {
+
+	my $info = shift;
+
+
+	return 1;
+}
+
+
+
 sub dump_wiretypes {
 
 	debug("analysing Wiretypes...");
@@ -615,11 +821,12 @@ sub dump_wiretypes {
 }
 
 
-
-
-
-
-
+sub error_and_rollback{
+	my $message = shift;
+	error($message);
+	database->rollback;
+	return undef;
+}
 
 
 
