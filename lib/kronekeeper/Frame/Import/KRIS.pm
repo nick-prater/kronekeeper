@@ -99,7 +99,7 @@ prefix '/frame/import/kris' => sub {
 		}
 
 		import_krn($upload->tempname);
-
+		database->commit;
 		return krn_error('SUCCESS');
 	};
 
@@ -625,7 +625,8 @@ sub import_blocks {
 			Block_Num   INTEGER,       --indicating groupings?
 			Block_Of    INTEGER,       --indicating groupings?
 			Link_File   TEXT,          --always NULL?
-			Link_Block  TEXT           --always NULL?
+			Link_Block  TEXT,          --always NULL?
+			kronekeeper_block_id INTEGER
 		)
 		ON COMMIT DROP
 	") or do {
@@ -660,7 +661,6 @@ sub import_blocks {
 	};
 
 	while(my $data = $csv->fetch) {
-		debug(join(':', @{$data}));
 
 		# Still trying to work out the purpose of Link_File and Link_Block fields
 		# they are numeric, but can sometimes be NULL. In the CSV file, NULL numbers
@@ -798,9 +798,73 @@ sub validate_wiretype_mapping {
 sub create_entities {
 
 	my $info = shift;
+	my $account_id = session('account')->{id};
 
+	my $frame_id = create_frame($info) or return undef;
+	map_block_ids($frame_id)           or return undef;
+	apply_block_labels()               or return undef;
 
 	return 1;
+}
+
+
+sub create_frame {
+
+	my $info = shift;
+	my $account_id = session('account')->{id};
+
+	my $frame_name = "$info->{job_title} : $info->{area}";
+	debug("creating frame [$frame_name]");
+
+	# Kris frame designations always run left-right, bottom-top
+	my $q = database->prepare("
+		SELECT create_regular_frame(?,?,?,?,?,?) AS new_frame_id
+	");
+	$q->execute(
+		$account_id,
+		$frame_name,
+		$info->{columns},
+		$info->{blocks},
+		'f', # don't reverse horizontal designations
+		'f', # don't reverse vertical designations
+	) or do {
+		return error_and_rollback("ERROR running create_regular_frame on database");
+	};
+	my $r = $q->fetchrow_hashref or do {
+		return error_and_rollback("ERROR no result after running create_regular_frame on database");
+	};
+
+	debug("created new frame with id: ", $r->{new_frame_id});
+	return $r->{new_frame_id};
+}
+
+
+
+sub map_block_ids {
+
+	my $frame_id = shift;
+	my $q = database->prepare("
+		UPDATE kris_blocks
+		SET kronekeeper_block_id = c_designation_to_block_id(?, Block_Ref)
+	");
+	$q->execute(
+		$frame_id,
+	) or return_error_and_rollback("ERROR mapping block_ids");
+}
+
+
+
+
+sub apply_block_labels {
+
+	my $q = database->do("
+		UPDATE block
+		SET name = Block_Title
+		FROM kris_blocks
+		WHERE block.id = kronekeeper_block_id
+		AND Block_Title IS NOT NULL
+		AND Block_Title != ''
+	") or return error_and_rollback("ERROR updaing Kronekeeper block names from KRIS data");
 }
 
 
