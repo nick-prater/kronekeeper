@@ -106,7 +106,15 @@ prefix '/frame/import/kris' => sub {
 			debug("No wiretype data received, using mapping from database");
 		}
 
-		import_krn($upload->tempname);
+		import_krn(
+			$upload->tempname,
+			param('block_type')
+		) or do {
+			error("Failed importing KRN file");
+			database->rollback;
+			return krn_error('ERROR_FAILED_IMPORT');
+		};
+
 		database->commit;
 		return krn_error('SUCCESS');
 	};
@@ -454,6 +462,7 @@ sub block_types {
 sub import_krn {
 
 	my $filename = shift;
+	my $block_type_id = shift;
 	debug("Received KRN file: $filename");
 
 	# We need to create a temporary directory to extract the KRN file tables
@@ -498,7 +507,7 @@ sub import_krn {
 	};
 
 	# Create Kronekeeper entities from imported data
-	create_entities($info) or do {
+	create_entities($info, $block_type_id) or do {
 		error("Failed creating Kronekeeper entities from imported KRN data");
 		database->rollback;
 		goto CLEANUP;
@@ -642,16 +651,16 @@ sub import_blocks {
 		CREATE TEMPORARY TABLE kris_blocks (
 			Block_Ref   TEXT,          --maps to kronekeeper designation e.g. 'A01'
 			Block_Title TEXT,          --maps to kronekeeper block.name
-			CCT1        INTEGER REFERENCES kris_circuits(Circuit_Number),
-			CCT2        INTEGER REFERENCES kris_circuits(Circuit_Number),
-			CCT3        INTEGER REFERENCES kris_circuits(Circuit_Number),
-			CCT4        INTEGER REFERENCES kris_circuits(Circuit_Number),
-			CCT5        INTEGER REFERENCES kris_circuits(Circuit_Number),
-			CCT6        INTEGER REFERENCES kris_circuits(Circuit_Number),
-			CCT7        INTEGER REFERENCES kris_circuits(Circuit_Number),
-			CCT8        INTEGER REFERENCES kris_circuits(Circuit_Number),
-			CCT9        INTEGER REFERENCES kris_circuits(Circuit_Number),
-			CCT0        INTEGER REFERENCES kris_circuits(Circuit_Number),
+			CCT1        INTEGER NOT NULL REFERENCES kris_circuits(Circuit_Number),
+			CCT2        INTEGER NOT NULL REFERENCES kris_circuits(Circuit_Number),
+			CCT3        INTEGER NOT NULL REFERENCES kris_circuits(Circuit_Number),
+			CCT4        INTEGER NOT NULL REFERENCES kris_circuits(Circuit_Number),
+			CCT5        INTEGER NOT NULL REFERENCES kris_circuits(Circuit_Number),
+			CCT6        INTEGER NOT NULL REFERENCES kris_circuits(Circuit_Number),
+			CCT7        INTEGER NOT NULL REFERENCES kris_circuits(Circuit_Number),
+			CCT8        INTEGER NOT NULL REFERENCES kris_circuits(Circuit_Number),
+			CCT9        INTEGER NOT NULL REFERENCES kris_circuits(Circuit_Number),
+			CCT0        INTEGER NOT NULL REFERENCES kris_circuits(Circuit_Number),
 			Block_Num   INTEGER,       --indicating groupings?
 			Block_Of    INTEGER,       --indicating groupings?
 			Link_File   TEXT,          --always NULL?
@@ -828,11 +837,15 @@ sub validate_wiretype_mapping {
 sub create_entities {
 
 	my $info = shift;
+	my $block_type_id = shift;
 	my $account_id = session('account')->{id};
 
 	my $frame_id = create_frame($info) or return undef;
-	map_block_ids($frame_id)           or return undef;
-	apply_block_labels()               or return undef;
+
+	map_block_ids($frame_id) &&
+	place_blocks($block_type_id) &&
+	apply_block_labels() &&
+	apply_circuit_labels() or return undef;
 
 	return 1;
 }
@@ -876,9 +889,18 @@ sub map_block_ids {
 		UPDATE kris_blocks
 		SET kronekeeper_block_id = c_designation_to_block_id(?, Block_Ref)
 	");
-	$q->execute(
-		$frame_id,
-	) or return_error_and_rollback("ERROR mapping block_ids");
+	$q->execute($frame_id) or return_error_and_rollback("ERROR mapping block_ids");
+}
+
+
+sub place_blocks {
+
+	my $block_type_id = shift;
+	my $q = database->prepare("
+		SELECT place_generic_block_type(kronekeeper_block_id, ?)
+		FROM kris_blocks
+	");
+	$q->execute($block_type_id) or return error_and_rollback("ERROR placing blocks");
 }
 
 
@@ -895,10 +917,64 @@ sub apply_block_labels {
 }
 
 
-sub create_circuits {
+sub apply_circuit_labels {
 
+	# We'll do this block-by-block
+	my $q = database->prepare("SELECT * from kris_blocks");
+	$q->execute();
 
+	my $update_circuit = database->prepare("
+		UPDATE circuit
+		SET
+			name = kris_circuits.Title,
+			cable_reference = kris_circuits.Cable,
+			connection = kris_circuits.Connection
+		FROM kris_circuits
+		WHERE kris_circuits.Circuit_Number = ?
+		AND circuit.block_id = ?
+		AND circuit.position = ?
+	");
 
+	my %circuit_map = (
+		 1 => 'cct1',
+		 2 => 'cct2',
+		 3 => 'cct3',
+		 4 => 'cct4',
+		 5 => 'cct5',
+		 6 => 'cct6',
+		 7 => 'cct7',
+		 8 => 'cct8',
+		 9 => 'cct9',
+		10 => 'cct0',
+	);
+
+	while(my $kris_block = $q->fetchrow_hashref()) {
+
+		use Data::Dumper;
+		debug("processing kris block: $kris_block->{block_ref}");
+		debug(Dumper $kris_block);
+
+		# A KRIS block record has a field for each of the
+		# 10 circuits. Process each of these in turn
+		foreach my $position(keys %circuit_map) {
+
+			my $kris_field = $circuit_map{$position};
+
+			debug("    processing position: $position");
+			debug("             kris_field: $kris_field");
+			debug("        kris_circuit_id: $kris_block->{$kris_field}");
+			debug("      kronekeeper block: $kris_block->{kronekeeper_block_id}");
+			debug("               position: $position");
+
+			$update_circuit->execute(
+				$kris_block->{$kris_field},
+				$kris_block->{kronekeeper_block_id},
+				$position,
+			) or return error_and_rollback("ERROR updating Kronekeeper circuit from KRIS data");
+		}
+	}
+
+	return 1;
 }
 
 
