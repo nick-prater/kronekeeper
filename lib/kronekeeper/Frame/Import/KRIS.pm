@@ -29,6 +29,9 @@ use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
 use kronekeeper::Activity_Log;
+use kronekeeper::Frame qw(
+	block_type_id_valid_for_account
+);
 use File::Temp;
 use File::Path qw(remove_tree);
 use Cwd;
@@ -49,6 +52,7 @@ prefix '/frame/import/kris' => sub {
 		my $data = {
 			wiretypes => wiretypes(),
 			jumper_templates => jumper_templates(),
+			block_types => block_types(),
 		};
 
 		template('import/kris', $data);
@@ -77,6 +81,10 @@ prefix '/frame/import/kris' => sub {
 		$upload->size <= $max_upload_bytes or do {
 			error("uploaded file exceeds limit of $max_upload_bytes bytes");
 			return krn_error('ERROR_TOO_BIG', 413);
+		};
+		block_type_id_valid_for_account(param('block_type')) or do {
+			error("block_type invalid");
+			return krn_error('ERROR_INVALID_BLOCK_TYPE', 400);
 		};
 
 
@@ -154,6 +162,7 @@ sub krn_error {
 		wiretypes => wiretypes(),
 		krn_error_code => $krn_error_code,
 		jumper_templates => jumper_templates(),
+		block_types => block_types(),
 	};
 
 	$http_status and status($http_status);
@@ -414,6 +423,27 @@ sub jumper_templates {
 		AND jumper_template_wire_count(jumper_template.id) = 2 
 
 		ORDER BY jumper_template.name	
+	");
+	$q->execute($account_id);
+	return $q->fetchall_arrayref({});
+}
+
+
+sub block_types {
+
+	# KRIS frames have only a single block type, having
+	# 10 pairs. We need to select which kronekeeper block
+	# type to use when importing the frame. This returns
+	# all available 10-pair block types for selection.
+
+	my $account_id = shift || session('account')->{id};
+	my $q = database->prepare("
+		SELECT id, name
+		FROM block_type
+		WHERE block_type.account_id = ?
+		AND circuit_count = 10
+		AND circuit_pin_count = 2
+		ORDER BY name ASC
 	");
 	$q->execute($account_id);
 	return $q->fetchall_arrayref({});
@@ -839,7 +869,6 @@ sub create_frame {
 }
 
 
-
 sub map_block_ids {
 
 	my $frame_id = shift;
@@ -851,8 +880,6 @@ sub map_block_ids {
 		$frame_id,
 	) or return_error_and_rollback("ERROR mapping block_ids");
 }
-
-
 
 
 sub apply_block_labels {
@@ -867,6 +894,12 @@ sub apply_block_labels {
 	") or return error_and_rollback("ERROR updaing Kronekeeper block names from KRIS data");
 }
 
+
+sub create_circuits {
+
+
+
+}
 
 
 sub dump_wiretypes {

@@ -81,10 +81,18 @@
 					<p class="error">ERROR: Failed to import the uploaded file.</p>
 				[% ELSIF krn_error_code == 'ERROR_INVALID_WIRETYPE_DATA' %]
 					<p class="error">Unexpected error: invalid wiretype data.</p>
+				[% ELSIF krn_error_code == 'ERROR_INVALID_BLOCK_TYPE' %]
+					<p class="error">Unexpected error: invalid block type.</p>
 				[% ELSIF krn_error_code == 'SUCCESS' %]
 					<p class="success">File uploaded OK.</p>
 				[% END %]
 				<p class="error" id="krn_too_big_message" hidden="hidden">ERROR: The selected file is bigger than the maximum size allowed. Please try again.</p>
+				<label for="block_type">Use block type:</label>
+				<select id="block_type" name="block_type" required="required">
+				[% FOREACH block_type IN block_types %]
+					<option value="[% block_type.id %]">[% block_type.name | html %]</option>
+				[% END %]
+				</select>
 				<input id="krn_file" type="file" name="file" required="required" />
 				<input id="wiretype_data" name="wiretype_data" type="hidden" />
 			</fieldset>

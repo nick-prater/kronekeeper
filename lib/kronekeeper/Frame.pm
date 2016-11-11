@@ -44,6 +44,7 @@ our $VERSION = '0.01';
 our @EXPORT_OK = qw(
 	frame_id_valid_for_account
 	frame_info
+	block_type_id_valid_for_account
 );
 
 my $al = kronekeeper::Activity_Log->new();
