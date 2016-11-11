@@ -43,6 +43,7 @@ use Exporter qw(import);
 our $VERSION = '0.01';
 our @EXPORT_OK = qw(
 	delete_jumper
+	get_connection_count
 );
 
 

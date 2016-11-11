@@ -32,6 +32,9 @@ use kronekeeper::Activity_Log;
 use kronekeeper::Frame qw(
 	block_type_id_valid_for_account
 );
+use kronekeeper::Jumper qw(
+	get_connection_count
+);
 use File::Temp;
 use File::Path qw(remove_tree);
 use Cwd;
@@ -593,7 +596,8 @@ sub import_circuits {
 			Title          TEXT,     --always NULL?
 			Cable          TEXT,     --maps to Kronekeeper circuit.cable field
 			Connection     TEXT,     --maps to Kronekeeper circuit.connection field
-			TempLevel      INTEGER   --always NULL?
+			TempLevel      INTEGER,  --always NULL?
+			kronekeeper_circuit_id INTEGER
 		)
 		ON COMMIT DROP
 	") or do {
@@ -845,7 +849,8 @@ sub create_entities {
 	map_block_ids($frame_id) &&
 	place_blocks($block_type_id) &&
 	apply_block_labels() &&
-	apply_circuit_labels() or return undef;
+	apply_circuit_labels() &&
+	apply_jumpers() or return undef;
 
 	return 1;
 }
@@ -920,6 +925,7 @@ sub apply_block_labels {
 sub apply_circuit_labels {
 
 	# We'll do this block-by-block
+	# Updates kris_circuits.kronekeeper_circuit_id field
 	my $q = database->prepare("SELECT * from kris_blocks");
 	$q->execute();
 
@@ -930,6 +936,15 @@ sub apply_circuit_labels {
 			cable_reference = kris_circuits.Cable,
 			connection = kris_circuits.Connection
 		FROM kris_circuits
+		WHERE kris_circuits.Circuit_Number = ?
+		AND circuit.block_id = ?
+		AND circuit.position = ?
+	");
+
+	my $update_circuit_id = database->prepare("
+		UPDATE kris_circuits
+		SET kronekeeper_circuit_id = circuit.id
+		FROM circuit
 		WHERE kris_circuits.Circuit_Number = ?
 		AND circuit.block_id = ?
 		AND circuit.position = ?
@@ -950,9 +965,9 @@ sub apply_circuit_labels {
 
 	while(my $kris_block = $q->fetchrow_hashref()) {
 
-		use Data::Dumper;
-		debug("processing kris block: $kris_block->{block_ref}");
-		debug(Dumper $kris_block);
+		#use Data::Dumper;
+		#debug("processing kris block: $kris_block->{block_ref}");
+		#debug(Dumper $kris_block);
 
 		# A KRIS block record has a field for each of the
 		# 10 circuits. Process each of these in turn
@@ -960,13 +975,19 @@ sub apply_circuit_labels {
 
 			my $kris_field = $circuit_map{$position};
 
-			debug("    processing position: $position");
-			debug("             kris_field: $kris_field");
-			debug("        kris_circuit_id: $kris_block->{$kris_field}");
-			debug("      kronekeeper block: $kris_block->{kronekeeper_block_id}");
-			debug("               position: $position");
+			#debug("    processing position: $position");
+			#debug("             kris_field: $kris_field");
+			#debug("        kris_circuit_id: $kris_block->{$kris_field}");
+			#debug("      kronekeeper block: $kris_block->{kronekeeper_block_id}");
+			#debug("               position: $position");
 
 			$update_circuit->execute(
+				$kris_block->{$kris_field},
+				$kris_block->{kronekeeper_block_id},
+				$position,
+			) or return error_and_rollback("ERROR updating Kronekeeper circuit from KRIS data");
+
+			$update_circuit_id->execute(
 				$kris_block->{$kris_field},
 				$kris_block->{kronekeeper_block_id},
 				$position,
@@ -974,6 +995,79 @@ sub apply_circuit_labels {
 		}
 	}
 
+	return 1;
+}
+
+
+sub apply_jumpers {
+
+	my $account_id = session('account')->{id};
+	my $q = database->prepare("
+
+		SELECT
+			SRC_CCT,
+			c1.kronekeeper_circuit_id AS a_kk_circuit_id,
+			DEST_CCT,
+			c2.kronekeeper_circuit_id AS b_kk_circuit_id,
+			SRC_Block,
+			DEST_Block,
+			CCT_Title,
+			Split,
+			Wire,
+			jumper_template_id
+		FROM kris_jumpers
+		JOIN kris_circuits AS c1 ON (
+			c1.Circuit_Number = kris_jumpers.SRC_CCT
+		)
+		JOIN kris_circuits AS c2 ON (
+			c2.Circuit_Number = kris_jumpers.DEST_CCT
+		)
+		JOIN kris.jumper_type ON (
+			jumper_type.account_id = ?
+			AND jumper_type.kris_wiretype_id = Wire			
+		)
+	");
+	$q->execute($account_id);
+
+	my $insert_jumper = database->prepare("
+		SELECT add_simple_jumper(?,?,?) AS jumper_id
+	");
+
+	while( my $jumper = $q->fetchrow_hashref() ) {
+
+		#use Data::Dumper;
+		#debug(Dumper $jumper);
+
+		# Check if a jumper already exists. KRN data
+		# includes each jumper twice... once in each direction
+		my $connections = get_connection_count(
+			$jumper->{a_kk_circuit_id},
+			$jumper->{b_kk_circuit_id},
+		);
+		if( $connections->{complex}->{connection_count} || 
+		    $connections->{simple}->{connection_count}
+		) {
+			#debug("jumper already exists - skipping");
+			next;
+		}
+
+		# Insert jumper of the appropriate type
+		if($jumper->{split} == 0) {
+
+			# simple jumper
+			$insert_jumper->execute(
+				$jumper->{a_kk_circuit_id},
+				$jumper->{b_kk_circuit_id},
+				$jumper->{jumper_template_id},
+			) or do {
+				return error_and_rollback("failed to insert jumper");
+			};
+		}
+		else {
+			error("unknown split value: $jumper->{split}");
+		}
+
+	}
 	return 1;
 }
 
