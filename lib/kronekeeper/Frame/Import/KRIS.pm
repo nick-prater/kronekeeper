@@ -857,7 +857,8 @@ sub create_entities {
 	place_blocks($block_type_id) &&
 	apply_block_labels() &&
 	apply_circuit_labels() &&
-	apply_jumpers() or return undef;
+	apply_jumpers() &&
+	remove_inactive_blocks($frame_id) or return undef;
 
 	return 1;
 }
@@ -1179,6 +1180,55 @@ sub get_pin_id {
 	return $result->{id};
 }
 
+
+sub remove_inactive_blocks {
+
+	# In KRIS all possible blocks in the frame are
+	# populated and of the same type. In Kronekeeper,
+	# we keep track of which positions are empty.
+	#
+	# Once all the KRIS blocks are imported, remove any
+	# blocks which are inactive... no jumpers, and all
+	# text fields empty
+
+	my $frame_id = shift;
+	debug("removing inactive blocks");
+	my $q = database->prepare("
+		SELECT remove_block(block.id)
+		FROM block
+		JOIN vertical ON (vertical.id = block.vertical_id)
+		WHERE vertical.frame_id = ?
+		AND (
+			block.name IS NULL
+			OR block.name = ''
+		)
+		AND NOT EXISTS (
+			SELECT 1
+			FROM circuit
+			WHERE circuit.block_id = block.id
+			AND (
+				circuit.name != ''
+				OR circuit.cable_reference != ''
+				OR circuit.connection != ''
+				OR circuit.note != ''
+			)
+		)
+		AND NOT EXISTS (
+			SELECT 1
+			FROM connection
+			JOIN pin ON (
+				pin.id = connection.pin_id
+			)
+			JOIN circuit ON (
+				circuit.id = pin.circuit_id
+			)
+			WHERE circuit.block_id = block.id
+		)
+	");
+	$q->execute($frame_id);
+
+}
+		
 
 sub dump_wiretypes {
 
