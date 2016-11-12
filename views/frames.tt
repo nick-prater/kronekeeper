@@ -3,7 +3,7 @@
 	<h1>Frames</h1>
 
 	<div class="menu">
-		<a href="add">add frame</a>
+		<a href="add">new frame</a>
 		[% IF can_import %]
 		<a href="import/kris/">import</a>
 		[% END %]
