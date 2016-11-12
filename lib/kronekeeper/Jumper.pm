@@ -44,6 +44,10 @@ our $VERSION = '0.01';
 our @EXPORT_OK = qw(
 	delete_jumper
 	get_connection_count
+	pins_are_connected
+	add_empty_jumper
+	add_jumper_wire
+	jumper_template_wire_colour
 );
 
 
@@ -760,6 +764,22 @@ sub get_pin_info {
 }
 
 
+sub pins_are_connected {
+
+	my $a_pin_id = shift;
+	my $b_pin_id = shift;
+	my $q = database->prepare("
+		SELECT pin_ids_are_connected(?, ?) AS connected
+	");
+	$q->execute(
+		$a_pin_id,
+		$b_pin_id,
+	);
+	my $r = $q->fetchrow_hashref or return undef;
+	return $r->{connected};
+}
+
+
 sub add_simple_jumper {
 
 	my $a_circuit_id = shift;
@@ -852,6 +872,31 @@ sub add_jumper_wire {
 
 	my $result = $q->fetchrow_hashref;
 	return $result->{new_jumper_wire_id};
+}
+
+
+sub jumper_template_wire_colour {
+
+	my $jumper_template_id = shift;
+	my $position = shift;
+
+	debug("extractng wire colour for jumper_template:[$jumper_template_id] position:[$position]");
+
+	my $q = database->prepare("
+		SELECT colour_id
+		FROM jumper_template_wire
+		WHERE jumper_template_id = ?
+		AND position = ?
+	");
+	$q->execute(
+		$jumper_template_id,
+		$position,
+	);
+	my $r = $q->fetchrow_hashref or do {
+		error("failed to extract jumper template wire colour");
+		return undef;
+	};
+	return $r->{colour_id};
 }
 
 

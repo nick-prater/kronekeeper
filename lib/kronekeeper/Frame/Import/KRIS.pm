@@ -34,6 +34,10 @@ use kronekeeper::Frame qw(
 );
 use kronekeeper::Jumper qw(
 	get_connection_count
+	pins_are_connected
+	add_empty_jumper
+	add_jumper_wire
+	jumper_template_wire_colour
 );
 use File::Temp;
 use File::Path qw(remove_tree);
@@ -466,6 +470,7 @@ sub import_krn {
 
 	my $filename = shift;
 	my $block_type_id = shift;
+	my $is_success = 0;
 	debug("Received KRN file: $filename");
 
 	# We need to create a temporary directory to extract the KRN file tables
@@ -510,7 +515,7 @@ sub import_krn {
 	};
 
 	# Create Kronekeeper entities from imported data
-	create_entities($info, $block_type_id) or do {
+	$is_success = create_entities($info, $block_type_id) or do {
 		error("Failed creating Kronekeeper entities from imported KRN data");
 		database->rollback;
 		goto CLEANUP;
@@ -523,6 +528,8 @@ sub import_krn {
 	remove_tree($dir) or do {
 		error("ERROR: failed to remove temporary diretory $dir $!");
 	};
+
+	return $is_success;
 }
 
 
@@ -1029,46 +1036,147 @@ sub apply_jumpers {
 	");
 	$q->execute($account_id);
 
-	my $insert_jumper = database->prepare("
-		SELECT add_simple_jumper(?,?,?) AS jumper_id
-	");
-
 	while( my $jumper = $q->fetchrow_hashref() ) {
 
 		#use Data::Dumper;
 		#debug(Dumper $jumper);
 
-		# Check if a jumper already exists. KRN data
-		# includes each jumper twice... once in each direction
-		my $connections = get_connection_count(
-			$jumper->{a_kk_circuit_id},
-			$jumper->{b_kk_circuit_id},
-		);
-		if( $connections->{complex}->{connection_count} || 
-		    $connections->{simple}->{connection_count}
-		) {
-			#debug("jumper already exists - skipping");
-			next;
-		}
-
 		# Insert jumper of the appropriate type
+		unless(defined $jumper->{split} && $jumper->{split} =~ m/^\d+$/) {
+			return error_and_rollback("invalid jumper->split type");
+		}
 		if($jumper->{split} == 0) {
-
-			# simple jumper
-			$insert_jumper->execute(
-				$jumper->{a_kk_circuit_id},
-				$jumper->{b_kk_circuit_id},
-				$jumper->{jumper_template_id},
-			) or do {
-				return error_and_rollback("failed to insert jumper");
+			insert_simple_jumper($jumper) or do {
+				return error_and_rollback("ERROR adding simple jumper");
 			};
 		}
 		else {
-			error("unknown split value: $jumper->{split}");
+			insert_complex_jumper($jumper) or do {
+				return error_and_rollback("ERROR adding complex jumper");
+			};
 		}
-
 	}
 	return 1;
+}
+
+
+sub insert_simple_jumper {
+
+	my $jumper = shift;
+
+	# Check if a jumper already exists. KRN data
+	# includes each jumper twice... once in each direction,
+	# so it's normal to find duplicates.
+	my $connections = get_connection_count(
+		$jumper->{a_kk_circuit_id},
+		$jumper->{b_kk_circuit_id},
+	);
+	if($connections->{complex}->{connection_count}) {
+		return error_and_rollback(
+			"KRIS data calls for a simple jumper where a complex jumper type already exists"
+		);
+	}
+	if($connections->{simple}->{connection_count}) {
+		debug("jumper already exists - skipping");
+		return 1;
+	}
+
+	# simple jumper
+	my $insert_jumper = database->prepare("
+		SELECT add_simple_jumper(?,?,?) AS jumper_id
+	");
+	$insert_jumper->execute(
+		$jumper->{a_kk_circuit_id},
+		$jumper->{b_kk_circuit_id},
+		$jumper->{jumper_template_id},
+	) or do {
+		return error_and_rollback("failed to insert jumper");
+	};
+}
+
+
+sub insert_complex_jumper {
+
+	my $jumper = shift;
+
+	# KRIS jumpers specify a 'split' code where they are not
+	# a simple pair connection. These split jumpers are only
+	# ever a single wire
+	my @split_pins = (
+		undef,  # type 0 : standard simple jumper
+		[1 => 1], # type 1 a->a
+		[1 => 2], # type 2 a->b
+		[2 => 1], # type 3 b->a
+		[2 => 2], # type 4 b->b
+	);
+	my($a_pin_position, $b_pin_position) = @{$split_pins[$jumper->{split}]} or do {
+		error("invalid jumper->split type");
+		return undef;		
+	};
+
+	# Get pin ids
+	my $a_pin_id = get_pin_id(
+		$jumper->{a_kk_circuit_id},
+		$a_pin_position,
+	);
+	my $b_pin_id = get_pin_id(
+		$jumper->{b_kk_circuit_id},
+		$b_pin_position,
+	);
+	$a_pin_id && $b_pin_id or do {
+		error("ERROR extracting pin ids");
+	};
+
+	# Already connected?
+	if(pins_are_connected($a_pin_id, $b_pin_id)) {
+		debug("pins are already connected");
+		return 1;
+	}
+	
+	# Get colour
+	my $colour_id = jumper_template_wire_colour(
+		$jumper->{jumper_template_id},
+		$a_pin_position,
+	) or return undef;
+	debug("got wire colour: [$colour_id]");
+
+	# Place jumper
+	my $new_jumper_id = add_empty_jumper() or return undef;
+	add_jumper_wire(
+		$new_jumper_id,
+		{
+			a_pin_id => $a_pin_id,
+			b_pin_id => $b_pin_id,
+			wire_colour_id => $colour_id,
+		}
+	) or return undef;
+}
+
+
+sub get_pin_id {
+
+	my $circuit_id = shift;
+	my $pin_position = shift;
+
+	debug("looking up pin id for circuit_id:[$circuit_id] position:[$pin_position]");
+	
+	my $q = database->prepare("
+		SELECT id
+		FROM pin
+		WHERE circuit_id = ?
+		AND position = ?
+	");
+	$q->execute(
+		$circuit_id,
+		$pin_position,
+	);
+	
+	my $result= $q->fetchrow_hashref() or do {
+		error("failed looking up pin_id");
+		return undef;
+	};
+	debug("pin_id: $result->{id}");
+	return $result->{id};
 }
 
 
