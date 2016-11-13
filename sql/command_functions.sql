@@ -87,7 +87,10 @@ BEGIN
 	JOIN vertical ON (vertical.id = block.vertical_id)
 	WHERE vertical.frame_id = p_frame_id
 	AND vertical.designation = c_designation_to_vertical_designation(c_designation)
-	AND block.designation = c_designation_to_block_designation(c_designation);
+	AND (
+		TRIM(LEADING '0' FROM block.designation) = 
+		TRIM(LEADING '0' FROM c_designation_to_block_designation(c_designation))
+	);
 
 	RETURN rv;
 END 
@@ -117,7 +120,10 @@ BEGIN
 	JOIN vertical ON (vertical.id = block.vertical_id)
 	WHERE vertical.frame_id = p_frame_id
 	AND vertical.designation = c_designation_to_vertical_designation(c_designation)
-	AND block.designation = c_designation_to_block_designation(c_designation)
+	AND (
+		TRIM(LEADING '0' FROM block.designation) = 
+		TRIM(LEADING '0' FROM c_designation_to_block_designation(c_designation))
+	)
 	AND circuit.designation = c_designation_to_circuit_designation(c_designation);
 	
 END 
