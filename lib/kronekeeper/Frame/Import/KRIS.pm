@@ -122,6 +122,17 @@ prefix '/frame/import/kris' => sub {
 			return krn_error('ERROR_FAILED_IMPORT');
 		};
 
+		# Update Activity Log
+		my $note = sprintf(
+			'Imported frame from KRIS file [%s]',
+			$upload->filename || 'unspecified',
+		);
+		$al->record({
+			function     => 'kronekeeper::Frame::Import::KRIS',
+			frame_id     => $frame_id,
+			note         => $note,
+		});
+
 		database->commit;
 
 		# All ok... display the new frame
