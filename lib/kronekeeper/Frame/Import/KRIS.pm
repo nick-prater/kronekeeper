@@ -1036,16 +1036,16 @@ sub apply_circuit_labels {
 	");
 
 	my %circuit_map = (
-		 1 => 'cct1',
-		 2 => 'cct2',
-		 3 => 'cct3',
-		 4 => 'cct4',
-		 5 => 'cct5',
-		 6 => 'cct6',
-		 7 => 'cct7',
-		 8 => 'cct8',
-		 9 => 'cct9',
-		10 => 'cct0',
+		 1 => 'cct0',
+		 2 => 'cct1',
+		 3 => 'cct2',
+		 4 => 'cct3',
+		 5 => 'cct4',
+		 6 => 'cct5',
+		 7 => 'cct6',
+		 8 => 'cct7',
+		 9 => 'cct8',
+		10 => 'cct9',
 	);
 
 	while(my $kris_block = $q->fetchrow_hashref()) {
