@@ -46,6 +46,8 @@ define([
 		icon: "ui-icon-check",
 		click: function(e) {
 			submit_form();
+			$("#confirm_krn_upload_dialog").dialog("close");
+			$("#uploading_message_dialog").dialog("open");
 		}
 	};
 	$("#confirm_krn_upload_dialog").dialog({
@@ -56,7 +58,15 @@ define([
 			reset_krn_upload_form();
 		}
 	});
-
+	$("#uploading_message_dialog").dialog({
+		dialogClass: "no-close",
+		autoOpen: false,
+		modal: true,
+		buttons: [],
+		close: function() {
+			reset_krn_upload_form();
+		}
+	});
 
 	
 	/* Handle file selection */

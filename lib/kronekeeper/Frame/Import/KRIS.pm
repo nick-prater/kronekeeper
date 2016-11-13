@@ -113,7 +113,7 @@ prefix '/frame/import/kris' => sub {
 			debug("No wiretype data received, using mapping from database");
 		}
 
-		import_krn(
+		my $frame_id = import_krn(
 			$upload->tempname,
 			param('block_type')
 		) or do {
@@ -123,7 +123,14 @@ prefix '/frame/import/kris' => sub {
 		};
 
 		database->commit;
-		return krn_error('SUCCESS');
+
+		# All ok... display the new frame
+		debug("Success! forwarding to /frame/$frame_id");
+		forward(
+			"/frame/$frame_id",
+			{},
+			{method => 'GET'},
+		);
 	};
 
 
@@ -470,7 +477,7 @@ sub import_krn {
 
 	my $filename = shift;
 	my $block_type_id = shift;
-	my $is_success = 0;
+	my $frame_id = undef;
 	debug("Received KRN file: $filename");
 
 	# We need to create a temporary directory to extract the KRN file tables
@@ -516,7 +523,7 @@ sub import_krn {
 	};
 
 	# Create Kronekeeper entities from imported data
-	$is_success = create_entities($info, $block_type_id) or do {
+	$frame_id = create_entities($info, $block_type_id) or do {
 		error("Failed creating Kronekeeper entities from imported KRN data");
 		database->rollback;
 		goto CLEANUP;
@@ -530,7 +537,7 @@ sub import_krn {
 		error("ERROR: failed to remove temporary diretory $dir $!");
 	};
 
-	return $is_success;
+	return $frame_id;
 }
 
 
@@ -680,9 +687,28 @@ sub import_blocks {
 			kronekeeper_block_id INTEGER
 		)
 		ON COMMIT DROP
-	") or do {
-		return error_and_rollback("ERROR creating temporary table kris_jumpers");
-	};
+	") or return error_and_rollback("ERROR creating temporary table kris_jumpers");
+	database->do("
+		CREATE UNIQUE INDEX kris_blocks_reference_idx ON kris_blocks(Block_Ref)
+	") or return error_and_rollback("ERROR creating index on kris_blocks(Block_Ref)");
+	database->do("
+		CREATE UNIQUE INDEX kris_blocks_kk_block_id_idx ON kris_blocks(kronekeeper_block_id)
+	") or return error_and_rollback("ERROR creating index on kris_blocks(kronekeeper_block_id)");
+
+	# We've encountered some corrupt KRIS files with duplicate Block records
+	# This stored procedure ignores them to allow the import to proceed.
+	# Postgresql >9.5 has this feature built-in, but we're using an earlier version
+	# so have to handle this ourselves.
+	database->do("
+		CREATE OR REPLACE RULE kris_blocks_ignore_duplicate_inserts AS
+			ON INSERT TO kris_blocks
+			WHERE (EXISTS (
+				SELECT 1
+				FROM kris_blocks
+				WHERE kris_blocks.Block_Ref = NEW.Block_Ref
+			))
+			DO INSTEAD NOTHING;
+	") or return error_and_rollback("ERROR creating trigger to prevent duplicate kris_blocks.Block_Ref");
 
 	my $q = database->prepare("
 		INSERT INTO kris_blocks (
@@ -837,6 +863,13 @@ sub import_jumpers {
 	};
 
 	while(my $data = $csv->fetch) {
+		debug join("::", @{$data});
+		# Clean Defer_Group - we've encountered some files where this has garbage data
+		$$data[13] =~ m/^-?\d+$/ or do {
+			warning("encountered bad Jumpers.Defer_Group value - ignoring");
+			$$data[13] = undef;
+		};
+
 		$q->execute(@{$data}) or do {
 			return error_and_rollback("ERROR writing kris_jumper data to database", join(":", @{$data}));
 		};
@@ -905,7 +938,7 @@ sub create_entities {
 	apply_jumpers() &&
 	remove_inactive_blocks($frame_id) or return undef;
 
-	return 1;
+	return $frame_id;
 }
 
 

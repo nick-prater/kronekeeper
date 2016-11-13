@@ -124,6 +124,11 @@
 		you are uploading.
 	</p>
 </div>
+<div id="uploading_message_dialog" title="KRN Import" class="dialog" hidden="hidden">
+	<p>
+		Uploading.... please wait.
+	</p>
+</div>
 
 
 
