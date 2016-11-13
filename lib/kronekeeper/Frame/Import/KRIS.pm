@@ -508,6 +508,7 @@ sub import_krn {
 	# Load CSV data into temporary database tables
 	import_circuits($dir)      and
 	import_blocks($dir, $info) and
+	import_cctlu($dir)         and
 	import_jumpers($dir) or do {
 		error("ERROR loading KRIS CSV data into database");
 		database->rollback;
@@ -737,6 +738,50 @@ sub import_blocks {
 }
 
 
+sub import_cctlu {
+
+	my $dir = shift;
+	my $file = "$dir/CCTLU.csv";
+	my $count = 0;
+	debug("importing $file...");
+
+	database->do("
+		CREATE TEMPORARY TABLE kris_cctlu (
+			cct_title_ref  INTEGER PRIMARY KEY, --referenced by kris_jumpers.cct_title_lu
+			cct_title_text TEXT
+		)
+		ON COMMIT DROP
+	") or do {
+		return error_and_rollback("ERROR creating temporary table kris_cctlu");
+	};
+
+	my $q = database->prepare("
+		INSERT INTO kris_cctlu(
+			cct_title_ref,
+			cct_title_text
+		)
+		VALUES(?, TRIM(?))
+	");
+
+	my $csv = Parse::CSV->new(
+		file => $file
+	) or do {
+		return error_and_rollback("ERROR opening $file");
+	};
+
+	while(my $data = $csv->fetch) {
+		$q->execute(@{$data}) or do {
+			return error_and_rollback("ERROR writing kris_jumper data to database", join(":", @{$data}));
+		};
+		$count ++;
+	};
+
+	debug("read $count cctlu records from $file");
+
+	return 1;
+}
+
+
 sub import_jumpers {
 
 	my $dir = shift;
@@ -756,7 +801,7 @@ sub import_jumpers {
 			DEST_Block   TEXT,          --Block full designation, references Blocks.BlockRef
 			CCT_Title    TEXT,          --always NULL?
 			Insert_Processed BOOLEAN,   --normally True - flag indicates if jumper been physically wired
-			CCT_Title_LU INTEGER,       --ignored by Kronekeeper, references CCTLU.CCT Title Ref
+			CCT_Title_LU INTEGER REFERENCES kris_cctlu(cct_title_ref), --use this to access circuit name
 			Split        INTEGER,       --normally 0, otherwise code indicates wire split - a>a a>b etc...
 			Wire         INTEGER,       --references jumper colour defined in external wiretype.def file
 			Defer_Group  INTEGER        --always -1
@@ -940,7 +985,6 @@ sub apply_circuit_labels {
 	my $update_circuit = database->prepare("
 		UPDATE circuit
 		SET
-			name = kris_circuits.Title,
 			cable_reference = kris_circuits.Cable,
 			connection = kris_circuits.Connection
 		FROM kris_circuits
@@ -1003,6 +1047,22 @@ sub apply_circuit_labels {
 		}
 	}
 
+	# Finally update all the circuit names - which come from a separate lookup table
+	database->do("
+		UPDATE circuit
+		SET name = kris_cctlu.cct_title_text
+		FROM kris_jumpers
+		JOIN kris_circuits ON (
+			SRC_CCT = kris_circuits.Circuit_Number
+			OR DEST_CCT = kris_circuits.Circuit_Number
+		)
+		LEFT JOIN kris_cctlu ON (
+			kris_cctlu.cct_title_ref = kris_jumpers.CCT_Title_LU
+		)
+		WHERE circuit.id = kris_circuits.kronekeeper_circuit_id
+	") or return error_and_rollback("ERROR mapping circuit names");
+
+
 	return 1;
 }
 
@@ -1011,7 +1071,6 @@ sub apply_jumpers {
 
 	my $account_id = session('account')->{id};
 	my $q = database->prepare("
-
 		SELECT
 			SRC_CCT,
 			c1.kronekeeper_circuit_id AS a_kk_circuit_id,
@@ -1037,6 +1096,8 @@ sub apply_jumpers {
 	");
 	$q->execute($account_id);
 
+	# Rather than looping, we could arguably do this in a single database
+	# query, but debugging is easier processing one-by-one
 	while( my $jumper = $q->fetchrow_hashref() ) {
 
 		#use Data::Dumper;
