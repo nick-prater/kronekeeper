@@ -23,12 +23,14 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 require([
 	'block/circuit',
 	'block/caption',
+	'block/loading_overlay',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
 	circuit,
-	caption
+	caption,
+	loading_overlay
 ) {
         'use strict';
 
@@ -74,6 +76,7 @@ require([
 	var circuit_list = new circuit.collection(window.circuits, {block_id: window.block_info.id});
 	var block_view = new Block_View({collection: circuit_list});
 	block_view.render();
+	loading_overlay.hide();
 
 	/* Trigger any highlighting determined by document fragment */
 	$(window).trigger("hashchange");

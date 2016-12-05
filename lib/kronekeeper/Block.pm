@@ -56,9 +56,12 @@ prefix '/block' => sub {
 			send_error('forbidden' => 403);
 		};
 
+		my $block_info = block_info($id);
+
 		template('block', {
-			block_info => block_info($id),
+			block_info => $block_info,
 			circuits   => block_circuits($id),
+			blocks     => ordered_frame_blocks($block_info->{frame_id}),
 		});
 	};
 
@@ -247,6 +250,46 @@ sub update_name {
 }
 
 
+sub ordered_verticals {
+
+	# Returns an array of verticals for the given frame
+	# ordered by position
+	my $frame_id = shift;
+
+	my $q = database->prepare("
+		SELECT id, designation, position
+		FROM vertical
+		WHERE frame_id = ?
+		ORDER BY position ASC
+	");
+	$q->execute($frame_id);
+	return $q->fetchall_arrayref({});
+}
+
+
+sub ordered_frame_blocks {
+
+	# Returns a nested array of verticals and blocks for the given frame
+	# ordered by position
+	my $frame_id = shift;
+
+	my $q = database->prepare("
+		SELECT id, designation, position
+		FROM block
+		WHERE vertical_id = ?
+		ORDER BY position ASC
+	");
+
+	my $verticals = ordered_verticals($frame_id);
+
+	# Add array of blocks to each vertical element
+	foreach my $vertical(@{$verticals}) {
+		$q->execute($vertical->{id});
+		$vertical->{blocks} = $q->fetchall_arrayref({});
+	}
+
+	return $verticals;
+}
 
 
 

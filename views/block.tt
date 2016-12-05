@@ -1,13 +1,46 @@
 [% USE JSON %]
 
 <div class="container block">
-	<h1><a href="[% request.uri_base %]/frame/[% block_info.frame_id %]" title="frame view">[% block_info.frame_name | html %]</a></h1>
+
 
 	<table>
 		<caption id="block_table_caption">
+
+			<dl>
+				<dt>
+					Frame:
+				</dt>
+				<dd>
+					<a href="[% request.uri_base %]/frame/[% block_info.frame_id %]" title="frame view">[% block_info.frame_name | html %]</a>
+				</dd>
+
+				<dt>
+					Block:
+				</dt>
+				<dd>
+					<select id="vertical_select">
+						[% FOREACH vertical IN blocks %]
+						<option 
+							value="[% vertical.id %]"
+							[% IF vertical.id == block_info.vertical_id %]
+							selected="selected"
+							[% END %]
+						>[% vertical.designation | html %]
+						</option>
+						[% END %]
+					</select>
+					<select id="block_select">
+						<option value=""></option>
+					</select>
+				</dd>
+			</dl>
+
+
 			[% block_info.full_designation | html %]
 			:
 			<input class="name" type="text" value="[% block_info.name | html %]" />
+
+
 		</caption>
 		<thead>
 			<tr>
@@ -41,6 +74,13 @@
 	<textarea>
 	</textarea>
 	<div class="message"></div>
+</div>
+
+<div class="overlay" id="loading_overlay">
+	<div id="loading_overlay" class="background"></div>
+	<div class="message">
+		<span>loading...</span>
+	</div>
 </div>
 
 
@@ -121,6 +161,7 @@ Failed to save note.
 <script type="text/javascript">
 var block_info = [% block_info.json %];
 var circuits = [% circuits.json %];
+var blocks = [% blocks.json %];
 </script>
 
 <script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>

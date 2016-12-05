@@ -22,12 +22,15 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 define([
 	'block/highlight',
+	'block/loading_overlay',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
-	highlight
+	highlight,
+	loading_overlay
 ) {
+
         'use strict';
 
 
@@ -45,9 +48,11 @@ define([
 		el: '#block_table_caption',
 
 		events: {
-			'input' : 'highlight_change',
-			'change' : 'save_caption',
-			'keypress' : 'reset_on_escape_key'
+			'input .name' : 'highlight_change',
+			'change .name' : 'save_caption',
+			'keypress .name' : 'reset_on_escape_key',
+			'change #block_select' : 'block_selection_changed',
+			'change #vertical_select' : 'vertical_selection_changed'
 		},
 
 		initialize: function() {
@@ -56,6 +61,14 @@ define([
 				'sync',
 				this.model_synced
 			);
+			this.populate_block_select({
+				selected_id: window.block_info.id
+			});
+
+			var view = this;
+			$(document).bind("keydown", function(e) {
+				view.handle_keydown(e)
+			});
 		},
 
 		highlight_change: function(e) {
@@ -97,7 +110,122 @@ define([
 			if('name' in response) {
 				highlight.element_change_applied(this.$el, "input.name");
 			};
+		},
+
+		populate_block_select: function(args) {
+			console.log("populating block selection");
+
+			/* Get current vertical selection */
+			var selected_vertical_id = $("#vertical_select").val();
+			var vertical;
+			$.each(blocks, function(index, value) {
+				if(value.id == selected_vertical_id) {
+					vertical = value;
+					return false;  //break loop
+				}
+			});
+
+			/* Clear existing block selection */
+			var block_select = $('#block_select');
+			block_select.children().remove();
+
+			/* Populate with new selection - in Kronekeeper, each
+			 * vertical can have a different number of blocks.
+			 * The blocks we have are sorted by position index, which
+			 * always runs from bottom-to-top.
+			 */
+			$.each(vertical.blocks, function(index, block) {
+				var option = $("<option />").val(block.id).text(block.designation);
+				option.attr("data-position", block.position);
+				if( 
+				    (args.selected_id && (block.id == args.selected_id)) ||
+				    (args.selected_position && (block.position == args.selected_position))
+				) {
+					option.attr("selected", "selected");
+				};
+				block_select.prepend(option);
+			});
+		},
+
+		handle_keydown: function(e) {
+			if(e.ctrlKey) {
+				if(e.keyCode == 40) {
+					// CTRL-ARROW_DOWN
+					this.select_next_option("#block_select");
+					return false;
+				}
+				else if(e.keyCode == 38) {
+					// CTRL-ARROW_UP
+					this.select_prev_option("#block_select");
+					return false;
+				}
+				else if(e.keyCode == 37) {
+					// CTRL-ARROW_LEFT
+					this.select_prev_option("#vertical_select");
+					return false;
+				}
+				else if(e.keyCode == 39) {
+					// CTRL-ARROW_RIGHT
+					this.select_next_option("#vertical_select");
+					return false;
+				}
+				else if(e.keyCode == 71) {
+					// CTRL-G
+					console.log("GOTO");
+					return false;
+				}
+			}
+		},
+
+		vertical_selection_changed: function() {
+			console.log("vertical selection changed");
+
+			/* Find position of currently selected block */
+			var selected_block_item = $("#block_select > option:selected");
+			var block_position = selected_block_item.attr("data-position") || 1;
+			console.log("block_position", block_position);
+
+			/* Kronekeeper verticals can differ in the available blocks, so
+			 * we have to re-populate the block selection whenever the vertical
+			 * changes
+			 */
+			this.populate_block_select({
+				selected_position: block_position
+			});
+
+			$("#block_select").trigger("change");
+		},
+
+		block_selection_changed: function() {
+			console.log("block selection changed");
+			var selected_block_id = $('#block_select').val();
+			console.log("loading block", selected_block_id);
+			loading_overlay.show();
+			location.assign("/block/" + selected_block_id);
+		},
+
+		select_next_option: function(option_selector) {
+			var selected_item = $(option_selector + " > option:selected");
+			var next_item = selected_item.next();
+
+			if(selected_item && next_item.html()) {
+				selected_item.prop("selected", false);
+				next_item.prop("selected", true);
+			}
+			$(option_selector).trigger("change");
+		},
+
+		select_prev_option: function(option_selector) {
+			var selected_item = $(option_selector + " > option:selected");
+			var prev_item = selected_item.prev();
+
+			if(selected_item && prev_item.html()) {
+				selected_item.prop("selected", false);
+				prev_item.prop("selected", true);
+			}
+			$(option_selector).trigger("change");
 		}
+
 	});
 
 

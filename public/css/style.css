@@ -764,4 +764,51 @@ td.arrow {
 
 
 
+/* Used to display dark background over page, with loading message */
+.overlay {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+.overlay .background {
+	background: black;
+	opacity: 0.5;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+.overlay .message {
+	position: absolute;
+	padding: 50%;
+}
+.overlay .message span {
+	color: white;
+	font-weight: bold;
+	font-size: 150%;
+	padding: 1em;
+	background: black;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

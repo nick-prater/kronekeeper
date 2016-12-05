@@ -66,7 +66,8 @@ SELECT
 	frame.name AS frame_name,
 	block_type.id AS block_type_id,
 	block_type.name AS block_type_name,
-	CONCAT('#', ENCODE(block_type.colour_html_code, 'hex')) AS html_colour
+	CONCAT('#', ENCODE(block_type.colour_html_code, 'hex')) AS html_colour,
+	vertical.id AS vertical_id
 FROM block
 JOIN vertical ON (vertical.id = block.vertical_id)
 JOIN frame ON (frame.id = vertical.frame_id)
