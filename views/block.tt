@@ -34,11 +34,11 @@
 					</select>
 					&emsp;
 					<span class="circuit_buttons">
-						<a id="load_block_left" title="Block left" class="block_navigation left" href="javascript:void(0)">&larr;</a>
-						<a id="load_block_right" title="Block right" class="block_navigation right" href="javascript:void(0)">&rarr;</a>
+						<a id="load_block_left" title="Block left [shift &larr;]" class="block_navigation left" href="javascript:void(0)">&larr;</a>
+						<a id="load_block_right" title="Block right [shift &rarr;]" class="block_navigation right" href="javascript:void(0)">&rarr;</a>
 						&emsp;
-						<a id="load_block_up" title="Block up" class="block_navigation up" href="javascript:void(0)">&uarr;</a>
-						<a id="load_block_down" title="Block down" class="block_navigation down" href="javascript:void(0)">&darr;</a>
+						<a id="load_block_up" title="Block up [shift &uarr;]" class="block_navigation up" href="javascript:void(0)">&uarr;</a>
+						<a id="load_block_down" title="Block down [shift &darr;]" class="block_navigation down" href="javascript:void(0)">&darr;</a>
 					</span>
 				</dd>
 			</dl>
@@ -63,6 +63,13 @@
 		</tbody>
 	</table>
 
+	<div class="shortcuts">
+		Keyboad shortcuts:
+		<ul>
+			<li>Shift-Arrow keys to navigate around frame</li>
+			<li>double-click jumper to load destination block</li>
+		</ul>
+	</div>
 </div>
 
 <!-- Menus -->	

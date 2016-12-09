@@ -453,6 +453,14 @@ div.credits.container {
 	top: -3pt;
 }
 
+.block div.shortcuts {
+	padding-top: 2em;
+	font-size: 8pt;
+}
+.block .shortcuts ul {
+	margin-top: 0px;
+}
+
 
 .designation {
 	background: #eeeeee;
