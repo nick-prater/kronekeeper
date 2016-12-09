@@ -52,7 +52,8 @@ define([
 			'change .name' : 'save_caption',
 			'keypress .name' : 'reset_on_escape_key',
 			'change #block_select' : 'block_selection_changed',
-			'change #vertical_select' : 'vertical_selection_changed'
+			'change #vertical_select' : 'vertical_selection_changed',
+			'click a.block_navigation' : 'navigate_block'
 		},
 
 		initialize: function() {
@@ -170,6 +171,23 @@ define([
 					return false;
 				}
 			}
+		},
+
+		navigate_block: function(e) {
+			var target = $(e.currentTarget);
+			if(target.hasClass("down")) {
+				this.select_next_option("#block_select");
+			}
+			else if(target.hasClass("up")) {
+				this.select_prev_option("#block_select");
+			}
+			else if(target.hasClass("left")) {
+				this.select_prev_option("#vertical_select");
+			}
+			else if(target.hasClass("right")) {
+				this.select_next_option("#vertical_select");
+			}
+			return false;
 		},
 
 		vertical_selection_changed: function() {

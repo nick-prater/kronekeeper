@@ -32,6 +32,14 @@
 					<select id="block_select">
 						<option value=""></option>
 					</select>
+					&emsp;
+					<span class="circuit_buttons">
+						<a id="load_block_left" title="Block left" class="block_navigation left" href="javascript:void(0)">&larr;</a>
+						<a id="load_block_right" title="Block right" class="block_navigation right" href="javascript:void(0)">&rarr;</a>
+						&emsp;
+						<a id="load_block_up" title="Block up" class="block_navigation up" href="javascript:void(0)">&uarr;</a>
+						<a id="load_block_down" title="Block down" class="block_navigation down" href="javascript:void(0)">&darr;</a>
+					</span>
 				</dd>
 			</dl>
 
