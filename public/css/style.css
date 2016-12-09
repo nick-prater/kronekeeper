@@ -236,7 +236,7 @@ div.credits.container {
 .frame .block div.label,
 .frame .block span.name {
 	position: absolute;
-	width: 100%;
+	width: 15em;
 	margin: 0;
 	top: 50%;
 	left: 50%;
