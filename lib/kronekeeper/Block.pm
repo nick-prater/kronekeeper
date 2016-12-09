@@ -60,7 +60,7 @@ prefix '/block' => sub {
 
 		template('block', {
 			block_info => $block_info,
-			circuits   => block_circuits($id),
+			circuits   => block_circuits($id) || [],
 			blocks     => ordered_frame_blocks($block_info->{frame_id}),
 		});
 	};

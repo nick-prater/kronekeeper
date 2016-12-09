@@ -43,7 +43,7 @@
 
 		</caption>
 		<thead>
-			<tr>
+			<tr id="block_table_headings">
 				<th></th>
 				<th>circuit</th>
 				<th>cable</th>

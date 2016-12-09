@@ -73,9 +73,17 @@ require([
 	var caption_view = new caption.view({
 		model: new caption.model(window.block_info)
 	});
-	var circuit_list = new circuit.collection(window.circuits, {block_id: window.block_info.id});
-	var block_view = new Block_View({collection: circuit_list});
-	block_view.render();
+
+	if(window.circuits.length) {
+		var circuit_list = new circuit.collection(window.circuits, {block_id: window.block_info.id});
+		var block_view = new Block_View({collection: circuit_list});
+		block_view.render();
+	}
+	else {
+		/* This is a block without any circuits, so no circuits table to show */
+		$("#block_table_headings").hide();
+	}
+
 	loading_overlay.hide();
 
 	/* Trigger any highlighting determined by document fragment */
