@@ -148,30 +148,25 @@ define([
 		},
 
 		handle_keydown: function(e) {
-			if(e.ctrlKey) {
+			if(e.shiftKey) {
 				if(e.keyCode == 40) {
-					// CTRL-ARROW_DOWN
+					// SHIFT-ARROW_DOWN
 					this.select_next_option("#block_select");
 					return false;
 				}
 				else if(e.keyCode == 38) {
-					// CTRL-ARROW_UP
+					// SHIFT-ARROW_UP
 					this.select_prev_option("#block_select");
 					return false;
 				}
 				else if(e.keyCode == 37) {
-					// CTRL-ARROW_LEFT
+					// SHIFT-ARROW_LEFT
 					this.select_prev_option("#vertical_select");
 					return false;
 				}
 				else if(e.keyCode == 39) {
-					// CTRL-ARROW_RIGHT
+					// SHIFT-ARROW_RIGHT
 					this.select_next_option("#vertical_select");
-					return false;
-				}
-				else if(e.keyCode == 71) {
-					// CTRL-G
-					console.log("GOTO");
 					return false;
 				}
 			}
