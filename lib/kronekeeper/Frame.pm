@@ -420,17 +420,8 @@ sub frame_blocks {
 	my $frame_id = shift;
 	my $verticals = verticals($frame_id);
 	my $q = database->prepare("
-		SELECT  
-			block.id,
-			block.vertical_id,
-			block.position,
-			block.designation,
-			block.name,
-			block_is_free(block.id) AS is_free,
-			block_type.name AS block_type_name,
-			CONCAT('#', ENCODE(colour_html_code, 'hex')) AS html_colour
-		FROM block
-		LEFT JOIN block_type ON (block_type.id = block.block_type_id)
+		SELECT *
+		FROM block_info
 		WHERE vertical_id = ?
 		ORDER BY position ASC
 	");

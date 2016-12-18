@@ -61,19 +61,24 @@ CREATE OR REPLACE VIEW block_info AS
 SELECT
 	block.id,
 	block.name,
+	block.position,
+	block.designation,
+	block_is_free(block.id) AS is_free,
 	CONCAT(vertical.designation, block.designation) AS full_designation,
 	frame.id AS frame_id,
 	frame.name AS frame_name,
 	block_type.id AS block_type_id,
 	block_type.name AS block_type_name,
-	CONCAT('#', ENCODE(block_type.colour_html_code, 'hex')) AS html_colour,
+	CONCAT('#', ENCODE(
+		COALESCE(block.colour_html_code, block_type.colour_html_code),
+		'hex'
+	)) AS html_colour,
+	CONCAT('#', ENCODE(block_type.colour_html_code, 'hex')) AS default_html_colour,
 	vertical.id AS vertical_id
 FROM block
 JOIN vertical ON (vertical.id = block.vertical_id)
 JOIN frame ON (frame.id = vertical.frame_id)
 LEFT JOIN block_type ON (block_type.id = block.block_type_id);
-
-
 
 
 /* This function returns a table with a single row, containing a nested json array 
