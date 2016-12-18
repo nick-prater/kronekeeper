@@ -1,4 +1,11 @@
 [% USE JSON %]
+[% block_colour_presets = [    
+	'#ffffff',
+	'#aaffff',
+	'#ffaaff',
+	'#ffffaa'
+] %]
+
 <div class="container frame">
 
 	<table>
@@ -47,7 +54,12 @@
 		      [% IF block.is_free  # -- Block position is unused -- %]
 			<td class="block is_free" data-block_id="[% id %]">
 		      [% ELSE  # -- Block position is in use -- %]
-			<td class="block in_use" data-block_id="[% id %]" style="background:[% block.html_colour %]">
+			<td
+				class="block in_use"
+				data-block_id="[% id %]"
+				data-default_block_colour="[% block.default_html_colour %]"
+				style="background:[% block.html_colour %]"
+			>
 		      [% END %]
 				<div class="container">
 					<a class="link" href="[% url %]" title="[% title | html %]">
@@ -111,6 +123,7 @@
 			</ul>
 		</li>
 		<li data-action="remove"><div>Remove Block</div></li>
+		<li data-action="change_colour"><div>Change Colour</div></li>
 	</ul>
 	<ul class="context_menu" id="frame_menu">
 		<li data-action="show_activity_log">
@@ -148,7 +161,7 @@
 		will also need updating to match the new designations.
 	</p>
 	<p>
-		This operation is itself reversible. Repeating it will put things
+		This operation is reversible. Repeating it will put things
 		back as they were.
 	<p>
 		Proceed with reversal of vertical designations?
@@ -163,7 +176,7 @@
 		will also need updating to match the new designations.
 	</p>
 	<p>
-		This operation is itself reversible. Repeating it will put things
+		This operation is reversible. Repeating it will put things
 		back as they were.
 	<p>
 		Proceed with reversal of block designations?
@@ -181,6 +194,55 @@
 		<span class="ui-icon ui-icon-refresh" style="float:left; margin:0 7px 20px 0;"></span>
 		Reversing designations...
 	</p>
+</div>
+
+<div id="dialog_change_colour" title="Choose block colour" style="display:none" class="choose_block_colour">
+
+	<div id="change_colour_selection" class="option_group">
+		<div>
+			<dt>Default</dt>
+			<dd><button class="default"><span id="default_block_colour">&emsp;</span></button></dd>
+		</div>
+		<div>
+			<dt>Custom</dt>
+			<dd>
+				<button id="set default"><span id="custom_block_colour">&emsp;</span></button>
+				<a id="custom_colour_change_link" href="javascript:void(0)" title="choose custom colour">change</a>
+				<!-- This input element is styled so that it's form button is invisible. We
+				     display its colour-picker dialog by triggering a click event on it. We don't
+				     use hidden or display:none as Chrome does not allow click events on hidden
+				     elements.
+				-->
+				<input
+					type="color"
+					name="block_colour"
+					id="custom_block_colour_picker"
+					style="opacity:0;"
+				/>
+			</dd>
+		</div>
+		<div>
+			<dt>Presets</dt>
+			<dd>
+				[% FOREACH c IN block_colour_presets %]
+				  <button><span style="background:[% c %]">&emsp;</span></button>
+				[% END %]
+			</dd>
+		</div>
+	</div>
+	<div id="change_colour_update_message">
+		<div class="message">
+			<span class="ui-icon ui-icon-refresh" style="float:left; margin:0 7px 20px 0;"></span>
+			Updating...
+		</div>
+	</div>
+	<div id="change_colour_error_message">
+		<div class="message">
+			<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+			Error updating block colour.
+		</div>
+	</div>
+
 </div>
 
 

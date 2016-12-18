@@ -113,7 +113,11 @@ prefix '/api/block' => sub {
 					$changes->{name} = $value;
 					last;
 				};
-
+				m/^html_colour$/ and do {
+					update_colour($block_info, $value);
+					$changes->{html_colour} = $value;
+					last;
+				};
 				# else
 				error "failed to update unrecognised circuit field '$field'";
 			}
@@ -243,6 +247,48 @@ sub update_name {
 
 	$al->record({
 		function     => 'kronekeeper::Block::update_name',
+		frame_id     => $info->{frame_id},
+		block_id_a   => $info->{id},
+		note         => $note,
+	});
+}
+
+
+sub update_colour {
+
+	my $info = shift;
+	my $html_colour = shift;
+
+	# html_colour can be undef, in which case block will revert
+	# to using the default colour specified by its block_type
+
+	# Strip leading # from the colour code		
+	$html_colour and $html_colour =~ s/^#//;
+
+	# Rename circuit
+	my $q = database->prepare("
+		UPDATE block SET colour_html_code = DECODE(?, 'hex')
+		WHERE id = ?
+	");
+
+	$q->execute(
+		$html_colour,
+		$info->{id},
+	) or do {
+		database->rollback;
+		send_error('error updating block' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'block %s colour set to %s (was %s)',
+		$info->{full_designation},
+		$html_colour ? "#$html_colour" : 'default',
+		$info->{block_html_colour} ? "$info->{html_colour}" : 'default',
+	);
+
+	$al->record({
+		function     => 'kronekeeper::Block::update_colour',
 		frame_id     => $info->{frame_id},
 		block_id_a   => $info->{id},
 		note         => $note,

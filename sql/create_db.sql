@@ -121,7 +121,9 @@ CREATE TABLE block(
 	vertical_id INTEGER NOT NULL REFERENCES vertical(id),
 	position INTEGER NOT NULL CHECK(position > 0),
 	designation TEXT,
-	name TEXT
+	name TEXT,
+	block_type_id INTEGER REFERENCES block_type(id),
+	colour_html_code BYTEA
 );
 CREATE UNIQUE INDEX block_vertical_position_idx ON block(vertical_id, position);
 CREATE UNIQUE INDEX block_designation_vertical_idx ON block(designation, vertical_id);

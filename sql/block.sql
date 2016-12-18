@@ -74,7 +74,8 @@ SELECT
 		'hex'
 	)) AS html_colour,
 	CONCAT('#', ENCODE(block_type.colour_html_code, 'hex')) AS default_html_colour,
-	vertical.id AS vertical_id
+	vertical.id AS vertical_id,
+	ENCODE(block.colour_html_code,'hex') AS block_html_colour
 FROM block
 JOIN vertical ON (vertical.id = block.vertical_id)
 JOIN frame ON (frame.id = vertical.frame_id)

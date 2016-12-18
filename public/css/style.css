@@ -471,8 +471,8 @@ div.credits.container {
 
 
 .choose_jumper_type {
-	text-align: center;
 	font-size: 65%;
+	text-align: center;
 }
 
 .choose_jumper_type table {
@@ -480,7 +480,7 @@ div.credits.container {
 	margin-right: auto;
 }
 
-.choose_jumper_type .option_group div.option_item {
+.option_group div.option_item {
 	background: #ddd;
 	border: 1px solid black;
 	border-radius: 5px;
@@ -497,25 +497,23 @@ div.credits.container {
 	border: 1px solid black;
 }
 
-.choose_jumper_type .option_item table {
+.option_item table {
 	border: 1px solid white;
 	border-radius: 5px;
 	margin-bottom: 1em;
 	background: white;
 }
-.choose_jumper_type .option_item table.wire_list,
-.choose_jumper_type .option_group div.selected.option_item table.wire_list {
+.option_item table.wire_list,
+.option_group div.selected.option_item table.wire_list {
 	margin: 0px;
 	border: 0px;
 }
-.choose_jumper_type .option_item .wire_list td {
+.option_item .wire_list td {
 	padding: 0px;
 }
-.choose_jumper_type .option_group div:hover.option_item table.wire_list {
+.option_group div:hover.option_item table.wire_list {
 	border: none;
 }
-
-
 
 .choose_jumper_type .message {
 	font-size: 150%;
@@ -535,6 +533,20 @@ div.credits.container {
 	text-align: center; 
 }
 
+
+
+.choose_block_colour dt {
+	margin-top: 1em;
+	margin-bottom: 0.25em;
+	font-weight: bold;
+	font-size: 75%;
+}
+.choose_block_colour dd {
+	margin-left: 0px;
+}
+.choose_block_colour a {
+	font-size: 60%;
+}
 
 
 /* Override jQueryUI background when a dialog is displayed */
@@ -773,13 +785,6 @@ td.arrow {
 
 
 /* Used to display dark background over page, with loading message */
-.overlay {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-}
 .overlay .background {
 	background: black;
 	opacity: 0.5;
@@ -789,16 +794,16 @@ td.arrow {
 	left: 0;
 	right: 0;
 }
-.overlay .message {
-	position: absolute;
-	padding: 50%;
-}
 .overlay .message span {
 	color: white;
 	font-weight: bold;
 	font-size: 150%;
 	padding: 1em;
 	background: black;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 }
 
 

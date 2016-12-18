@@ -23,13 +23,15 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 require([
 	'frame/remove_block',
 	'frame/title',
+	'frame/block_colour',
 	'frame/frame_menu',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
 	remove_block,
-	title
+	title,
+	block_colour
 ) {
         'use strict';
 
@@ -42,6 +44,7 @@ require([
 		select: handle_block_menu_selection
 	});
 	$(".block .menu_button a").on("click", show_block_menu);
+	block_colour.initialise();
 
 
 	function show_block_menu(e) {
@@ -80,6 +83,10 @@ require([
 		);
 		enable_menu_action_if_true(
 			"remove",
+			!jq_block.hasClass("is_free") && !jq_block.hasClass("unavailable")
+		);
+		enable_menu_action_if_true(
+			"change_colour",
 			!jq_block.hasClass("is_free") && !jq_block.hasClass("unavailable")
 		);
 	}
@@ -126,6 +133,16 @@ require([
 						jq_block.find("div.block_type").first().text("");
 						console.log("finished removing block");
 					}
+				});
+				break;
+
+			case "change_colour" :
+				$("#block_menu").menu().hide();
+				block_colour.show_dialog({
+					block_id: jq_block.data("block_id"),
+					jq_element: jq_block,
+					default_colour: jq_block.data("default_block_colour"),
+					current_rgb_text: jq_block.css("background-color")
 				});
 				break;
 		}
