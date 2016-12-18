@@ -25,7 +25,6 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
 use warnings;
-use feature 'switch';
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
@@ -108,15 +107,16 @@ prefix '/api/block' => sub {
 
 		foreach my $field(keys %{$data}) {
 			my $value = $data->{$field};
-			given($field) {
-				when('name') {
+			for($field) {
+				m/^name$/ and do {
 					update_name($block_info, $value);
 					$changes->{name} = $value;
+					last;
 				};
-				default {
-					error "failed to update unrecognised circuit field '$field'";
-				};					
-			};
+
+				# else
+				error "failed to update unrecognised circuit field '$field'";
+			}
 		};
 
 		database->commit;
