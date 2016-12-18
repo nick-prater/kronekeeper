@@ -25,7 +25,6 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
 use warnings;
-use feature 'switch';
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
@@ -210,15 +209,15 @@ prefix '/api/frame' => sub {
 
 		foreach my $field(keys %{$data}) {
 			my $value = $data->{$field};
-			given($field) {
-				when('name') {
+			for($field) {
+				m/^name$/ and do {
 					update_name($frame_info, $value);
 					$changes->{name} = $value;
+					last;
 				};
-				default {
-					error "failed to update unrecognised frame field '$field'";
-				};					
-			};
+				# Else
+				error "failed to update unrecognised frame field '$field'";
+			}
 		};
 
 		database->commit;
