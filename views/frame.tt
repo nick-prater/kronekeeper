@@ -1,9 +1,16 @@
 [% USE JSON %]
-[% block_colour_presets = [    
+[% block_colour_presets = [
 	'#ffffff',
+	'#ffaaaa',
+	'#aaffaa',
+	'#aaaaff',
 	'#aaffff',
 	'#ffaaff',
-	'#ffffaa'
+	'#ffffaa',
+	'#ffddaa',
+	'#aaddff',
+	'#ddaaff',
+	'#aaaaaa'
 ] %]
 
 <div class="container frame">
