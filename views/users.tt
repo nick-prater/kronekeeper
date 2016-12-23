@@ -1,0 +1,18 @@
+
+<div class="container add_frame">
+	<h1>Users</h1>
+
+	<div class="menu">
+		<a href="add">new user</a>
+	</div>
+
+	<table>
+
+		[% FOREACH user IN users %]
+		<tr>
+			<td><a href="[% user.id %]">[% user.name | html %]</a></td>
+		</tr>
+		[% END %]
+	</table>
+
+</div>

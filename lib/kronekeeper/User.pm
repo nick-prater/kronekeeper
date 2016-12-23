@@ -35,6 +35,30 @@ my $al = kronekeeper::Activity_Log->new();
 #TODO Authentication for these routes
 
 
+prefix '/user' => sub {
+
+	get '/' => require_login sub {
+
+		user_has_role('manage_users') or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $q = database->prepare("
+			SELECT * FROM person
+			WHERE account_id = ?
+			ORDER BY name ASC
+		");
+		$q->execute(
+			session('account')->{id}
+		);
+
+		template('users', {
+			users => $q->fetchall_arrayref({})
+		});
+	};
+};
+
+
 prefix '/api/user' => sub {
 
 	post '/add' => sub {
