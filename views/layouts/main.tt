@@ -26,6 +26,9 @@
 				[% END %]
 				</div>
 			<div class="menu">
+				[% IF user_roles.manage_users %]
+ 				<a href="#">users</a>
+				[% END %]
 				<a href="/frame/">list frames</a>
 				<a href="/logout">logout</a>
 			</div>

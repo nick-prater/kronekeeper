@@ -37,8 +37,7 @@ use kronekeeper::Frame::Import::KRIS;
 
 my $al = kronekeeper::Activity_Log->new();
 
-
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 
 hook 'database_error' => sub {
@@ -47,6 +46,15 @@ hook 'database_error' => sub {
 	error("ERROR: Caught database error - rolling back");
 	database->rollback;
 	send_error("Caught database error - rolling back" => 500);
+};
+
+hook 'before_template_render' => sub {
+
+	# Add list of user roles to every template
+	# so we can show/hide options as appropriate
+	my $tokens = shift;
+	my %user_roles = map {$_ => 1} user_roles;
+	$tokens->{user_roles} = \%user_roles;
 };
 
 

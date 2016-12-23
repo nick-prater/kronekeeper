@@ -68,6 +68,7 @@ CREATE TABLE activity_log(
 INSERT INTO role(role) VALUES ('edit');
 INSERT INTO role(role) VALUES ('view_activity_log');
 INSERT INTO role(role) VALUES ('import');
+INSERT INTO role(role) VALUES ('manage_users');
 
 
 
