@@ -67,7 +67,6 @@ prefix '/frame' => sub {
 
 		template('frames', {
 			frames => $f,
-			can_import => user_has_role('import'),
 		});
 	};	
 
