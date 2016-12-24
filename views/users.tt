@@ -1,5 +1,5 @@
 
-<div class="container add_frame">
+<div class="container add_frame user_list">
 	<h1>Users</h1>
 
 	<div class="menu">
@@ -7,10 +7,16 @@
 	</div>
 
 	<table>
-
+		<tr>
+			<th></th>
+			<th>name</th>
+			<th>login</th>
+		</tr>
 		[% FOREACH user IN users %]
 		<tr>
-			<td><a href="[% user.id %]">[% user.name | html %]</a></td>
+			<td class="buttons"><a href="/user/[% user.id %]" title="edit user" class="lsf">edit</a></td>
+			<td>[% user.name | html %]</td>
+			<td>[% user.email | html %]</td>
 		</tr>
 		[% END %]
 	</table>

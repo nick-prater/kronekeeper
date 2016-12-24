@@ -329,23 +329,28 @@ div.credits.container {
 
 
 .block table,
+.user_list table,
 .kris_jumper_colours table {
 	border-collapse: collapse;
 }
 
 .block td,
 .block th,
+.user_list td,
+.user_list th,
 .kris_jumper_colours td,
 .kris_jumper_colours th {
 	border: 1px solid black;
 }
 
 .block th,
+.user_list th,
 .kris_jumper_colours th {
 	background: #aaaaaa;
 }
 
 .block td,
+.user_list td,
 .kris_jumper_colours td {
 	background: white;
 	height: 10pt;
@@ -426,13 +431,19 @@ div.credits.container {
 	vertical-align: middle;
 }
 
+.user_list td.buttons {
+	min-width: 3em;
+	text-align: center;
+}
+
+.user_list .buttons a,
 .block .circuit_buttons a {
 	text-decoration: none;
 	outline: none;
 	color: black;
 	border-radius: 3px;
 }
-
+.user_list .buttons a:hover,
 .block .circuit_buttons a:hover {
         color: white;
         background: #aaaaaa;
