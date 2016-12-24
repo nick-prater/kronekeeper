@@ -54,6 +54,15 @@ prefix '/user' => sub {
 			users => $q->fetchall_arrayref({})
 		});
 	};
+
+	get '/password' => require_login sub {
+
+
+
+		template('user/password', {
+
+		});
+	};
 };
 
 
@@ -139,7 +148,7 @@ prefix '/api/user' => sub {
 			send_error("email is invalid for this account" => 403);
 		}
 
-		if($email == $user->{email}) {
+		if($email eq $user->{email}) {
 			# Changing our own password - must provide current password
 			defined $old_password or do {
 				error("missing old_password parameter when changing own password");
@@ -157,7 +166,6 @@ prefix '/api/user' => sub {
 		}
 
 		# Update password
-
 		user_password(
 			username     => $email,
 			new_password => $new_password,
@@ -167,8 +175,8 @@ prefix '/api/user' => sub {
 		};
 
 		$al->record({
-			function   => '/api/user/password',
-			note       => sprintf("changed password for user '%s'", param('email'))
+			function => '/api/user/password',
+			note     => sprintf("changed password for user '%s'", param('email'))
 		});
 
 		database->commit;

@@ -587,16 +587,19 @@ div.credits.container {
 	font-size: 10pt;
 }
 
+.change_password form ul,
 .add_frame form ul {
 	list-style-type: none;
 	list-style-position: outside;
 	margin: 0px;
 	padding: 0px;
 }
+.change_password form li,
 .add_frame form li {
 	padding: 3px;
 	position: relative;
 }
+.change_password form label,
 .add_frame form label {
 	width: 10em;
 	text-align: right;
@@ -608,6 +611,24 @@ div.credits.container {
 	margin-top: 1em;
 	margin-left: 2em;
 }
+.change_password form li.message,
+.change_password form li.buttons {
+	width: 30em;
+	text-align: center;
+	margin-top: 1em;
+}
+.change_password .message div {
+	display: none;
+}
+.change_password .message .error {
+	color: red;
+}
+.change_password .message .success {
+	color: green;
+}
+
+
+
 
 .credits dt {
 	max-width: 14em;
