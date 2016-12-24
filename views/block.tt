@@ -85,7 +85,7 @@
 <div id="jumper_connection_dialog" title="Jumper connection" class="dialog">
 </div>
 
-<div id="circuit_note_dialog" title="Circuit note" class="dialog">
+<div id="circuit_note_dialog" title="Circuit comments" class="dialog">
 	<textarea>
 	</textarea>
 	<div class="message"></div>
@@ -113,22 +113,22 @@
 					</span>
 					<span>
 		    			<% if(note) { %>
-					<a class="notes_button lsf has_note" href="javascript:void(0)" tabindex="-1" title="Notes">comments</a>
+					<a class="notes_button lsf has_note" href="javascript:void(0)" tabindex="-1" title="Comments">comments</a>
 		    			<% } else  { %>
-					<a class="notes_button lsf" href="javascript:void(0)" tabindex="-1" title="Notes">comments</a>
+					<a class="notes_button lsf" href="javascript:void(0)" tabindex="-1" title="Comments">comments</a>
 		    			<% } %>
 					</span>
 				</td>
 </script>
 
 <script type="text/template" id="saving_note_message">
-Saving note...
+Saving comments...
 </script>
 <script type="text/template" id="saved_note_message">
-Note saved.
+Comments saved.
 </script>
 <script type="text/template" id="failed_saving_note_message">
-Failed to save note.
+Failed to save comments.
 </script>
 
 
