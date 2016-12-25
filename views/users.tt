@@ -13,10 +13,10 @@
 			<th>login</th>
 		</tr>
 		[% FOREACH user IN users %]
-		<tr>
+		<tr [% IF !user.is_active %]class="inactive"[% END %] >
 			<td class="buttons"><a href="/user/[% user.id %]" title="edit user" class="lsf">edit</a></td>
-			<td>[% user.name | html %]</td>
-			<td>[% user.email | html %]</td>
+			<td class="name">[% user.name | html %]</td>
+			<td class="email">[% user.email | html %]</td>
 		</tr>
 		[% END %]
 	</table>

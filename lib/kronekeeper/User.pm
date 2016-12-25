@@ -42,7 +42,13 @@ prefix '/user' => sub {
 		};
 
 		my $q = database->prepare("
-			SELECT * FROM person
+			SELECT
+				id,
+				account_id,
+				email,
+				name,
+				password != '' AS is_active 
+			FROM person
 			WHERE account_id = ?
 			ORDER BY name ASC
 		");

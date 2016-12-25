@@ -82,6 +82,9 @@ prefix '/' => sub {
 
 	post '/login' => sub {
 
+		# If database password field is empty, authentication
+		# will never succeed. We use this property to disable
+		# certain user logins.
 		my ($success, $realm) = authenticate_user(
 			param('username'),
 			param('password'),

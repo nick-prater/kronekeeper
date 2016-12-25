@@ -839,7 +839,11 @@ td.arrow {
 }
 
 
-
+.user_list .inactive td.name,
+.user_list .inactive td.email  {
+	text-decoration: line-through;
+	color: #999;
+}
 
 
 
