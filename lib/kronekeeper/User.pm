@@ -42,13 +42,7 @@ prefix '/user' => sub {
 		};
 
 		my $q = database->prepare("
-			SELECT
-				id,
-				account_id,
-				email,
-				name,
-				password != '' AS is_active 
-			FROM person
+			SELECT * FROM user_info
 			WHERE account_id = ?
 			ORDER BY name ASC
 		");
@@ -63,12 +57,49 @@ prefix '/user' => sub {
 
 	get '/password' => require_login sub {
 
-
-
-		template('user/password', {
-
-		});
+		template('user/password', {});
 	};
+
+	get '/:user_id' => require_login sub {
+
+		my $user_id = param('user_id');
+		my $current_user = logged_in_user;
+
+		# A user can edit their own details, otherwise
+		# must have the manage_users role
+		unless(
+			($user_id == $current_user->{id}) ||
+			user_has_role('manage_users') 
+		) {
+			send_error('forbidden' => 403);
+		}
+
+		# Can only view details of users on one's own account
+		unless(user_id_valid_for_account($user_id)) {
+			error("user is invalid for this account");
+			send_error("user is invalid for this account" => 403);
+		}
+
+		my $user = user_info($user_id);
+		$user->{roles} = user_roles($user->{email});
+
+		# Build hash of roles to help UI construction
+		my $roles = roles();
+		foreach my $role(@{$user->{roles}}) {
+			$roles->{$role}->{assigned} = 1;
+		}
+
+		my $template_data = {
+			role_max_rank => user_role_max_rank($current_user->{id}),
+			user => $user,
+			roles => $roles,
+		};
+		use Data::Dumper;
+		debug Dumper $template_data;
+		template('user', $template_data);
+	};
+
+
 };
 
 
@@ -226,6 +257,70 @@ sub user_email_valid_for_account {
 }
 
 
+sub user_id_valid_for_account {
+
+	my $user_id = shift;
+	my $account_id = shift || session('account')->{id};
+
+	$user_id && $user_id =~ m/^\d+$/ or do {
+		error "user_id is not an integer";
+		return undef;
+	};
+	$account_id && $account_id =~ m/^\d+$/ or do {
+		error "account_id is not an integer";
+		return undef;
+	};
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM person
+		WHERE id = ?
+		AND account_id = ?
+	");
+
+	$q->execute(
+		$user_id,
+		$account_id,
+	);
+
+	return $q->fetchrow_hashref;
+}
+
+
+sub user_role_max_rank {
+	my $user_id = shift;
+	my $q = database->prepare("
+		SELECT MAX(rank) AS max_rank
+		FROM user_role
+		JOIN role ON (role.id = user_role.role_id)
+		WHERE user_role.user_id = ?
+	");
+	$q->execute($user_id);
+	my $r = $q->fetchrow_hashref or return undef;
+
+	return $r->{max_rank};
+}
+
+
+sub user_info {
+	my $user_id = shift;
+	my $q = database->prepare("
+		SELECT *
+		FROM user_info 
+		WHERE id = ?
+	");
+	$q->execute($user_id);
+	return $q->fetchrow_hashref;
+}
+
+
+sub roles {
+	my $q = database->prepare("
+		SELECT * FROM role
+	");
+	$q->execute;
+	return $q->fetchall_hashref('role');
+}
 
 
 1;

@@ -628,6 +628,7 @@ div.credits.container {
 	text-align: center;
 	margin-top: 1em;
 }
+.edit_user .message div,
 .change_password .message div {
 	display: none;
 }
@@ -845,12 +846,24 @@ td.arrow {
 	color: #999;
 }
 
+.edit_user form .roles label {
+	text-align: left;
+	margin-left: 2em;
+}
+.edit_user form .roles input {
+	margin-left: -2em;
+}
+.edit_user form input.email,
+.edit_user form input.name {
+	width: 25em;
+}
 
-
-
-
-
-
+.edit_user form li.message,
+.edit_user form li.buttons {
+	width: 35em;
+	text-align: center;
+	margin-top: 1em;
+}
 
 
 

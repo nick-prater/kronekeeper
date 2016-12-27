@@ -41,8 +41,10 @@ CREATE UNIQUE INDEX person_email_idx ON person(email);
 
 CREATE TABLE role(
 	id SERIAL NOT NULL PRIMARY KEY,
-	role TEXT NOT NULL
+	role TEXT NOT NULL,
+	rank INTEGER NOT NULL DEFAULT 100
 );
+CREATE UNIQUE INDEX role_idx ON role(role);
 
 CREATE TABLE user_role(
 	user_id INTEGER NOT NULL REFERENCES person(id),
@@ -68,7 +70,7 @@ CREATE TABLE activity_log(
 INSERT INTO role(role) VALUES ('edit');
 INSERT INTO role(role) VALUES ('view_activity_log');
 INSERT INTO role(role) VALUES ('import');
-INSERT INTO role(role) VALUES ('manage_users');
+INSERT INTO role(role, hierarchy) VALUES ('manage_users', 100);
 
 
 

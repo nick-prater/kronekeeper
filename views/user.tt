@@ -1,0 +1,103 @@
+[%
+# Define human-readable role names
+# Done in template so we can localise them for other languages
+role_names = {
+	view_activity_log => 'View Activity Log',
+	edit => 'Edit',
+	manage_users => 'Manage Users',
+	import => 'Import'
+}
+%]
+
+
+<div class="container add_frame edit_user">
+	<h1>User details</h1>
+
+
+	<form>
+
+		<ul>
+
+			<li>
+				<label for="login">login:</label>
+				<input 
+					type="email"
+					id="login"
+					name="login"
+					class="email"
+					value="[% user.email | html %]"
+				/>
+			</li>
+
+			<li>
+				<label for="name">name:</label>
+				<input 
+					type="text"
+					id="name"
+					name="name"
+					class="name"
+					value="[% user.name | html %]"
+				/>
+			</li>
+
+			<li>
+				<label for="enabled_checkbox">enabled:</label>
+				<input
+					type="checkbox"
+					name="enabled"
+					id="enabled_checkbox"
+					[% IF user.is_active %]
+					checked="checked"
+					[% END %]
+				/>
+			</li>
+
+			<li>
+				<fieldset class="roles">
+					<legend>roles</legend>
+
+					[% FOREACH key IN roles.keys.sort %]
+					[% SET r = roles.$key %]
+					[% SET label = role_names.$key || key %]
+					<label>
+						<input
+							type="checkbox"
+							name="roles"
+							[% IF r.rank > role_max_rank %]
+							disabled="disabled"
+							[% END %]
+							[% IF r.assigned %]
+							checked="checked"
+							[% END %]
+						/>
+						[% label | html %]
+					</label>
+					[% END %]
+				</fieldset>
+			</li>
+
+			<li class="message">
+				<div id="password_mismatch_message" class="error">New passwords do not match</div>
+				<div id="password_incorrect_message" class="error">Error - old password is incorrect</div>
+				<div id="password_change_error_message" class="error">Error changing password</div>
+				<div id="password_change_ok_message" class="success">&#10004; Password changed OK.</div>
+			</li>
+
+			<li class="buttons">
+				<button
+					type="button"
+					id="reset_password_button"
+					[% IF !user.is_active %]
+					hidden="hidden"
+					[% END %]
+				><span class="lsf">key</span> Reset Password</button>
+
+				<button
+					type="button"
+					id="update_button"
+				><span class="lsf">check</span> Update</button>
+			</li>
+		</ul>
+	</form>
+
+</div>
