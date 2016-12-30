@@ -270,6 +270,18 @@ prefix '/api/user' => sub {
 					$changes->{roles} = $value;
 					last;
 				};
+				m/^is_active$/ and do {
+					if($value) {
+						database->rollback;
+						error("can't re-enable a user using this route");
+						send_error("can't re-enable a user using this route", 400);
+					}
+					else {
+						disable_user($user_info);
+						$changes->{is_active} = $value;
+					}
+					last;
+				};
 				# else
 				error "failed to update unrecognised user field '$field'";
 			}
@@ -589,6 +601,35 @@ sub add_role {
 }
 
 
+sub disable_user {
+
+	# We disable users by setting an empty password in the database.
+	# This is considered invalid - all valid passwords are stored as hashes
+	my $info = shift;
+	debug("disabling login for user $info->{email}");
+
+	my $q = database->prepare("
+		UPDATE person
+		SET password = ''
+		WHERE id = ?
+	");
+	$q->execute($info->{id}) or do {
+		database->rollback;
+		error("error disabling user");
+		send_error("error disabling user" => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'Disabled login for user %s',
+		$info->{email} || '',
+	);
+	$al->record({
+		function     => 'kronekeeper::User::disable_user',
+		note         => $note,
+		to_person_id => $info->{id},
+	});
+}
 
 
 1;
