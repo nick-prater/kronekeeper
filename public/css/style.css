@@ -632,9 +632,11 @@ div.credits.container {
 .change_password .message div {
 	display: none;
 }
+.edit_user .message .error,
 .change_password .message .error {
 	color: red;
 }
+.edit_user .message .success,
 .change_password .message .success {
 	color: green;
 }

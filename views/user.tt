@@ -14,7 +14,7 @@ role_names = {
 	<h1>User details</h1>
 
 
-	<form>
+	<form id="user_form">
 
 		<ul>
 
@@ -25,6 +25,7 @@ role_names = {
 					id="login"
 					name="login"
 					class="email"
+					autocomplete="off"
 					value="[% user.email | html %]"
 				/>
 			</li>
@@ -36,6 +37,7 @@ role_names = {
 					id="name"
 					name="name"
 					class="name"
+					autocomplete="off"
 					value="[% user.name | html %]"
 				/>
 			</li>
@@ -46,6 +48,7 @@ role_names = {
 					type="checkbox"
 					name="enabled"
 					id="enabled_checkbox"
+					autocomplete="off"
 					[% IF user.is_active %]
 					checked="checked"
 					[% END %]
@@ -63,6 +66,8 @@ role_names = {
 						<input
 							type="checkbox"
 							name="roles"
+							value="[% key | html %]"
+							autocomplete="off"
 							[% IF r.rank > role_max_rank %]
 							disabled="disabled"
 							[% END %]
@@ -77,16 +82,18 @@ role_names = {
 			</li>
 
 			<li class="message">
-				<div id="password_mismatch_message" class="error">New passwords do not match</div>
-				<div id="password_incorrect_message" class="error">Error - old password is incorrect</div>
-				<div id="password_change_error_message" class="error">Error changing password</div>
-				<div id="password_change_ok_message" class="success">&#10004; Password changed OK.</div>
+				<div id="saving_message">Saving data...</div>
+				<div id="saving_error_message" class="error">Error saving data.</div>
+				<div id="saving_ok_message" class="success">&#10004; User details saved OK.</div>
+				<div id="no_change_message" class="success">&#10004; No changes to save.</div>
+				<div id="login_conflict_message" class="error">Error: the new login conflicts with an existing user.</div>
 			</li>
 
 			<li class="buttons">
 				<button
 					type="button"
 					id="reset_password_button"
+					autocomplete="off"
 					[% IF !user.is_active %]
 					hidden="hidden"
 					[% END %]
@@ -95,9 +102,18 @@ role_names = {
 				<button
 					type="button"
 					id="update_button"
+					autocomplete="off"
 				><span class="lsf">check</span> Update</button>
 			</li>
 		</ul>
 	</form>
 
 </div>
+
+<script type="text/javascript">
+var user_id = [% user.id %];
+</script>
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/user.js"></script>
+

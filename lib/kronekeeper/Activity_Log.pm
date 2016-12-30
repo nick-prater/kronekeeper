@@ -63,7 +63,6 @@ prefix '/activity_log' => sub {
 
 
 
-
 sub record {
 
 	my $self = shift;
@@ -84,8 +83,9 @@ sub record {
 			block_id_a,
 			block_id_b,
 			circuit_id_a,
-			circuit_id_b
-		) VALUES (?,?,?,?,?,?,?,?,?)"
+			circuit_id_b,
+			to_person_id
+		) VALUES (?,?,?,?,?,?,?,?,?,?)"
 	);
 
 	$q->execute(
@@ -98,6 +98,7 @@ sub record {
 		$args->{block_id_b},
 		$args->{circuit_id_a},
 		$args->{circuit_id_b},
+		$args->{to_person_id},
 	);
 		
 	debug sprintf(
@@ -106,7 +107,6 @@ sub record {
 		$args->{person_id} || '--',
 		$args->{note},
 	);
-
 }
 
 

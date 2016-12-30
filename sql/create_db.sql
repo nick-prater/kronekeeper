@@ -60,10 +60,11 @@ CREATE TABLE activity_log(
 	frame_id INTEGER REFERENCES frame(id),
 	function TEXT,
 	note TEXT,
-	block_id_A INTEGER REFERENCES block(id),
-	block_id_B INTEGER REFERENCES block(id),
-	circuit_id_A INTEGER REFERENCES circuit(id),
-	circuit_id_B INTEGER REFERENCES circuit(id)
+	block_id_a INTEGER REFERENCES block(id),
+	block_id_b INTEGER REFERENCES block(id),
+	circuit_id_a INTEGER REFERENCES circuit(id),
+	circuit_id_b INTEGER REFERENCES circuit(id),
+	to_person_id INTEGER REFERENCES person(id)
 );
 
 /* Initialise Roles */

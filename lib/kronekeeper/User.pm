@@ -211,9 +211,11 @@ prefix '/api/user' => sub {
 			send_error('error changing password' => 500);
 		};
 
+		my $user_details = get_user_details($email);
 		$al->record({
-			function => '/api/user/password',
-			note     => sprintf("changed password for user '%s'", param('email'))
+			function     => '/api/user/password',
+			note         => sprintf("changed password for user '%s'", param('email')),
+			to_person_id => $user_details->{id},
 		});
 
 		database->commit;
@@ -221,7 +223,57 @@ prefix '/api/user' => sub {
 		return to_json {
 			success => 1,
 		};
-	}
+	};
+
+	patch '/:user_id' => require_login sub {
+
+		my $user_id = param('user_id');
+		my $current_user = logged_in_user;
+
+		# A user can change their own details, otherwise
+		# must have the manage_users role
+		unless(
+			($user_id == $current_user->{id}) ||
+			user_has_role('manage_users') 
+		) {
+			send_error('forbidden' => 403);
+		}
+
+		# Can only change users on one's own account
+		unless(user_id_valid_for_account($user_id)) {
+			error("user is invalid for this account");
+			send_error("user is invalid for this account" => 403);
+		}
+
+		debug request->body;
+		my $data = from_json(request->body);
+		my $changes = {};
+		my $user_info = user_info($user_id);
+
+		foreach my $field(keys %{$data}) {
+			my $value = $data->{$field};
+			for($field) {
+				m/^email$/ and do {
+					update_email($user_info, $value);
+					$changes->{email} = $value;
+					last;
+				};
+				m/^name$/ and do {
+					update_name($user_info, $value);
+					$changes->{name} = $value;
+					last;
+				};
+				# else
+				error "failed to update unrecognised user field '$field'";
+			}
+		};
+
+
+		database->commit;
+
+		content_type 'application/json';
+		return to_json $changes;
+	};
 
 };
 
@@ -320,6 +372,83 @@ sub roles {
 	");
 	$q->execute;
 	return $q->fetchall_hashref('role');
+}
+
+
+sub update_name {
+	my $info = shift;
+	my $name = shift;
+
+	# Rename user
+	my $q = database->prepare("
+		UPDATE person
+		SET name = ?
+		WHERE id = ?
+	");
+
+	$q->execute(
+		$name,
+		$info->{id},
+	) or do {
+		database->rollback;
+		send_error('error updating user name' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'user renamed "%s" (was "%s")',
+		$name,
+		$info->{name} || '',
+	);
+
+	$al->record({
+		function     => 'kronekeeper::User::update_name',
+		note         => $note,
+		to_person_id => $info->{id},
+	});
+}
+
+
+sub update_email {
+	my $info = shift;
+	my $email = shift;
+
+	# Validation
+	if($email eq $info->{email}) {
+		info("new e-mail matches existing e-mail - no update needed");
+		return;
+	}
+	elsif(get_user_details($email)) {
+		error("cannot change user e-mail as it conflicts with an existing user");
+		send_error("New login conflicts with an existing user", 409);
+	};
+
+	my $q = database->prepare("
+		UPDATE person
+		SET email= ?
+		WHERE id = ?
+	");
+
+	$q->execute(
+		$email,
+		$info->{id},
+	) or do {
+		database->rollback;
+		send_error('error updating user name' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'user email changed to "%s" (was "%s")',
+		$email,
+		$info->{email} || '',
+	);
+
+	$al->record({
+		function     => 'kronekeeper::User::update_email',
+		note         => $note,
+		to_person_id => $info->{id},
+	});
 }
 
 
