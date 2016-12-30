@@ -29,6 +29,7 @@ use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
 use kronekeeper::Activity_Log;
+use Array::Utils qw(array_minus);
 
 my $al = kronekeeper::Activity_Log->new();
 
@@ -256,11 +257,17 @@ prefix '/api/user' => sub {
 				m/^email$/ and do {
 					update_email($user_info, $value);
 					$changes->{email} = $value;
+					$user_info->{email} = $value;
 					last;
 				};
 				m/^name$/ and do {
 					update_name($user_info, $value);
 					$changes->{name} = $value;
+					last;
+				};
+				m/^roles$/ and do {
+					update_roles($user_info, $value);
+					$changes->{roles} = $value;
 					last;
 				};
 				# else
@@ -419,6 +426,7 @@ sub update_email {
 		return;
 	}
 	elsif(get_user_details($email)) {
+		database->rollback;
 		error("cannot change user e-mail as it conflicts with an existing user");
 		send_error("New login conflicts with an existing user", 409);
 	};
@@ -450,6 +458,137 @@ sub update_email {
 		to_person_id => $info->{id},
 	});
 }
+
+
+sub update_roles {
+
+	my $info = shift;
+	my $roles = shift;
+	my $existing_roles = user_roles($info->{email});
+
+	my @roles_to_remove = array_minus(
+		@{$existing_roles},
+		@{$roles}
+	);
+	debug("Need to remove roles: ", join(",", @roles_to_remove));
+	foreach my $role(@roles_to_remove) {
+		remove_role($role, $info);
+	}
+
+
+	my @roles_to_add = array_minus(
+		@{$roles},
+		@{$existing_roles}
+	);
+	debug("Need to add roles: ", join(",", @roles_to_add));
+	foreach my $role(@roles_to_add) {
+		add_role($role, $info);
+	}
+}
+
+
+
+sub allowed_to_edit_role {
+
+	my $role = shift;
+	my $current_user = logged_in_user;
+	my $current_user_max_rank = user_role_max_rank($current_user->{id});
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM role
+		WHERE role.role = ?
+		AND role.rank <= ?
+	");
+	$q->execute(
+		$role,
+		$current_user_max_rank,
+	);
+
+	return $q->fetchrow_hashref;
+}
+
+
+
+sub remove_role {
+
+	my $role = shift;
+	my $info = shift;
+
+	debug("removing role $role for user $info->{email}");
+
+	allowed_to_edit_role($role) or do {
+		database->rollback;
+		error("error: insufficient permissions to remove role");
+		send_error("error removing role $role" => 403);
+	};
+
+	my $q = database->prepare("
+		DELETE FROM user_role
+		USING role
+		WHERE role.id = user_role.role_id
+		AND user_role.user_id = ?
+		AND role.role = ?
+	");
+	$q->execute($info->{id}, $role) or do {
+		database->rollback;
+		error("error removing role");
+		send_error("error removing role $role" => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'Removed role %s for user %s',
+		$role,
+		$info->{email} || '',
+	);
+	$al->record({
+		function     => 'kronekeeper::User::remove_role',
+		note         => $note,
+		to_person_id => $info->{id},
+	});
+}
+
+
+sub add_role {
+
+	my $role = shift;
+	my $info = shift;
+
+	debug("adding role $role for user $info->{email}");
+
+	allowed_to_edit_role($role) or do {
+		database->rollback;
+		error("error: insufficient permissions to add role");
+		send_error("error adding role $role" => 403);
+	};
+
+	my $q = database->prepare("
+		INSERT INTO user_role (user_id, role_id)
+		SELECT ?, id
+		FROM role
+		WHERE role.role = ?
+	");
+	$q->execute($info->{id}, $role) or do {
+		database->rollback;
+		error("error adding role");
+		send_error("error adding role $role" => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'Added role %s for user %s',
+		$role,
+		$info->{email} || '',
+	);
+	$al->record({
+		function     => 'kronekeeper::User::add_role',
+		note         => $note,
+		to_person_id => $info->{id},
+	});
+}
+
+
 
 
 1;

@@ -87,6 +87,7 @@ role_names = {
 				<div id="saving_ok_message" class="success">&#10004; User details saved OK.</div>
 				<div id="no_change_message" class="success">&#10004; No changes to save.</div>
 				<div id="login_conflict_message" class="error">Error: the new login conflicts with an existing user.</div>
+				<div id="permission_denied_message" class="error">Permission denied when trying to update user.</div>
 			</li>
 
 			<li class="buttons">

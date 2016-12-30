@@ -128,6 +128,9 @@ require([
 			if(xhr.status == 409) {
 				this.show_message("#login_conflict_message");
 			}
+			else if(xhr.status == 403) {
+				this.show_message("#permission_denied_message");
+			}
 			else {
 				this.show_message("#saving_error_message");
 			}
