@@ -856,6 +856,11 @@ td.arrow {
 	color: #999;
 }
 
+/* Hide inactive users in user list */
+.user_list tr.inactive {
+	display: none;
+}
+
 .edit_user form .roles label {
 	text-align: left;
 	margin-left: 2em;

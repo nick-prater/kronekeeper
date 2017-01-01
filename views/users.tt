@@ -3,7 +3,9 @@
 	<h1>Users</h1>
 
 	<div class="menu">
-		<a href="add">new user</a>
+		<a href="new">new user</a>
+		<a href="javascript:void(0)" id="show_inactive_users">show inactive users</a>
+		<a href="javascript:void(0)" id="hide_inactive_users" style="display:none">hide inactive users</a>
 	</div>
 
 	<table>
@@ -22,3 +24,8 @@
 	</table>
 
 </div>
+
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/users.js"></script>
+

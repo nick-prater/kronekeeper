@@ -87,7 +87,7 @@ require([
 				this.save(changes, {
 					patch: true,
 					need_password_reset: need_password_reset,
-					success: function(model, xhr, options) {
+					success: function(model, data, options) {
 						/* If needed, reset password after update
 						 * As a password reset depends on the user e-mail, this
 						 * must be done after any other update has been applied
@@ -96,6 +96,10 @@ require([
 						if(options.need_password_reset) {
 							console.log("triggering password reset");
 							reset_password.reset();
+						}
+						if(data.id) {
+							console.log("updated user_id:", data.id);
+							window.user_id = data.id;
 						}
 					},
 					error: function(model, xhr, options) {

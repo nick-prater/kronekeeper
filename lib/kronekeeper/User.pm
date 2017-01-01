@@ -61,6 +61,32 @@ prefix '/user' => sub {
 		template('user/password', {});
 	};
 
+	get '/new' => require_login sub {
+
+		my $user_id = param('user_id');
+		my $current_user = logged_in_user;
+
+		unless(user_has_role('manage_users')) {
+			error("user does not have manage_users role");
+			send_error('forbidden' => 403);
+		}
+
+		my $user = {
+			id => undef,
+			name => '',
+			email => '',
+			is_active => 0,
+			roles => [],
+		};
+
+		my $template_data = {
+			role_max_rank => user_role_max_rank($current_user->{id}),
+			user => $user,
+			roles => roles(),
+		};
+		template('user', $template_data);
+	};
+
 	get '/:user_id' => require_login sub {
 
 		my $user_id = param('user_id');
@@ -95,59 +121,60 @@ prefix '/user' => sub {
 			user => $user,
 			roles => $roles,
 		};
-		use Data::Dumper;
-		debug Dumper $template_data;
 		template('user', $template_data);
 	};
-
-
 };
 
 
 prefix '/api/user' => sub {
 
-	post '/add' => require_login sub {
+	post '' => require_login sub {
 
-		user_has_role('manage_users') or do {
+		my $account_id = session('account')->{id};
+
+		unless(user_has_role('manage_users')) {
+			error("user does not have manage_users role");
 			send_error('forbidden' => 403);
-		};
-
-		param('email') or send_error('missing email parameter' => 400);
-		param('name') or send_error('missing name parameter' => 400);
-		my $account_id = param('account_id') || session('account')->{id};
-
-		if($account_id != param('account_id')) {
-			error("cannot add user for another account");
-			send_error("cannot add user for another account" => 403);
 		}
 
+		debug request->body;
+		my $data = from_json(request->body);
+
+		unless($data->{email}) {
+			error("email parameter missing or invalid");
+			send_error("INVALID_EMAIL" => 400);
+		}
+		unless($data->{name}) {
+			error("name parameter missing or invalid");
+			send_error("INVALID NAME" => 400);
+		}
 		if(get_user_details(param('email'))) {
-			error(sprintf("user %s already exists", param('email')));
-			send_error('user already exists' => 400);
+			error(sprintf("user %s already exists", $data->{email}));
+			send_error('user already exists' => 409);
 		}
 
 		my $user_id = create_user(
-			username   => param('email'),
+			username   => $data->{email},
 			account_id => $account_id,
-			name       => param('name'),
+			name       => $data->{name},
 		) or do {
 			database->rollback;
 			send_error('error creating user' => 500);
 		};
 
 		$al->record({
-			function   => '/api/user/add',
-			account_id => param('account_id'),
-			note       => sprintf("added new user '%s'", param('email'))
+			function     => '/api/user/new',
+			note         => "added new user '$data->{email}'",
+			to_person_id => $user_id,
 		});
+
+		my $user_info = user_info($user_id);
+		update_roles($user_info, $data->{roles});
 
 		database->commit;
 
-		return to_json {
-			user_id => $user_id
-		};
+		return to_json $user_info
 	};
-
 
 	post '/password' => require_login sub {
 
@@ -294,7 +321,6 @@ prefix '/api/user' => sub {
 		content_type 'application/json';
 		return to_json $changes;
 	};
-
 };
 
 

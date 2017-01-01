@@ -144,7 +144,11 @@ role_names = {
 
 
 <script type="text/javascript">
-var user_id = [% user.id %];
+[% IF user.id %]
+var user_id = [% user.id %]
+[% ELSE %]
+var user_id = null;
+[% END %]
 </script>
 
 <script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
