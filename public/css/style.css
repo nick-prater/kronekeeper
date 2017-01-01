@@ -896,6 +896,10 @@ td.arrow {
 	margin-right: auto;
 	text-align: center;
 }
+
+.edit_user form fieldset label {
+	min-width: 10em;
+}
 .edit_user form ul.fields {
 	width: 40em;
 	margin-left: auto;
