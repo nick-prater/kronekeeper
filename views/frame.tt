@@ -152,7 +152,7 @@
 <!-- Dialogs hidden on page load -->
 <div id="dialog_confirm_remove" title="Permanently remove block?" style="display:none">
 	<p>
-		<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		<span class="ui-icon ui-icon-alert"></span>
 		This block and any associated jumpers will be permanently deleted and cannot be recovered.
 	</p>
 	<p>
@@ -161,7 +161,7 @@
 </div>
 <div id="dialog_confirm_reverse_vertical_designations" title="Reverse vertical designations?" style="display:none">
 	<p>
-		<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		<span class="ui-icon ui-icon-alert"></span>
 		You are about to reverse the order in which the block columns are labelled. All jumper
 		designations within Kronekeeper will be updated automatically, but bear in mind that
 		any external documentation, cable numbering or labelling referring to block designations
@@ -176,7 +176,7 @@
 </div>
 <div id="dialog_confirm_reverse_block_designations" title="Reverse block designations?" style="display:none">
 	<p>
-		<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		<span class="ui-icon ui-icon-alert"></span>
 		You are about to reverse the order in which the blocks are numbered. All jumper
 		designations within Kronekeeper will be updated automatically, but bear in mind that
 		any external documentation, cable numbering or labelling referring to block designations
@@ -191,14 +191,14 @@
 </div>
 <div id="dialog_cannot_reverse_block_designations" title="Reverse block designations" style="display:none">
 	<p>
-		<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		<span class="ui-icon ui-icon-alert"></span>
 		Cannot automatically reverse block designations as the number of blocks in each
 		vertical column differs.
 	</p>
 </div>
 <div id="dialog_reversing_designations" title="Please wait..." style="display:none">
 	<p>
-		<span class="ui-icon ui-icon-refresh" style="float:left; margin:0 7px 20px 0;"></span>
+		<span class="ui-icon ui-icon-refresh"></span>
 		Reversing designations...
 	</p>
 </div>
@@ -239,13 +239,13 @@
 	</div>
 	<div id="change_colour_update_message">
 		<div class="message">
-			<span class="ui-icon ui-icon-refresh" style="float:left; margin:0 7px 20px 0;"></span>
+			<span class="ui-icon ui-icon-refresh"></span>
 			Updating...
 		</div>
 	</div>
 	<div id="change_colour_error_message">
 		<div class="message">
-			<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+			<span class="ui-icon ui-icon-alert"></span>
 			Error updating block colour.
 		</div>
 	</div>
