@@ -168,19 +168,6 @@ CREATE TABLE pin(
 CREATE UNIQUE INDEX pin_circuit_position_idx ON pin(circuit_id, position);
 CREATE UNIQUE INDEX pin_designation_circuit_idx ON pin(designation, circuit_id);
 
-CREATE OR REPLACE VIEW frame_info AS
-SELECT
-        frame.id,
-        frame.name,
-        frame.is_deleted,
-        COALESCE(MAX(vertical.position), 0) AS vertical_count,
-        COALESCE(MAX(block.position), 0) AS block_count
-FROM frame
-LEFT JOIN vertical ON (vertical.frame_id = frame.id)
-LEFT JOIN block ON (block.vertical_id = vertical.id)
-GROUP BY frame.id;
-
-
 
 /*--------------------------------------------------------------------------*/
 /* JUMPER TEMPLATES */
