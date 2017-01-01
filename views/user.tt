@@ -10,14 +10,13 @@ role_names = {
 %]
 
 
-<div class="container add_frame edit_user">
+<div class="container edit_user">
 	<h1>User details</h1>
 
 
 	<form id="user_form">
 
-		<ul>
-
+		<ul class="fields">
 			<li>
 				<label for="login">login:</label>
 				<input 
@@ -54,30 +53,33 @@ role_names = {
 					[% END %]
 				/>
 			</li>
+		</ul>
+		<ul>
 
 			<li>
 				<fieldset class="roles">
 					<legend>roles</legend>
-
-					[% FOREACH key IN roles.keys.sort %]
-					[% SET r = roles.$key %]
-					[% SET label = role_names.$key || key %]
-					<label>
-						<input
-							type="checkbox"
-							name="roles"
-							value="[% key | html %]"
-							autocomplete="off"
-							[% IF r.rank > role_max_rank %]
-							disabled="disabled"
-							[% END %]
-							[% IF r.assigned %]
-							checked="checked"
-							[% END %]
-						/>
-						[% label | html %]
-					</label>
-					[% END %]
+					<div>
+						[% FOREACH key IN roles.keys.sort %]
+						[% SET r = roles.$key %]
+						[% SET label = role_names.$key || key %]
+						<label>
+							<input
+								type="checkbox"
+								name="roles"
+								value="[% key | html %]"
+								autocomplete="off"
+								[% IF r.rank > role_max_rank %]
+								disabled="disabled"
+								[% END %]
+								[% IF r.assigned %]
+								checked="checked"
+								[% END %]
+							/>
+							[% label | html %]
+						</label>
+						[% END %]
+					</div>
 				</fieldset>
 			</li>
 
