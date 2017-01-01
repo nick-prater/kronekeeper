@@ -119,6 +119,12 @@ a:hover {
 .footer li {
 	display: inline-block;
 }
+	
+.dialog span.ui-icon {
+	float: left;
+	margin-top: 0;
+	margin-right: 0.5em;
+}
 
 div.credits.container {
 	padding-top: 2em;
@@ -472,7 +478,6 @@ div.credits.container {
 	margin-top: 0px;
 }
 
-
 .designation {
 	background: #eeeeee;
 	border: 1px solid #555555;
@@ -629,14 +634,17 @@ div.credits.container {
 	margin-top: 1em;
 }
 .edit_user .message div,
+.dialog.password_result .message div,
 .change_password .message div {
 	display: none;
 }
 .edit_user .message .error,
+.dialog.password_result .message .error,
 .change_password .message .error {
 	color: red;
 }
 .edit_user .message .success,
+.dialog.password_result .message .success,
 .change_password .message .success {
 	color: green;
 }
@@ -867,8 +875,24 @@ td.arrow {
 	margin-top: 1em;
 }
 
+.dialog.password_result p.password {
+	background: #eeeeee;
+	border: 1px solid #555555;
+	border-radius: 3px;
+	text-align: center;
+}
+.dialog.password_result p.small {
+	font-size: 70%;
+	font-style: italic;
+	color: blue;
+} 
+.dialog.password_result .message div {
+	text-align: center;
+}
 
-
+.dialog.hidden {
+	display: none;
+}
 
 
 

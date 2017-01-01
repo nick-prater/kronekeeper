@@ -186,8 +186,9 @@ prefix '/api/user' => sub {
 			send_error("email is invalid for this account" => 403);
 		}
 
-		if($email eq $user->{email}) {
-			# Changing our own password - must provide current password
+		if($email eq $user->{email} && !user_has_role('manage_users')) {
+			# Changing our own password, but don't have the manage_users role
+			# - must provide current password
 			defined $old_password or do {
 				error("missing old_password parameter when changing own password");
 				send_error("missing old_password parameter when changing own password" => 400);

@@ -21,10 +21,12 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 require([
+	'user/reset_password',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
+	reset_password
 ) {
         'use strict';
 
@@ -55,15 +57,47 @@ require([
 		save_data: function(data) {
 
 			this.set(data);
+			var changes = this.changedAttributes();
+			var need_password_reset = false;
+			
+			/* Strip any attempt to enable a user via this route.
+			 * Enabling users is done by resetting their password,
+			 * we can only disable users this way.
+			 */
+			if(changes.is_active) {
+				console.log("update requires password reset");
+				need_password_reset = true;
+				delete changes.is_active;
+			}
 
-			if(!this.changedAttributes()) {
+			/* Only run update if something has changed */
+			if($.isEmptyObject(changes)) {
 				console.log("nothing changed");
-				this.trigger("unchanged");
+				if(need_password_reset) {
+					console.log("triggering password reset");
+					reset_password.reset();
+					this.trigger("sync");
+				}
+				else {
+					this.trigger("unchanged");
+				}
 			}
 			else {
 				var previous_attributes = this.previousAttributes();
-				this.save(this.changedAttributes(), {
+				this.save(changes, {
 					patch: true,
+					need_password_reset: need_password_reset,
+					success: function(model, xhr, options) {
+						/* If needed, reset password after update
+						 * As a password reset depends on the user e-mail, this
+						 * must be done after any other update has been applied
+						 * on the server.
+						 */
+						if(options.need_password_reset) {
+							console.log("triggering password reset");
+							reset_password.reset();
+						}
+					},
 					error: function(model, xhr, options) {
 						console.log("ERROR saving user data");
 						model.set(previous_attributes);
@@ -78,12 +112,13 @@ require([
 		el: '#user_form',
 
 		events: {
-			'click #update_button' : 'do_update'
+			'click #update_button' : 'do_update',
+			'click #reset_password_button' : reset_password.click
 		},
 
 		initialize: function() {
 			console.log("current_state:", this.model.attributes);
-			console.log("view initialised");
+			reset_password.initialise(this);
 
 			this.listenTo(
 				this.model,
@@ -100,6 +135,8 @@ require([
 				"sync",
 				this.upload_success
 			);
+
+			console.log("view initialised");
 		},
 
 		do_update: function(e) {
@@ -145,7 +182,6 @@ require([
 			this.show_message("#no_change_message");
 			this.enable_buttons();
 		}
-	
 	});
 
 	var user_view = new User_View({

@@ -95,9 +95,6 @@ role_names = {
 					type="button"
 					id="reset_password_button"
 					autocomplete="off"
-					[% IF !user.is_active %]
-					hidden="hidden"
-					[% END %]
 				><span class="lsf">key</span> Reset Password</button>
 
 				<button
@@ -110,6 +107,41 @@ role_names = {
 	</form>
 
 </div>
+
+
+<!-- Dialogs hidden on page load -->
+<div id="dialog_confirm_enable_user" title="Enable user" class="dialog hidden">
+	<p>
+		<span class="ui-icon ui-icon-alert"></span>
+		This user is currently inactive. Resetting their password will enable this user.
+	</p>
+	<p>
+		Are you sure you wish to continue?
+	</p>
+</div>
+<div id="dialog_show_new_password" title="Reset password" class="dialog password_result hidden">
+	<p>
+		A new password has been generated for this user:
+	</p>
+
+	<p id="generated_password" class="password">
+	</p>
+
+	<p class="small">
+		This interface has been created assuming the server has no internet or e-mail
+		connectivity. If it's possible to send e-mails, that would be a better method
+		and one which the underlying authentication library already supports.
+		LDAP integration with an existing Active Directory user database might
+		be even better.
+	</p>
+
+	<div class="message">
+		<div id="saving_password_message">Saving password...</div>
+		<div id="saving_password_error_message" class="error">Error saving password.</div>
+		<div id="saving_password_ok_message" class="success">&#10004; Password saved OK.</div>
+	</div>
+</div>
+
 
 <script type="text/javascript">
 var user_id = [% user.id %];
