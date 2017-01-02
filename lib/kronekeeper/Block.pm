@@ -5,7 +5,7 @@ package kronekeeper::Block;
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2017 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -69,6 +69,42 @@ prefix '/block' => sub {
 
 
 prefix '/api/block' => sub {
+
+	post '/copy' => require_login sub {
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		user_has_role('edit') or do {
+			error("user does not have edit role");
+			send_error('forbidden' => 403);
+		};
+		block_id_valid_for_account($data->{from_block_id}) or do {
+			error("source block_id is invalid");
+			send_error('forbidden' => 403);
+		};
+		block_id_valid_for_account($data->{to_block_id}) or do {
+			error("destination block_id is invalid");
+			send_error('forbidden' => 403);
+		};
+		block_is_free($data->{from_block_id}) and do {
+			error("cannot copy from an empty block");
+			send_error("cannot copy from a empty block" => 400);
+		};
+		block_is_free($data->{to_block_id}) or do {
+			error("destination block is not free");
+			send_error("destination block is not free" => 400);
+		};
+	
+		copy_block(
+			$data->{from_block_id},
+			$data->{to_block_id},
+		);
+
+		return to_json(
+			 block_info($data->{to_block_id})
+		);
+	};
 
 	get '/:block_id' => require_login sub {
 
@@ -335,6 +371,22 @@ sub ordered_frame_blocks {
 	}
 
 	return $verticals;
+}
+
+
+sub copy_block {
+
+	my $from_block_id = shift;
+	my $to_block_id = shift;
+	my $q = database->prepare("SELECT copy_block(?,?)");
+	$q->execute(
+		$from_block_id,
+		$to_block_id,
+	);
+	my $result = $q->fetchrow_hashref or do {
+		database->rollback;
+		send_error('error copying block' => 500);
+	};
 }
 
 
