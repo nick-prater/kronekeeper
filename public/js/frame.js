@@ -153,7 +153,7 @@ require([
 			case "paste" :
 				var from_block = sessionStorage.getItem("copied_block_id");
 				var to_block = jq_block.data("block_id");
-				console.log("copying block", from_block, "->", to_block);
+				paste_block(from_block, to_block);
 				break;
 
 			case "remove" :
@@ -214,6 +214,37 @@ require([
 		});
 	}
 
+
+	function paste_block(from_block, to_block) {
+
+		console.log("copying block", from_block, "->", to_block);
+		var url = '/api/block/copy';
+		var data = {
+			from_block_id: from_block,
+			to_block_id: to_block
+		};
+
+		$.ajax({
+			url: url,
+			type: "POST",
+			contentType: 'application/json; charset=utf-8',
+			data: JSON.stringify(data),
+			dataType: "json",
+			success: function(json) {
+				console.log("copied block ok");
+				var block = $("#block-" + json.id);
+				block.removeClass("is_free");
+				block.addClass("in_use");
+				block.find("span.name").first().text(json.name);
+				block.find("div.block_type").first().text(json.block_type_name);
+				block.attr("style", "background:" + json.html_colour);
+			},
+			error: function(xhr, status) {
+				var error_code = xhr.status + " " + xhr.statusText;
+				alert("ERROR copying block: " + error_code);
+			}
+		});
+	}
 
 
 	var title_view = new title.view({

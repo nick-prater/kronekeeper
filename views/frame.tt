@@ -59,10 +59,11 @@
 		      [% SET url = "/block/$id" %]
 		      [% SET title = "block $vertical.designation$block.designation" %]
 		      [% IF block.is_free  # -- Block position is unused -- %]
-			<td class="block is_free" data-block_id="[% id %]">
+			<td class="block is_free" data-block_id="[% id %]" id="block-[% id %]">
 		      [% ELSE  # -- Block position is in use -- %]
 			<td
 				class="block in_use"
+				id="block-[% id %]"
 				data-block_id="[% id %]"
 				data-default_block_colour="[% block.default_html_colour %]"
 				style="background:[% block.html_colour %]"
@@ -203,6 +204,12 @@
 	<p>
 		<span class="ui-icon ui-icon-refresh"></span>
 		Reversing designations...
+	</p>
+</div>
+<div id="dialog_pasting" title="Please wait..." style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-refresh"></span>
+		Pasting copied block...
 	</p>
 </div>
 
