@@ -378,6 +378,9 @@ sub copy_block {
 
 	my $from_block_id = shift;
 	my $to_block_id = shift;
+	my $user = logged_in_user;
+
+	# Do copy
 	my $q = database->prepare("SELECT copy_block(?,?)");
 	$q->execute(
 		$from_block_id,
@@ -387,6 +390,15 @@ sub copy_block {
 		database->rollback;
 		send_error('error copying block' => 500);
 	};
+
+	# Update Activity Log
+	$q = database->prepare("SELECT al_record_block_copy(?,?,?,?)");
+	$q->execute(
+		$from_block_id,
+		$to_block_id,
+		$user->{id},
+		'copy_block',
+	);
 }
 
 
