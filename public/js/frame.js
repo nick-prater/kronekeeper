@@ -24,6 +24,7 @@ require([
 	'frame/remove_block',
 	'frame/title',
 	'frame/block_colour',
+	'frame/template',
 	'frame/frame_menu',
 	'backbone',
         'jquery',
@@ -31,7 +32,8 @@ require([
 ], function (
 	remove_block,
 	title,
-	block_colour
+	block_colour,
+	template
 ) {
         'use strict';
 
@@ -45,6 +47,7 @@ require([
 	});
 	$(".block .menu_button a").on("click", show_block_menu);
 	block_colour.initialise();
+	template.initialise();
 
 
 	function show_block_menu(e) {
@@ -79,6 +82,10 @@ require([
 		);
 		enable_menu_action_if_true(
 			"place_submenu",
+			jq_block.hasClass("is_free") && !jq_block.hasClass("unavailable")
+		);
+		enable_menu_action_if_true(
+			"place_template",
 			jq_block.hasClass("is_free") && !jq_block.hasClass("unavailable")
 		);
 		enable_menu_action_if_true(
@@ -121,6 +128,13 @@ require([
 				);
 				break;
 
+			case "place_template" :
+				template.show_dialog({
+					block_id: jq_block.data("block_id"),
+					jq_element: jq_block
+				});
+				break;
+
 			case "remove" :
 				$("#block_menu").menu().hide();
 				remove_block.activate({
@@ -137,7 +151,6 @@ require([
 				break;
 
 			case "change_colour" :
-				$("#block_menu").menu().hide();
 				block_colour.show_dialog({
 					block_id: jq_block.data("block_id"),
 					jq_element: jq_block,

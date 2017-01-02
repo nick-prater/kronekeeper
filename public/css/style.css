@@ -485,7 +485,7 @@ div.credits.container {
 }
 
 
-
+.place_template,
 .choose_jumper_type {
 	font-size: 65%;
 	text-align: center;
@@ -531,6 +531,7 @@ div.credits.container {
 	border: none;
 }
 
+.place_template .message,
 .choose_jumper_type .message {
 	font-size: 150%;
 	font-style: italic;

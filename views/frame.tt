@@ -129,6 +129,7 @@
 			[% END %]
 			</ul>
 		</li>
+		<li data-action="place_template"><div>Place Template</div></li>
 		<li data-action="remove"><div>Remove Block</div></li>
 		<li data-action="change_colour"><div>Change Colour</div></li>
 	</ul>
@@ -252,7 +253,25 @@
 
 </div>
 
+<div id="dialog_pick_template" title="Place template" class="place_template" style="display:none">
 
+	<div class="section template_selection">
+		[% FOREACH template IN templates %]
+		<div>
+			<a href="javascript:void(0)" data-template_id="[% template.id %]" class="template">
+				[%- template.name | html %] [[% template.vertical_count %] x [% template.block_count %]]
+			</a>
+		</div>
+		[% END %]
+
+		<div class="message">Select template to place</div>
+	</div>
+	<div class="section server_response">
+		<div class="message" id="pick_template_saving_message">
+			<span class="lsf">sync</span> Placing template...
+		</div>
+	</div>
+</div>
 
 
 

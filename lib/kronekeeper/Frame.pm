@@ -57,6 +57,7 @@ prefix '/frame' => sub {
 			SELECT * FROM frame
 			WHERE account_id = ?
 			AND is_deleted IS FALSE
+			AND is_template IS FALSE
 			ORDER BY name ASC
 		");
 		$q->execute(
@@ -170,6 +171,7 @@ prefix '/frame' => sub {
 			frame_info   => $frame_info,
 			frame_blocks => frame_blocks($frame_id),
 			block_types  => block_types(),
+			templates    => templates(),
 		});
 	};
 
@@ -653,6 +655,21 @@ sub update_name {
 		frame_id     => $info->{id},
 		note         => $note,
 	});
+}
+
+
+sub templates {
+	my $q = database->prepare("
+		SELECT * FROM frame_info
+		WHERE account_id = ?
+		AND is_deleted IS FALSE
+		AND is_template IS TRUE
+		ORDER BY name ASC
+	");
+	$q->execute(
+		session('account')->{id}
+	);
+	return $q->fetchall_arrayref({});
 }
 
 
