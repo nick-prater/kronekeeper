@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2017 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -61,9 +61,7 @@ CREATE TABLE activity_log(
 	function TEXT,
 	note TEXT,
 	block_id_a INTEGER REFERENCES block(id),
-	block_id_b INTEGER REFERENCES block(id),
 	circuit_id_a INTEGER REFERENCES circuit(id),
-	circuit_id_b INTEGER REFERENCES circuit(id),
 	to_person_id INTEGER REFERENCES person(id)
 );
 

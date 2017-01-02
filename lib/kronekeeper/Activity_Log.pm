@@ -81,11 +81,9 @@ sub record {
 			frame_id,
 			note,
 			block_id_a,
-			block_id_b,
 			circuit_id_a,
-			circuit_id_b,
 			to_person_id
-		) VALUES (?,?,?,?,?,?,?,?,?,?)"
+		) VALUES (?,?,?,?,?,?,?,?)"
 	);
 
 	$q->execute(
@@ -95,9 +93,7 @@ sub record {
 		$args->{frame_id},
 		$args->{note},
 		$args->{block_id_a},
-		$args->{block_id_b},
 		$args->{circuit_id_a},
-		$args->{circuit_id_b},
 		$args->{to_person_id},
 	);
 		
