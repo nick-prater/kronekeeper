@@ -130,6 +130,8 @@
 			</ul>
 		</li>
 		<li data-action="place_template"><div>Place Template</div></li>
+		<li data-action="copy"><div>Copy</div></li>
+		<li data-action="paste"><div>Paste</div></li>
 		<li data-action="remove"><div>Remove Block</div></li>
 		<li data-action="change_colour"><div>Change Colour</div></li>
 	</ul>

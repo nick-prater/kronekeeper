@@ -89,6 +89,16 @@ require([
 			jq_block.hasClass("is_free") && !jq_block.hasClass("unavailable")
 		);
 		enable_menu_action_if_true(
+			"copy",
+			!jq_block.hasClass("is_free") && !jq_block.hasClass("unavailable")
+		);
+		enable_menu_action_if_true(
+			"paste",
+			jq_block.hasClass("is_free") &&
+			!jq_block.hasClass("unavailable") &&
+			sessionStorage.getItem("copied_block_id")
+		);
+		enable_menu_action_if_true(
 			"remove",
 			!jq_block.hasClass("is_free") && !jq_block.hasClass("unavailable")
 		);
@@ -133,6 +143,17 @@ require([
 					block_id: jq_block.data("block_id"),
 					jq_element: jq_block
 				});
+				break;
+
+			case "copy" :
+				sessionStorage.setItem("copied_block_id", jq_block.data("block_id"));
+				console.log("copied block", sessionStorage.getItem("copied_block_id"));
+				break;
+
+			case "paste" :
+				var from_block = sessionStorage.getItem("copied_block_id");
+				var to_block = jq_block.data("block_id");
+				console.log("copying block", from_block, "->", to_block);
 				break;
 
 			case "remove" :
