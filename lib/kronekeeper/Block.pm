@@ -102,7 +102,8 @@ prefix '/api/block' => sub {
 		);
 
 		return to_json(
-			 block_info($data->{to_block_id})
+			 block_info($data->{to_block_id}),
+			{utf8 => 0}, # Database driver has already handled encoding
 		);
 	};
 
