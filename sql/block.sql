@@ -34,12 +34,12 @@ DECLARE circuit_count INTEGER;
 BEGIN
 
 	IF NOT EXISTS (SELECT 1 FROM block WHERE id = p_block_id) THEN
-		RAISE NOTICE 'block_id % does not exist', p_block_id;
+		/* block does not exist */
 		RETURN FALSE;
 	END IF;
 
 	IF EXISTS (SELECT 1 FROM block WHERE id = p_block_id AND name IS NOT NULL) THEN
-		RAISE NOTICE 'block_id % is in use - it has a name.', p_block_id;
+		/* block is in use - it has a name */
 		RETURN FALSE;
 	END IF;
 
@@ -48,10 +48,11 @@ BEGIN
 	WHERE block_id = p_block_id;
 
 	IF circuit_count != 0 THEN
-		RAISE NOTICE 'block_id %u is in use - it has %u associated circuits.', p_block_id, circuit_count;
+		/* block is in use - it has associated circuits */
 		RETURN FALSE;
 	END IF;
 
+	/* Otherwise it must be free */
 	RETURN TRUE;
 END
 $$ LANGUAGE plpgsql;
