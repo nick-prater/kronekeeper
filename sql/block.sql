@@ -152,6 +152,12 @@ BEGIN
 	WHERE circuit.block_id = p_block_id
 	AND pin.circuit_id = circuit.id;
 
+	UPDATE activity_log
+	SET circuit_id_a = NULL
+	FROM circuit
+	WHERE circuit.block_id = p_block_id
+	AND activity_log.circuit_id_a = circuit.id;
+
 	DELETE FROM circuit
 	WHERE circuit.block_id = p_block_id;
 
