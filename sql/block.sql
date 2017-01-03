@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2017 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -138,7 +138,7 @@ $$ LANGUAGE plpgsql;
 
 
 /* Removes the given block_id and it's associated pins and circuits.
- * But note this leaves the block position itself intact, so it reains
+ * But note this leaves the block position itself intact, so it remains
  * available for a new block to be placed there later
  */
 CREATE OR REPLACE FUNCTION remove_block(
