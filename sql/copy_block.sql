@@ -118,7 +118,6 @@ DECLARE p_from_frame_name TEXT;
 DECLARE p_to_frame_name TEXT;
 DECLARE p_from_block_designation TEXT;
 DECLARE p_to_block_designation TEXT;
-DECLARE p_account_id INTEGER;
 BEGIN
 
 	/* Get info about the block we've copied */
@@ -133,16 +132,9 @@ BEGIN
 	FROM block_info
 	WHERE id = p_to_block_id;
 
-	/* Get info about the user executing this activity */
-	SELECT account_id
-	INTO p_account_id
-	FROM person
-	WHERE id = p_by_person_id;
-
 	/* Log start of activity */
 	PERFORM al_log_activity(
 		p_by_person_id,
-		p_account_id,
 		p_to_frame_id,
 		p_function,
 		CONCAT(
@@ -163,7 +155,6 @@ BEGIN
 	/* Log block changes */
 	PERFORM al_log_activity(
 		p_by_person_id,
-		p_account_id,
 		p_to_frame_id,
 		p_function,
 		CONCAT(
@@ -181,7 +172,6 @@ BEGIN
 
 	PERFORM al_log_activity(
 		p_by_person_id,
-		p_account_id,
 		p_to_frame_id,
 		p_function,
 		CONCAT(
@@ -201,7 +191,6 @@ BEGIN
 
 	PERFORM al_log_activity(
 		p_by_person_id,
-		p_account_id,
 		p_to_frame_id,
 		p_function,
 		CONCAT(
@@ -222,7 +211,6 @@ BEGIN
 	/* Log circuit changes */
 	PERFORM al_log_activity(
 		p_by_person_id,
-		p_account_id,
 		p_to_frame_id,
 		p_function,
 		CONCAT(
@@ -245,7 +233,6 @@ BEGIN
 
 	PERFORM al_log_activity(
 		p_by_person_id,
-		p_account_id,
 		p_to_frame_id,
 		p_function,
 		CONCAT(
@@ -268,7 +255,6 @@ BEGIN
 
 	PERFORM al_log_activity(
 		p_by_person_id,
-		p_account_id,
 		p_to_frame_id,
 		p_function,
 		CONCAT(
@@ -291,7 +277,6 @@ BEGIN
 
 	PERFORM al_log_activity(
 		p_by_person_id,
-		p_account_id,
 		p_to_frame_id,
 		p_function,
 		CONCAT(
@@ -316,7 +301,6 @@ BEGIN
 	/* Log pin changes */
 	PERFORM al_log_activity(
 		p_by_person_id,
-		p_account_id,
 		p_to_frame_id,
 		p_function,
 		CONCAT(
@@ -340,7 +324,6 @@ BEGIN
 
 	PERFORM al_log_activity(
 		p_by_person_id,
-		p_account_id,
 		p_to_frame_id,
 		p_function,
 		CONCAT(
@@ -366,7 +349,6 @@ BEGIN
 	/* Log end of activity */
 	PERFORM al_log_activity(
 		p_by_person_id,
-		p_account_id,
 		p_to_frame_id,
 		p_function,
 		CONCAT(
@@ -391,7 +373,6 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION al_log_activity(
 	p_by_person_id INTEGER,
-	p_account_id INTEGER,
 	p_to_frame_id INTEGER,
 	p_function TEXT,
 	p_note TEXT,
@@ -399,8 +380,16 @@ CREATE OR REPLACE FUNCTION al_log_activity(
 	p_circuit_id INTEGER
 )
 RETURNS VOID AS $$
+DECLARE p_account_id INTEGER;
 BEGIN
 
+	/* Look up account_id */
+	SELECT account_id
+	INTO p_account_id
+	FROM person
+	WHERE id = p_by_person_id;
+
+	/* Write log entry */
 	INSERT INTO activity_log(
 		by_person_id,
 		account_id,
