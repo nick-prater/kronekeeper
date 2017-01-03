@@ -29,7 +29,7 @@ BEGIN
 	/* Validation */
 	CASE
 		WHEN block_is_free(p_from_block_id) THEN
-			RAISE EXCEPTION 'Cannot copy block id % - it is not in use', p_fromblock_id;
+			RAISE EXCEPTION 'Cannot copy block id % - it is not in use', p_from_block_id;
 		WHEN NOT block_is_free(p_to_block_id) THEN
 			RAISE EXCEPTION 'Cannot place block for id % - it is already in use', p_to_block_id;
 		ELSE -- validation OK
