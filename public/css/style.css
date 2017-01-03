@@ -237,8 +237,6 @@ div.credits.container {
 	margin: 0px;
 }
 
-
-
 .frame .block div.label,
 .frame .block span.name {
 	position: absolute;
@@ -247,6 +245,17 @@ div.credits.container {
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
+	max-height: 26pt;
+	font-size: 11pt;
+
+	/* This handles overflow of single line, which
+	 * applies when the line contains no opportunities
+	 * for line breaks. The template/javascript puts
+	 * a further limit on the number of characters to
+	 * limit vertical extent.
+	 */
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 /* Make link cover entire table cell */

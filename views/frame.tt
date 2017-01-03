@@ -12,6 +12,7 @@
 	'#ddaaff',
 	'#aaaaaa'
 ] %]
+[% block_name_max_chars = 60 %]
 
 <div class="container frame">
 
@@ -72,7 +73,7 @@
 				<div class="container">
 					<a class="link" href="[% url %]" title="[% title | html %]">
 						<span class="name">
-							[% block.name | html | truncate(50) %]
+							[% block.name | truncate(block_name_max_chars) | html %]
 						</span>
 					</a>
 					<div class="label">
@@ -287,6 +288,7 @@
 <!-- Global state variables -->
 <script type="text/javascript">
 var frame_info = [% frame_info.json %];
+var block_name_max_chars = [% block_name_max_chars %];
 </script>
 
 <script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>

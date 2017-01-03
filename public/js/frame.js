@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2017 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -235,7 +235,7 @@ require([
 				var block = $("#block-" + json.id);
 				block.removeClass("is_free");
 				block.addClass("in_use");
-				block.find("span.name").first().text(json.name);
+				block.find("span.name").first().text(truncate_string(json.name, window.block_name_max_chars));
 				block.find("div.block_type").first().text(json.block_type_name);
 				block.attr("style", "background:" + json.html_colour);
 			},
@@ -244,6 +244,15 @@ require([
 				alert("ERROR copying block: " + error_code);
 			}
 		});
+	}
+
+	function truncate_string(text, length) {
+		if(text.length <= length) {
+			return text;
+		}
+		else {
+			return text.substring(0, (length - 3)) + "...";
+		}
 	}
 
 
