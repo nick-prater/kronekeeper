@@ -47,6 +47,7 @@ prefix '/api/frame' => sub {
 
 	post '/place_template' => sub {
 
+		my $user = logged_in_user;
 		user_has_role('edit') or do {
 			error("user does not have edit role");
 			send_error('forbidden' => 403);
@@ -64,7 +65,16 @@ prefix '/api/frame' => sub {
 			send_error('forbidden' => 403);
 		};
 
-		debug("placing frame");
+		# Unusually for kronekeeper, this database call updates
+		# the activity log, so we don't have to do that separately
+		my $q = database->prepare("SELECT * FROM place_template(?,?,?)");
+		$q->execute(
+			$data->{block_id},
+			$data->{template_id},
+			$user->{id},
+		);
+
+		return to_json $q->fetchall_arrayref({});
 	};
 };
 

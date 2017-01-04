@@ -21,6 +21,7 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 require([
+	'util',
 	'frame/remove_block',
 	'frame/title',
 	'frame/block_colour',
@@ -30,6 +31,7 @@ require([
         'jquery',
 	'jqueryui'
 ], function (
+	util,
 	remove_block,
 	title,
 	block_colour,
@@ -235,7 +237,7 @@ require([
 				var block = $("#block-" + json.id);
 				block.removeClass("is_free");
 				block.addClass("in_use");
-				block.find("span.name").first().text(truncate_string(json.name, window.block_name_max_chars));
+				block.find("span.name").first().text(util.truncate(json.name, window.block_name_max_chars));
 				block.find("div.block_type").first().text(json.block_type_name);
 				block.attr("style", "background:" + json.html_colour);
 			},
@@ -244,15 +246,6 @@ require([
 				alert("ERROR copying block: " + error_code);
 			}
 		});
-	}
-
-	function truncate_string(text, length) {
-		if(text.length <= length) {
-			return text;
-		}
-		else {
-			return text.substring(0, (length - 3)) + "...";
-		}
 	}
 
 

@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2017 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -21,9 +21,11 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 define([
+	'util',
         'jquery',
 	'jqueryui'
 ], function (
+	util
 ) {
         'use strict';
 
@@ -88,17 +90,29 @@ define([
 				$("#change_colour_update_message").hide();
 				$("#change_colour_error_message").show();
 			},
-			success: function(data, status_text, jq_xhr) {
+			success: function(json, status_text, jq_xhr) {
 				console.log("placed template");
 				$("#dialog_pick_template").dialog("close");
-				//TODO update frame elements
-				//server should return array of blocks to update
-				// block_id, color, title, type
+				update_blocks(JSON.parse(json));
 			}
 		});
 
 
 	}
+
+
+	function update_blocks(blocks) {
+
+		$.each(blocks, function(index, data) {
+			var block = $("#block-" + data.id);
+			block.removeClass("is_free");
+			block.addClass("in_use");
+			block.find("span.name").first().text(util.truncate(data.name, window.block_name_max_chars));
+			block.find("div.block_type").first().text(data.block_type_name);
+			block.attr("style", "background:" + data.html_colour);
+		});
+	}
+
 
 
 	console.log("loaded frame/template.js");
