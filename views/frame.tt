@@ -276,10 +276,16 @@
 
 		<div class="message">Select template to place</div>
 	</div>
-	<div class="section server_response">
+	<div class="section messages">
 		<div class="message" id="pick_template_saving_message">
 			<span class="lsf">sync</span> Placing template...
 		</div>
+
+		<div class="message error" id="pick_template_error_message">
+			<span class="ui-icon ui-icon-alert"></span>
+			Error placing template.
+		</div>
+
 	</div>
 </div>
 

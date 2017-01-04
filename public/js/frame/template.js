@@ -46,6 +46,16 @@ define([
 			autoOpen: false,
 			modal: true,
 			buttons: [cancel_button],
+			open: function() {
+				/* Close dialog on Escape key, even if we don't have focus. */
+				$(document).on("keydown", function(e) {
+					console.log("Escape key pressed - closing dialog");
+					$("#dialog_pick_template").dialog("close");
+				});
+			},
+			close: function() {
+				$(document).off("keydown");
+			}
 		});
 
 		$("#dialog_pick_template a.template").click(handle_template_click);
@@ -75,7 +85,10 @@ define([
 
 	function place_template(template_id, block_id) {
 
-		$("#dialog_pick_template div.section.server_response").show();
+		
+		$("#dialog_pick_template div.section.messages div.message").hide();
+		$("#pick_template_saving_message").show();
+		$("#dialog_pick_template div.section.messages").show();
 
 		$.ajax({
 			url: "/api/frame/place_template",
@@ -86,9 +99,8 @@ define([
 			method: 'POST',
 			error: function(jq_xhr, status_text, error_text) {
 				console.log("error placing template", status_text, error_text);
-				//TODO display status messages
-				$("#change_colour_update_message").hide();
-				$("#change_colour_error_message").show();
+				$("#dialog_pick_template div.section.messages div.message").hide();
+				$("#pick_template_error_message").show();
 			},
 			success: function(json, status_text, jq_xhr) {
 				console.log("placed template");
@@ -96,8 +108,6 @@ define([
 				update_blocks(JSON.parse(json));
 			}
 		});
-
-
 	}
 
 
