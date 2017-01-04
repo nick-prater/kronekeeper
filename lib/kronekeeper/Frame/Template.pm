@@ -74,7 +74,14 @@ prefix '/api/frame' => sub {
 			$user->{id},
 		);
 
-		return to_json $q->fetchall_arrayref({});
+		my $result = $q->fetchall_arrayref({}) or do {
+			database->rollback;
+			error("error placing template");
+			send_error("error placing template" => 500);
+		};
+
+		database->commit;
+		return to_json $result;
 	};
 };
 
