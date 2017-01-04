@@ -167,7 +167,8 @@ BEGIN
 	 */
 	UPDATE block SET
 		name = NULL,
-		block_type_id = NULL
+		block_type_id = NULL,
+		colour_html_code = NULL
 	WHERE block.id = p_block_id;
 
 	RETURN FOUND;
