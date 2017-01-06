@@ -49,25 +49,57 @@ our @EXPORT_OK = qw(
 my $al = kronekeeper::Activity_Log->new();
 
 
+prefix '/template' => sub {
+
+	# Templates are just frames with a flag set
+	# Redirect them to the appropriate frame routes
+	get '/' => require_login sub {
+		forward '/frame/', { show_templates => 1 };
+	};
+	get '/add' => sub {
+		forward '/frame/add', { is_template => 1 };
+	};
+	post '/add' => sub {
+		forward '/frame/add';
+	};
+	get '/:frame_id' => sub {
+		forward '/frame/' . param('frame_id');
+	};
+	any qr{/\d+(/\d+.*)} => require_login sub {
+		
+		# To keep a nice hierachy, allow access to 'block' routes
+		# responds to routes of the form: /template/[frame_id]/[block_id]/xxx...
+		# forwards them to /block/[block_id]/xxx...
+		my ($route) = splat;
+		my $target =  "/block" . $route;
+		debug "redirecting to $target";
+		forward $target;
+	};
+};
+
+
 prefix '/frame' => sub {
 
 	get '/' => require_login sub {
 
+		my $want_templates = param('show_templates') ? 'TRUE' : 'FALSE';
 		my $q = database->prepare("
 			SELECT * FROM frame
 			WHERE account_id = ?
 			AND is_deleted IS FALSE
-			AND is_template IS FALSE
+			AND is_template = $want_templates
 			ORDER BY name ASC
 		");
 		$q->execute(
-			session('account')->{id}
+			session('account')->{id},
 		);
 
 		my $f = $q->fetchall_arrayref({});
+		my $show_templates = param('show_templates') ? 1 : 0;
 
 		template('frames', {
 			frames => $f,
+			show_templates => $show_templates,
 		});
 	};	
 
@@ -77,7 +109,9 @@ prefix '/frame' => sub {
 			send_error('forbidden' => 403);
 		};
 
-		template('add_frame', {});
+		template('add_frame', {
+			is_template => param('is_template') ? 1 : 0,
+		});
 	};
 
 	post '/add' => sub {
@@ -115,6 +149,8 @@ prefix '/frame' => sub {
 			send_error("invalid designation_order_v parameter" => 400);
 		};
 
+		my $is_template = param('is_template') ? 1 : 0;
+
 
 		my $frame_id = create_frame(
 			param('frame_name'),
@@ -122,6 +158,7 @@ prefix '/frame' => sub {
 			param('frame_height'),
 			$designation_order_h,
 			$designation_order_v,
+			$is_template,
 		) or do {
 			error("Failed creating new frame");
 			database->rollback;
@@ -130,7 +167,8 @@ prefix '/frame' => sub {
 
 		# Update Activity Log
 		my $note = sprintf(
-			'Created new frame "%s" with dimensions %d x %d',
+			'Created new %s "%s" with dimensions %d x %d',
+			$is_template ? 'template' : 'frame',
 			param('frame_name'),
 			param('frame_width'),
 			param('frame_height'),
@@ -144,8 +182,9 @@ prefix '/frame' => sub {
 
 		database->commit;
 
+		my $next_url = $is_template ? '/template/' : '/frame/';
 		forward(
-			'/frame/',
+			$next_url,
 			{},
 			{method => 'GET'}
 		);
@@ -551,10 +590,12 @@ sub create_frame {
 	my $frame_height = shift;
 	my $designation_order_h = shift;
 	my $designation_order_v = shift;
+	my $is_template = shift;
 	my $account_id = session('account')->{id};
 
 	debug(sprintf(
-		'creating frame "%s" with dimensions %dx%d',
+		'creating %s "%s" with dimensions %dx%d',
+		$is_template ? 'template' : 'frame',
 		$frame_name,
 		$frame_width,
 		$frame_height,
@@ -563,7 +604,7 @@ sub create_frame {
 
 
 	my $q = database->prepare("
-		SELECT create_regular_frame(?,?,?,?,?,?) AS new_frame_id
+		SELECT create_regular_frame(?,?,?,?,?,?,?) AS new_frame_id
 	");
 	$q->execute(
 		$account_id,
@@ -572,6 +613,7 @@ sub create_frame {
 		$frame_height,
 		($designation_order_h eq 'right-to-left' ? 't':'f'),  # whether to reverse or not
 		($designation_order_v eq 'top-to-bottom' ? 't':'f'),  # whether to reverse or not
+		($is_template ? 't':'f'),
 	) or do {
 		error("ERROR running create_regular_frame on database");
 		database->rollback;

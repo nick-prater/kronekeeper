@@ -1,9 +1,17 @@
-
+[% # This template is used to show Frames and Templates (which are just frames with a flag set) %]
 <div class="container add_frame">
+	[% IF show_templates %]
+	<h1>Templates</h1>
+	[% ELSE %]
 	<h1>Frames</h1>
+	[% END %]
 
 	<div class="menu">
-		<a href="add">new frame</a>
+		[% IF show_templates %]
+			<a href="add">new template</a>
+		[% ELSE %]
+			<a href="add">new frame</a>
+		[% END %]
 		[% IF user_roles.import %]
 		<a href="import/kris/">import</a>
 		[% END %]

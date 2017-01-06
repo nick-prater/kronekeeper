@@ -1,6 +1,10 @@
 
 <div class="container add_frame">
+	[% IF is_template %]
+	<h1>Add Template</h1>
+	[% ELSE %]
 	<h1>Add Frame</h1>
+	[% END %]
 
 	<form
 		method="post"
@@ -14,7 +18,11 @@
 					required="required"
 					name="frame_name"
 					id="frame_name"
+					[% IF is_template %]
+					placeholder="template name"
+					[% ELSE %]
 					placeholder="frame name"
+					[% END %]
 				/>
 			</li>
 			<li>
@@ -67,39 +75,26 @@
 	
 		<div class="buttons">
 			<button onclick="window.location='../'">Cancel</button>
-			<button type="submit">Create Frame</button>
+			<button type="submit">
+				[% IF is_template %]
+				Create Template
+				[% ELSE %]
+				Create Frame
+				[% END %]
+			</button>
 		</div>
+
+		<input
+			type="checkbox"
+			hidden="hidden"
+			name="is_template"
+			id="is_template"
+			[% IF is_template %]
+			checked="checked"
+			[% END %]
+		/>
 	</form>
 
-
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

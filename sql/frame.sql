@@ -37,7 +37,8 @@ CREATE OR REPLACE FUNCTION create_regular_frame(
 	p_vertical_count INTEGER,
 	p_row_count INTEGER,
 	p_reverse_vertical_designations BOOLEAN,
-	p_reverse_row_designations BOOLEAN
+	p_reverse_row_designations BOOLEAN,
+	p_is_template BOOLEAN
 )
 RETURNS INTEGER AS $$
 DECLARE frame_id INTEGER;
@@ -68,8 +69,8 @@ BEGIN
 	END CASE;
 		
 	/* Create the frame */
-	INSERT INTO frame(account_id, name)
-	VALUES(p_account_id, p_name)
+	INSERT INTO frame(account_id, name, is_template)
+	VALUES(p_account_id, p_name, p_is_template)
 	RETURNING id INTO frame_id;
 
 	RAISE DEBUG 'Inserted new frame with id:%', frame_id;
