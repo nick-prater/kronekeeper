@@ -29,7 +29,7 @@
 			<td class="buttons">
 				<a href="[% frame.id %]" title="edit" class="lsf edit">edit</a>
 				<a href="javascript:void(0)" title="delete" class="lsf delete">delete</a>
-				<a href="javascript:void(0)" title="delete" class="lsf copy">copy</a>
+				<a href="javascript:void(0)" title="copy" class="lsf copy">copy</a>
 			</td>
 			<td><a href="[% frame.id %]" class="clickable_cell">[% frame.name | html %]</a></td>
 		</tr>
@@ -37,3 +37,23 @@
 	</table>
 
 </div>
+
+<div id="dialog_confirm_delete" title="Delete block?" style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-alert"></span>
+		[% IF show_templates %]
+		This template and any associated jumpers will be deleted.
+		[% ELSE %]
+		This template and any associated jumpers will be deleted.
+		[% END %]
+	</p>
+	<p>
+		Are you sure?
+	</p>
+</div>
+
+
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/frames.js"></script>
+
