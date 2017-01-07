@@ -458,7 +458,7 @@ div.credits.container {
 
 
 .user_list td.buttons {
-	min-width: 3em;
+	min-width: 4em;
 	text-align: center;
 }
 .frame_list td.buttons {
@@ -482,6 +482,7 @@ div.credits.container {
         background: #aaaaaa;
 	border-color: black;
 }
+.user_list .buttons a,
 .frame_list .buttons a {
 	font-size: 16pt;
 }
