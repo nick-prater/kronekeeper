@@ -62,14 +62,16 @@ CREATE TABLE activity_log(
 	note TEXT,
 	block_id_a INTEGER REFERENCES block(id),
 	circuit_id_a INTEGER REFERENCES circuit(id),
-	to_person_id INTEGER REFERENCES person(id)
+	to_person_id INTEGER REFERENCES person(id),
+	comment TEXT,
+	completed_by_person_id INTEGER REFERENCES person(id)
 );
 
 /* Initialise Roles */
 INSERT INTO role(role) VALUES ('edit');
 INSERT INTO role(role) VALUES ('view_activity_log');
 INSERT INTO role(role) VALUES ('import');
-INSERT INTO role(role, hierarchy) VALUES ('manage_users', 100);
+INSERT INTO role(role, rank) VALUES ('manage_users', 1000);
 
 
 

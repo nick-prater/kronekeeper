@@ -1,5 +1,5 @@
 [% # This template is used to show Frames and Templates (which are just frames with a flag set) %]
-<div class="container add_frame">
+<div class="container frame_list">
 	[% IF show_templates %]
 	<h1>Templates</h1>
 	[% ELSE %]
@@ -19,9 +19,19 @@
 
 	<table>
 
+
+		<tr>
+			<th></th>
+			<th>name</th>
+		</tr>
 		[% FOREACH frame IN frames %]
 		<tr>
-			<td><a href="[% frame.id %]">[% frame.name | html %]</a></td>
+			<td class="buttons">
+				<a href="[% frame.id %]" title="edit" class="lsf edit">edit</a>
+				<a href="javascript:void(0)" title="delete" class="lsf delete">delete</a>
+				<a href="javascript:void(0)" title="delete" class="lsf copy">copy</a>
+			</td>
+			<td><a href="[% frame.id %]" class="clickable_cell">[% frame.name | html %]</a></td>
 		</tr>
 		[% END %]
 	</table>

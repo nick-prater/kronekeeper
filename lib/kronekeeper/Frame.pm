@@ -401,6 +401,68 @@ prefix '/api/frame' => sub {
 
 		return to_json $data;
 	};
+
+
+	post '/copy' => sub {
+
+		my $user = logged_in_user;
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		frame_id_valid_for_account($data->{frame_id}) or do {
+			error("frame_id is not valid for this account");
+			send_error("frame_id invalid or not permitted" => 403);
+		};
+
+		my $frame_info = frame_info($data->{frame_id}) or do {
+			error("unable to retrieve frame_info");
+			send_error("failed to retrieve frame_info" => 500);
+		};
+
+		# New frame name can be provided, otherwise base it on the source frame
+		my $frame_name = $data->{frame_name} || $frame_info->{name}.' (copy)';
+		my $new_frame_id = create_frame(
+			$frame_name,
+			$frame_info->{vertical_count},
+			$frame_info->{block_count},
+		) or do {
+			database->rollback;
+			send_error("failed to create new frame" => 500);
+		};
+
+		# Get origin block for new frame
+		my $q = database->prepare("
+			SELECT block.id AS block_id
+			FROM block
+			JOIN vertical ON (vertical.id = block.vertical_id)
+			WHERE vertical.frame_id = ?
+			AND vertical.position = 1
+			AND block.position = 1
+		");
+		my $r = $q->fetchrow_hashref;
+		
+		# Unusually for kronekeeper, this database call updates
+		# the activity log, so we don't have to do that separately
+		my $q = database->prepare("SELECT 1 FROM place_template(?,?,?) LIMIT 1");
+		$q->execute(
+			$r->{block_id},
+			$data->{frame_id},
+			$user->{id},
+		);
+
+		my $result = $q->fetchrow_hashref or do {
+			database->rollback;
+			error("error making copy");
+			send_error("error copying frame as template" => 500);
+		};
+
+		database->commit;
+		return to_json $result;
+	};
 };
 
 
@@ -588,8 +650,8 @@ sub create_frame {
 	my $frame_name = shift;
 	my $frame_width = shift;
 	my $frame_height = shift;
-	my $designation_order_h = shift;
-	my $designation_order_v = shift;
+	my $designation_order_h = shift || 'left-to-right';
+	my $designation_order_v = shift || 'bottom-to-top';
 	my $is_template = shift;
 	my $account_id = session('account')->{id};
 

@@ -131,6 +131,7 @@ div.credits.container {
 }
 
 
+.frame_list table,
 .add_frame table {
 	margin-top: 1em;
 	margin-left: 1em;
@@ -270,6 +271,7 @@ div.credits.container {
 }
 
 
+
 /* Don't display block link unless a block is placed there */
 .frame .is_free a.link {
 	display: none;
@@ -345,12 +347,15 @@ div.credits.container {
 
 .block table,
 .user_list table,
+.frame_list table,
 .kris_jumper_colours table {
 	border-collapse: collapse;
 }
 
 .block td,
 .block th,
+.frame_list td,
+.frame_list th,
 .user_list td,
 .user_list th,
 .kris_jumper_colours td,
@@ -360,9 +365,11 @@ div.credits.container {
 
 .block th,
 .user_list th,
+.frame_list th,
 .kris_jumper_colours th {
 	background: #aaaaaa;
 }
+
 
 .block td,
 .user_list td,
@@ -370,6 +377,10 @@ div.credits.container {
 	background: white;
 	height: 10pt;
 }
+.frame_list td {
+	background: white;
+}
+
 
 .block td.cable_reference {
 	width: 5em;
@@ -446,12 +457,19 @@ div.credits.container {
 	vertical-align: middle;
 }
 
+
 .user_list td.buttons {
 	min-width: 3em;
 	text-align: center;
 }
+.frame_list td.buttons {
+	min-width: 6em;
+	text-align: center;
+}
+
 
 .user_list .buttons a,
+.frame_list td a,
 .block .circuit_buttons a {
 	text-decoration: none;
 	outline: none;
@@ -459,10 +477,14 @@ div.credits.container {
 	border-radius: 3px;
 }
 .user_list .buttons a:hover,
+.frame_list td a:hover,
 .block .circuit_buttons a:hover {
         color: white;
         background: #aaaaaa;
 	border-color: black;
+}
+.frame_list .buttons a {
+	font-size: 16pt;
 }
 .block a.notes_button {
 	font-size: 16pt;
