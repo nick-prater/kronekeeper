@@ -51,6 +51,11 @@
 		<p>
 			Are you sure?
 		</p>
+		<p class="small">
+			Actually, deleting a frame or template via this interface just sets a flag
+			in the database, leaving all other data intact. It's left for a later
+			and as-yet unimplemented process to purge the data.
+		</p>
 	</div>
 	<div class="section messages">
 		<div class="message" id="deleting_message">

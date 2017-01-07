@@ -945,7 +945,7 @@ td.arrow {
 	border-radius: 3px;
 	text-align: center;
 }
-.dialog.password_result p.small {
+p.small {
 	font-size: 70%;
 	font-style: italic;
 	color: blue;
