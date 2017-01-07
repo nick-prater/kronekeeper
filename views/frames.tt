@@ -31,7 +31,7 @@
 				<a href="javascript:void(0)" title="delete" class="lsf delete">delete</a>
 				<a href="javascript:void(0)" title="copy" class="lsf copy">copy</a>
 			</td>
-			<td><a href="[% frame.id %]" class="clickable_cell">[% frame.name | html %]</a></td>
+			<td><a href="[% frame.id %]" class="clickable_cell name">[% frame.name | html %]</a></td>
 		</tr>
 		[% END %]
 	</table>
@@ -83,6 +83,68 @@
 			Error deleting frame.
 			[% END %]
 		</div>
+	</div>
+</div>
+
+
+<div
+	id="dialog_confirm_copy"
+	[% IF show_templates %]
+	title="Copy template"
+	[% ELSE %]
+	title="Copy frame"
+	[% END %]
+	style="display:none"
+>
+	<div class="section main">
+
+		<label>New name:
+			<input
+				type="text"
+				name="name"
+				id="new_name"
+			>
+		</label>
+		<p class="small">
+			Copying creates a new 
+			[% IF show_templates %]template,[% ELSE %]frame,[% END %]
+			then copies all elements from the original 
+			[% IF show_templates %]template[% ELSE %]frame[% END %]
+			into it.
+		</p>
+		<p class="small">
+			The new
+			[% IF show_templates %]template's[% ELSE %]frame's[% END %]
+			activity log will record the steps needed to build a replica of
+			the original from scratch, rather than copying the original activity log.
+		</p>
+	</div>
+	<div class="section messages">
+		<div class="message" id="copying_message">
+			<span class="lsf">sync</span>
+			[% IF show_templates %]
+			Copying template...
+			[% ELSE %]
+			Copying frame...
+			[% END %]
+		</div>
+		<div class="message error" id="copy_error_message">
+			<span class="ui-icon ui-icon-alert"></span>
+			[% IF show_templates %]
+			Error copying template.
+			[% ELSE %]
+			Error copying frame.
+			[% END %]
+		</div>
+		<div class="message success" id="copy_success_message">
+			<span class="ui-icon ui-icon-alert"></span>
+			[% IF show_templates %]
+			Copied template.
+			[% ELSE %]
+			Copied frame.
+			[% END %]
+		</div>
+
 	</div>
 </div>
 

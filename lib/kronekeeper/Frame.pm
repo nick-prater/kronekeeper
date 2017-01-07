@@ -466,6 +466,9 @@ prefix '/api/frame' => sub {
 			$frame_name,
 			$frame_info->{vertical_count},
 			$frame_info->{block_count},
+			undef, # designation order doesn't matter - we'll overwrite them later
+			undef, # designation order doesn't matter - we'll overwrite them later
+			$frame_info->{is_template},
 		) or do {
 			database->rollback;
 			send_error("failed to create new frame" => 500);
@@ -480,11 +483,13 @@ prefix '/api/frame' => sub {
 			AND vertical.position = 1
 			AND block.position = 1
 		");
+		$q->execute($new_frame_id);
 		my $r = $q->fetchrow_hashref;
+		debug("origin of new frame is block_id $r->{block_id}");
 		
 		# Unusually for kronekeeper, this database call updates
 		# the activity log, so we don't have to do that separately
-		$q = database->prepare("SELECT 1 FROM place_template(?,?,?) LIMIT 1");
+		$q = database->prepare("SELECT COUNT(*) AS blocks_placed FROM place_template(?,?,?)");
 		$q->execute(
 			$r->{block_id},
 			$data->{frame_id},

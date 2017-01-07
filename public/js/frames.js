@@ -21,13 +21,16 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 require([
-	'frames/delete'
+	'frames/delete',
+	'frames/copy'
 ], function (
-	delete_frame
+	delete_frame,
+	copy_frame
 ) {
         'use strict';
 
 
 	delete_frame.initialise();
+	copy_frame.initialise();
 
 });

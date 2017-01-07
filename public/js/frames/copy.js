@@ -40,23 +40,29 @@ define([
 				$(this).dialog("close");
 			}
 		};
-		var delete_button = {
-			text: "Delete",
-			icon: "ui-icon-trash",
+		var copy_button = {
+			text: "Copy",
+			icon: "ui-icon-copy",
 			click: function(e) {
-				delete_frame(frame_id);
+				copy_frame(frame_id);
 			}
 		};
 
-		$("#dialog_confirm_delete").dialog({
+		$("#dialog_confirm_copy").dialog({
 			autoOpen: false,
 			modal: true,
-			buttons: [cancel_button, delete_button],
+			buttons: [cancel_button, copy_button],
 			open: function() {
 				/* Close dialog on Escape key, even if we don't have focus. */
 				$(document).on("keydown", function(e) {
-					console.log("Escape key pressed - closing dialog");
-					$("#dialog_confirm_delete").dialog("close");
+					if(e.keyCode == 27) {
+						console.log("Escape key pressed - closing dialog");
+						$("#dialog_confirm_copy").dialog("close");
+					}
+					if(e.keyCode == 13) {
+						/* Default Action */
+						copy_frame(frame_id);
+					}
 				});
 			},
 			close: function() {
@@ -66,7 +72,7 @@ define([
 			}
 		});
 
-		$("table a.delete").click(display_dialog);
+		$("table a.copy").click(display_dialog);
 	}
 
 
@@ -75,37 +81,47 @@ define([
 		jq_row = $(e.target).closest("tr");
 		frame_id = jq_row.data('frame_id');
 
-		$("#dialog_confirm_delete div.section.messages div.message").hide();
-		$("#dialog_confirm_delete div.section.main").show();
-		$("#dialog_confirm_delete").dialog("open");
+		/* Set a default for the new name */
+		var frame_name = jq_row.find("td a.name").first().text();
+		$("#new_name").val(frame_name + ' (copy)');
+
+		$("#dialog_confirm_copy div.section.messages div.message").hide();
+		$("#dialog_confirm_copy div.section.main").show();
+		$("#dialog_confirm_copy").dialog("open");
 	}
 
 
-	function delete_frame() {
+	function copy_frame() {
 
 		/* Looks at global frame_id and jq_row variables */		
-		$("#dialog_confirm_delete div.section.main").hide();
-		$("#dialog_confirm_delete div.section.messages div.message").hide();
-		$("#deleting_message").show();
+		$("#dialog_confirm_copy div.section.main").hide();
+		$("#dialog_confirm_copy div.section.messages div.message").hide();
+		$("#copying_message").show();
 
+		var data = {
+			frame_id: frame_id,
+			frame_name: $("#new_name").val()
+		};
 		$.ajax({
-			url: "/api/frame/" + frame_id,
-			method: 'DELETE',
+			url: "/api/frame/copy",
+			method: 'POST',
+			data: JSON.stringify(data),
 			error: function(jq_xhr, status_text, error_text) {
-				console.log("error deleting frame", status_text, error_text);
-				$("#dialog_confirm_delete div.section.messages div.message").hide();
-				$("#delete_error_message").show();
+				console.log("error copying frame", status_text, error_text);
+				$("#dialog_confirm_copy div.section.messages div.message").hide();
+				$("#copy_error_message").show();
 			},
 			success: function(json, status_text, jq_xhr) {
-				console.log("deleted frame");
-				jq_row.remove();
-				$("#dialog_confirm_delete").dialog("close");
+				console.log("copied frame");
+				$("#dialog_confirm_copy div.section.messages div.message").hide();
+				$("#copy_success_message").show();
+				location.reload();
 			}
 		});
 	}
 
 
-	console.log("loaded frames/delete.js");
+	console.log("loaded frames/copy.js");
 
 	/* Expose public methods/properties */
 	return {
