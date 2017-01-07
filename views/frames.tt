@@ -25,7 +25,7 @@
 			<th>name</th>
 		</tr>
 		[% FOREACH frame IN frames %]
-		<tr>
+		<tr data-frame_id="[% frame.id %]">
 			<td class="buttons">
 				<a href="[% frame.id %]" title="edit" class="lsf edit">edit</a>
 				<a href="javascript:void(0)" title="delete" class="lsf delete">delete</a>
@@ -39,17 +39,38 @@
 </div>
 
 <div id="dialog_confirm_delete" title="Delete block?" style="display:none">
-	<p>
-		<span class="ui-icon ui-icon-alert"></span>
-		[% IF show_templates %]
-		This template and any associated jumpers will be deleted.
-		[% ELSE %]
-		This template and any associated jumpers will be deleted.
-		[% END %]
-	</p>
-	<p>
-		Are you sure?
-	</p>
+	<div class="section main">
+		<p>
+			<span class="ui-icon ui-icon-alert"></span>
+			[% IF show_templates %]
+			This template and any associated jumpers will be deleted.
+			[% ELSE %]
+			This template and any associated jumpers will be deleted.
+			[% END %]
+		</p>
+		<p>
+			Are you sure?
+		</p>
+	</div>
+	<div class="section messages">
+		<div class="message" id="deleting_message">
+			<span class="lsf">sync</span>
+			[% IF show_templates %]
+			Deleting template...
+			[% ELSE %]
+			Deleting frame...
+			[% END %]
+		</div>
+
+		<div class="message error" id="delete_error_message">
+			<span class="ui-icon ui-icon-alert"></span>
+			[% IF show_templates %]
+			Error deleting template.
+			[% ELSE %]
+			Error deleting frame.
+			[% END %]
+		</div>
+	</div>
 </div>
 
 

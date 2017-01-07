@@ -230,6 +230,43 @@ prefix '/frame' => sub {
 
 prefix '/api/frame' => sub {
 
+
+	del '/:frame_id' => sub {
+
+		# This marks the specified frame as deleted
+		# It remains in the database, just not displayed
+
+		my $frame_id = param('frame_id');
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+		frame_id_valid_for_account($frame_id) or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug("deleting frame $frame_id");
+
+		my $q = database->prepare("
+			UPDATE frame
+			SET is_deleted = TRUE
+			WHERE id = ?
+		");
+		$q->execute(
+			$frame_id
+		) or do {
+			database->rollback;
+			error("failed to delete frame $frame_id");
+			send_error("failed to delete frame" => 500);
+		};
+
+		database->commit;
+			
+		return to_json {
+			frame_id => $frame_id
+		};
+	};
+
+
 	patch '/:frame_id' => sub {
 
 		user_has_role('edit') or do {
@@ -447,7 +484,7 @@ prefix '/api/frame' => sub {
 		
 		# Unusually for kronekeeper, this database call updates
 		# the activity log, so we don't have to do that separately
-		my $q = database->prepare("SELECT 1 FROM place_template(?,?,?) LIMIT 1");
+		$q = database->prepare("SELECT 1 FROM place_template(?,?,?) LIMIT 1");
 		$q->execute(
 			$r->{block_id},
 			$data->{frame_id},
