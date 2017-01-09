@@ -35,9 +35,9 @@ our $VERSION = '0.01';
 
 
 
-prefix '/activity_log' => sub {
+prefix '/frame' => sub {
 
-	get '/:frame_id' => sub {
+	get '/:frame_id/activity_log' => require_login sub {
 
 		user_has_role('view_activity_log') or do {
 			send_error('forbidden' => 403);
@@ -46,15 +46,9 @@ prefix '/activity_log' => sub {
 			send_error('forbidden' => 403);
 		};
 
-
-		my $activity_log = get_activity_log(
-			frame_id => param("frame_id"),
-		);
-
 		template(
 			'activity_log',
 			{
-				activity_log => $activity_log,
 				frame_info => kronekeeper::Frame::frame_info(param("frame_id")),
 			}
 		);

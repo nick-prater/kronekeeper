@@ -106,7 +106,7 @@ require([
 		switch(e.currentTarget.dataset.action) {
 
 			case "show_activity_log" : 
-				window.location.href = "/activity_log/" + window.frame_info.id;
+				window.location.href = window.frame_info.id + '/activity_log';
 				break;
 
 			case "reverse_vertical_designations" :
