@@ -1,22 +1,43 @@
 
-<div class="container frame">
-	<h1>
-		<a href="[% request.uri_base %]/frame/[% frame_info.id %]">[% frame_info.name | html %]</a>
-	</h1>
+<div class="container activity_log">
 
-	<table>
-		<tr>
-			<th>timestamp</th>
-			<th>by user</th>
-			<th>activity</th>
-		</tr>
-		[% FOREACH entry IN activity_log %]
-		<tr>
-			<td>[% entry.log_timestamp | html %]</td>
-			<td>[% entry.by_person_name | html %]</td>
-			<td>[% entry.note | html %]</td>
-		</tr>
-		[% END %]
+	<h1>Activity Log</h1>
+
+		<dl>
+			<dt>
+				[% IF frame_info.is_template %]
+				Template:
+				[% ELSE %]
+				Frame:
+				[% END %]
+			</dt>
+			<dd>
+				<a href="[% request.uri_base %]/frame/[% frame_info.id %]">[% frame_info.name | html %]</a>
+			</dd>
+		</dl>
+
+
+	<table id="activity_log_table" style="display:none">
+		<thead>
+			<tr>
+				<th>timestamp</th>
+				<th>by user</th>
+				<th>activity</th>
+			</tr>
+		</thead>
+		<tbody>
+			[% FOREACH entry IN activity_log %]
+			<tr>
+				<td>[% entry.log_timestamp | html %]</td>
+				<td>[% entry.by_person_name | html %]</td>
+				<td>[% entry.note | html %]</td>
+			</tr>
+			[% END %]
+		</tbody>
 	</table>
 </div>
+
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/activity_log.js"></script>
 

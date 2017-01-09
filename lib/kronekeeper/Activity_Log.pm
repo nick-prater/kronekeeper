@@ -5,7 +5,7 @@ package kronekeeper::Activity_Log;
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2017 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -31,8 +31,18 @@ use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
 use Moo;
 use kronekeeper::Frame;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
+
+
+prefix '/template' => sub {
+
+	# Templates are just frames with a flag set
+	# Redirect them to the appropriate frame routes
+	get '/:frame_id/activity_log' => require_login sub {
+		forward '/frame/'.param('frame_id').'/activity_log';
+	};
+};
 
 
 prefix '/frame' => sub {
