@@ -30,6 +30,9 @@
 					<input class="name" type="text" title="Frame Name" value="[% frame_info.name | html %]" />
 				</dd>
 			</dl>
+			<div class="menu">
+				<a href="[% frame_info.id %]/activity_log" title="show activity log">activity log</a>
+			</div>
 		</caption>
 
 		<tr>
