@@ -80,6 +80,7 @@ a:hover {
 
 .menu a {
 	font-size: 10pt;
+	font-weight: normal;
 	color: #555;
 	padding: 3px;
 	border-radius: 3px;
