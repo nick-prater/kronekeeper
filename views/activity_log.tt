@@ -20,8 +20,8 @@
 	<table id="activity_log_table" style="display:none">
 		<thead>
 			<tr>
-				<th>timestamp</th>
-				<th>by user</th>
+				<th>time</th>
+				<th>person</th>
 				<th>activity</th>
 			</tr>
 		</thead>

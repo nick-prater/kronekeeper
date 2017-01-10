@@ -363,11 +363,16 @@ div.credits.container {
 	border: 1px solid black;
 }
 
+.activity_log th,
 .block th,
 .user_list th,
 .frame_list th,
 .kris_jumper_colours th {
 	background: #aaaaaa;
+}
+
+.activity_log th {
+	text-align: left;
 }
 
 
