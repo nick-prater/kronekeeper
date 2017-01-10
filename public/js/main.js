@@ -29,8 +29,13 @@ require.config({
 		jqueryui: 'jquery-ui-1.12.0.min',
 		underscore: 'underscore-1.8.3.min',
 		backbone: 'backbone-1.3.3.min',
-		"datatables.net": 'jquery-dataTables-1.10.13.min',
+		"datatables.net": 'jquery-dataTables-1.10.13.min'
 	},
+
+	packages: [{
+		name: 'moment',
+		main: 'moment-with-locales-2.17.1.min'
+	}],
 
 	shim: {
 		underscore: {
