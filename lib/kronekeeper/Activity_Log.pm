@@ -45,9 +45,9 @@ prefix '/template' => sub {
 };
 
 
-prefix '/frame' => sub {
+prefix '/frame/:frame_id/activity_log' => sub {
 
-	get '/:frame_id/activity_log' => require_login sub {
+	get '' => require_login sub {
 
 		user_has_role('view_activity_log') or do {
 			send_error('forbidden' => 403);
@@ -62,7 +62,48 @@ prefix '/frame' => sub {
 				frame_info => kronekeeper::Frame::frame_info(param("frame_id")),
 			}
 		);
-	};	
+	};
+
+
+	post '/query' => require_login sub {
+
+		# This receives and sends JSON data suitable for use with Datatables
+		# See: https://datatables.net/manual/server-side
+
+		user_has_role('view_activity_log') or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $id = param('frame_id');
+		kronekeeper::Frame::frame_id_valid_for_account($id) or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $data = from_json(request->body);
+
+		# We return this directly to the client, so
+		# make sure it doesn't contain anything nasty.
+		$data->{draw} =~ m/^\d+$/ or do {
+			error("draw parameter is invalid");
+			send_error("invalid draw parameter" => 400);
+		};
+		$data->{draw} += 0; # Recast as numeric
+
+		my $results = get_activity_log(
+			max_items => $data->{length},
+			skip_records => $data->{start},
+			frame_id => $id,
+		);
+
+		my $rv = {
+			draw => $data->{draw},
+			data => $results,
+			recordsTotal => activity_log_count($id),
+			recordsFiltered => activity_log_count($id),
+		};
+
+		return to_json $rv;
+	};
 };
 
 
@@ -112,13 +153,12 @@ sub record {
 
 sub get_activity_log {
 
-	my %args = @_;;
-	$args{items_per_page} ||= 500;
-	$args{page} ||= 1;
+	my %args = @_;
+	$args{max_items} ||= 500;
+	$args{skip_records} ||= 0;
 	$args{frame_id} or die "missing frame_id argument";
 	$args{timezone} ||= 'UTC';
 
-	my $skip_records = $args{items_per_page} * ($args{page} - 1);
 
 	my $q = database->prepare("
 		SELECT 
@@ -138,8 +178,8 @@ sub get_activity_log {
 	$q->execute(
 		$args{timezone},
 		$args{frame_id},
-		$args{items_per_page},
-		$skip_records,
+		$args{max_items},
+		$args{skip_records},
 	);
 		
 	my $result = $q->fetchall_arrayref({});
@@ -147,7 +187,24 @@ sub get_activity_log {
 }
 
 
+sub activity_log_count {
 
+	my $frame_id = shift;
+	my $q = database->prepare("
+		SELECT COUNT(*) AS c
+		FROM activity_log
+		WHERE frame_id = ?
+	");
+	$q->execute($frame_id);
+
+	my $r = $q->fetchrow_hashref or do {
+		database->rollback;
+		error("failed to query count from activity_log");
+		send_error("Failed to query count from activity_log" => 500);
+	};
+
+	return $r->{c};
+}
 
 
 1;

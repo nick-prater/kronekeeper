@@ -1,10 +1,8 @@
 /* 
-require.js configuration file
-
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2017 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -21,29 +19,35 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-require.config({
-	baseUrl: '/js',
 
-	paths: {
-		jquery: 'jquery-2.2.4.min',
-		jqueryui: 'jquery-ui-1.12.0.min',
-		underscore: 'underscore-1.8.3.min',
-		backbone: 'backbone-1.3.3.min',
-		"datatables.net": 'jquery-dataTables-1.10.13.min',
-	},
+require([
+	'datatables.net'
+], function (
+) {
+        'use strict';
 
-	shim: {
-		underscore: {
-			exports: '_'
+	/* Table is hidden until it is processed by Data */
+	$("#activity_log_table").on("draw.dt", function () {
+		console.log("table redrawn");
+		$("#activity_log_table").off("draw.dt");
+		$("#activity_log_table").show();
+	});
+
+	$("#activity_log_table").DataTable({
+		serverSide: true,
+		searching: false, /* Not yet implemented in our perl api */
+		ordering: false,  /* Not yet implemented in our perl api */
+		ajax: {
+			url: "activity_log/query",
+			type: "POST",
+			data: function(d) {
+				return JSON.stringify(d);
+			}
 		},
-		backbone: {
-			deps: ['underscore', 'jquery'],
-			exports: 'Backbone'
-		},
-		jqueryui: {
-			deps: ['jquery']
-		},
-	}
+		columns: [
+			{ data: 'log_timestamp'  },
+			{ data: 'by_person_name' },
+			{ data: 'note'           }
+		]
+	});
 });
-
-console.log("loaded main.js");
