@@ -21,8 +21,10 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 require([
+	'moment',
 	'datatables.net'
 ], function (
+	moment
 ) {
         'use strict';
 
@@ -45,9 +47,22 @@ require([
 			}
 		},
 		columns: [
-			{ data: 'log_timestamp'  },
-			{ data: 'by_person_name' },
-			{ data: 'note'           }
+			{
+				data: 'log_timestamp',
+				render: function(data, type, row) {
+					console.log("data:", data);
+					console.log("type:", type);
+					console.log(" row:", row);
+					return moment.utc(data).fromNow();
+				} 
+			},
+			{
+			 	data: 'by_person_name' 
+			},
+			{
+				data: 'note'
+			}
 		]
 	});
+
 });
