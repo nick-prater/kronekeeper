@@ -38,6 +38,7 @@ require([
 		serverSide: true,
 		searching: false, /* Not yet implemented in our perl api */
 		ordering: false,  /* Not yet implemented in our perl api */
+		bAutoWidth: false,
 		ajax: {
 			url: "activity_log/query",
 			type: "POST",
