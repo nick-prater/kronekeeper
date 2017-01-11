@@ -51,22 +51,31 @@ require([
 				data: 'log_timestamp',
 				render: function(data, type, row) {
 					return moment.utc(data).fromNow();
-				} 
+				},
+				className: "dt-left"
 			},
 			{
 			 	data: 'by_person_name' 
 			},
 			{
-				data: 'note'
+				data: 'note',
+				className: "dt-left"
 			},
 			{
 				data: 'completed_by_person_id',
-				render: function(data, type, row) {
+				render: function(data, type, row, meta) {
 					var checked = data ? 'checked="checked" ' : '';
 					return '<input type="checkbox" ' + checked + 'value="' + row.id + '" class="completed" />';
-				}
+				},
+				className: "dt-center",
+				width: "5em"
 			}
-		]
+		],
+		createdRow: function(row, data, index) {
+			if(data.completed_by_person_id) {
+				$(row).addClass("completed");
+			}	
+		}
 	});
 
 	/* When table is redrawn, attach events to new rows */
@@ -99,6 +108,13 @@ require([
 			},
 			success: function(json, status_text, jq_xhr) {
 				console.log("activity log updated");
+				var tr = $(element).closest("tr");
+				if(checked) {
+					tr.addClass("completed");
+				}
+				else {
+					tr.removeClass("completed");
+				}
 			}
 		});
 	}

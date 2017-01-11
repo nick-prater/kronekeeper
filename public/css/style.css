@@ -965,7 +965,9 @@ p.small {
 }
 
 
-
+#activity_log_table tr.completed {
+	background: #ccffcc
+}
 
 
 

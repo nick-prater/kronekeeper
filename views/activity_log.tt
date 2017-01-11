@@ -17,7 +17,7 @@
 		</dl>
 
 
-	<table id="activity_log_table" style="display:none">
+	<table id="activity_log_table" style="display:none" class="hover row-border">
 		<thead>
 			<tr>
 				<th>time</th>
