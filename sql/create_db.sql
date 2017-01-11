@@ -70,6 +70,7 @@ CREATE TABLE activity_log(
 /* Initialise Roles */
 INSERT INTO role(role) VALUES ('edit');
 INSERT INTO role(role) VALUES ('view_activity_log');
+INSERT INTO role(role) VALUES ('edit_activity_log');
 INSERT INTO role(role) VALUES ('import');
 INSERT INTO role(role, rank) VALUES ('manage_users', 1000);
 

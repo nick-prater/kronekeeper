@@ -29,9 +29,8 @@ require([
         'use strict';
 
 	/* Table is hidden until it is processed by Data */
-	$("#activity_log_table").on("draw.dt", function () {
+	$("#activity_log_table").on("init.dt", function () {
 		console.log("table redrawn");
-		$("#activity_log_table").off("draw.dt");
 		$("#activity_log_table").show();
 	});
 
@@ -50,9 +49,6 @@ require([
 			{
 				data: 'log_timestamp',
 				render: function(data, type, row) {
-					console.log("data:", data);
-					console.log("type:", type);
-					console.log(" row:", row);
 					return moment.utc(data).fromNow();
 				} 
 			},
@@ -61,8 +57,51 @@ require([
 			},
 			{
 				data: 'note'
+			},
+			{
+				data: 'completed_by_person_id',
+				render: function(data, type, row) {
+					var checked = data ? 'checked="checked" ' : '';
+					return '<input type="checkbox" ' + checked + 'value="' + row.id + '" class="completed" />';
+				}
 			}
 		]
 	});
+
+	/* When table is redrawn, attach events to new rows */
+	$("#activity_log_table").on("draw.dt", function () {
+		console.log("draw.dt");
+		$("input.completed").change(handle_checkbox_change);
+	});
+
+
+	function handle_checkbox_change(e) {
+
+		var element = e.currentTarget;
+		var activity_log_id = element.value;
+		var checked = element.checked;
+
+
+		console.log("checkbox changed for activity_log id:", activity_log_id, checked);
+
+		$.ajax({
+			url: "/api/activity_log/" + activity_log_id,
+			method: 'PATCH',
+			data: JSON.stringify({
+				completed: checked
+			}),
+			error: function(jq_xhr, status_text, error_text) {
+				console.log("error updating activity log", status_text, error_text);
+				console.log("reversing state of checkbox");
+				alert("Failed to update activity log", status_text, error_text);
+				element.checked = !checked;
+			},
+			success: function(json, status_text, jq_xhr) {
+				console.log("activity log updated");
+			}
+		});
+	}
+
+
 
 });

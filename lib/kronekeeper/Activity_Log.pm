@@ -107,6 +107,50 @@ prefix '/frame/:frame_id/activity_log' => sub {
 };
 
 
+prefix '/api/activity_log' => sub {
+
+	# Templates are just frames with a flag set
+	# Redirect them to the appropriate frame routes
+	patch '/:id' => require_login sub {
+
+		user_has_role('edit_activity_log') or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $id = param("id");
+		my $user = logged_in_user;
+		activity_log_id_valid_for_account($id) or do {
+			error("activity log id is invalid for this account");
+			send_error("activity log id is invalid for this account" => 403);
+		};
+
+		my $data = from_json(request->body);
+		my $completed_by = $data->{completed} ? $user->{id} : undef;
+
+		debug("updating completed_by_person_id for activity_log id $id");
+
+		my $q = database->prepare("
+			UPDATE activity_log
+			SET completed_by_person_id = ?
+			WHERE activity_log.id = ?
+		");
+		$q->execute(
+			$completed_by,
+			$id,
+		) or do {
+			database->rollback;
+			error("ERROR updating activity log");
+			send_error("database error updating activity log" => 500);
+		};
+
+		return to_json {
+			id => $id,
+			completed_by_person_id => $completed_by,
+		};
+	};
+};
+
+
 
 sub record {
 
@@ -161,13 +205,15 @@ sub get_activity_log {
 
 
 	my $q = database->prepare("
-		SELECT 
+		SELECT
+			activity_log.id,
 			log_timestamp AT TIME ZONE ? AS log_timestamp,
 			by_person_id,
 			person.name AS by_person_name,
 			frame_id,
 			function,
-			note
+			note,
+			completed_by_person_id
 		FROM activity_log
 		JOIN person ON (person.id = activity_log.by_person_id)
 		WHERE frame_id = ?
@@ -204,6 +250,31 @@ sub activity_log_count {
 	};
 
 	return $r->{c};
+}
+
+
+sub activity_log_id_valid_for_account {
+
+	my $id = shift;
+	my $account_id = shift || session('account')->{id};
+
+	$id && $id =~ m/^\d+$/ or do {
+		error "activity_log_id is not an integer: [$id]";
+		return undef;
+	};
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM activity_log
+		WHERE activity_log.account_id = ?
+		AND activity_log.id = ?
+	");
+	$q->execute(
+		$account_id,
+		$id
+	);
+
+	return $q->fetchall_arrayref({});
 }
 
 

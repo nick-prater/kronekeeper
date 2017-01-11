@@ -23,6 +23,7 @@
 				<th>time</th>
 				<th>person</th>
 				<th>activity</th>
+				<th>complete</th>
 			</tr>
 		</thead>
 		<tbody>
