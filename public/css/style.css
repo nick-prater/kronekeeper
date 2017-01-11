@@ -968,6 +968,10 @@ p.small {
 #activity_log_table tr.completed {
 	background: #ccffcc
 }
+#activity_log_table tr.next_task {
+	background: #ffffcc
+}
+
 
 
 

@@ -66,6 +66,7 @@ CREATE TABLE activity_log(
 	comment TEXT,
 	completed_by_person_id INTEGER REFERENCES person(id)
 );
+CREATE INDEX activity_log_frame_id_timestamp_idx ON activity_log(frame_id, log_timestamp);
 
 /* Initialise Roles */
 INSERT INTO role(role) VALUES ('edit');

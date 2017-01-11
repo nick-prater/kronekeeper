@@ -93,6 +93,7 @@ prefix '/frame/:frame_id/activity_log' => sub {
 			max_items => $data->{length},
 			skip_records => $data->{start},
 			frame_id => $id,
+			next_task_id => next_frame_task_id($id),
 		);
 
 		my $rv = {
@@ -143,10 +144,18 @@ prefix '/api/activity_log' => sub {
 			send_error("database error updating activity log" => 500);
 		};
 
-		return to_json {
+		my $rv = {
 			id => $id,
 			completed_by_person_id => $completed_by,
 		};
+
+		# If this is a frame log item, include the next item id in returned data
+		my $row;
+		if($row = get_activity_log_record($id)) {
+			$rv->{next_item_id} = next_frame_task_id($row->{frame_id});
+		}
+
+		return to_json $rv;
 	};
 };
 
@@ -213,7 +222,8 @@ sub get_activity_log {
 			frame_id,
 			function,
 			note,
-			completed_by_person_id
+			completed_by_person_id,
+			(? = activity_log.id) AS is_next_task
 		FROM activity_log
 		JOIN person ON (person.id = activity_log.by_person_id)
 		WHERE frame_id = ?
@@ -223,6 +233,7 @@ sub get_activity_log {
 	");
 	$q->execute(
 		$args{timezone},
+		$args{next_task_id},
 		$args{frame_id},
 		$args{max_items},
 		$args{skip_records},
@@ -230,6 +241,18 @@ sub get_activity_log {
 		
 	my $result = $q->fetchall_arrayref({});
 	return $result;
+}
+
+
+sub get_activity_log_record {
+
+	my $id = shift;
+	my $q = database->prepare("
+		SELECT * FROM activity_log
+		WHERE id = ?
+	");
+	$q->execute($id);
+	return $q->fetchrow_hashref;
 }
 
 
@@ -275,6 +298,28 @@ sub activity_log_id_valid_for_account {
 	);
 
 	return $q->fetchall_arrayref({});
+}
+
+
+sub next_frame_task_id {
+
+	my $frame_id = shift;
+	my $q = database->prepare("
+		SELECT id
+		FROM activity_log
+		WHERE frame_id = ?
+		AND completed_by_person_id IS NULL
+		ORDER BY log_timestamp ASC
+		LIMIT 1
+	");
+	$q->execute($frame_id);
+
+	my $r = $q->fetchrow_hashref or do {
+		error("failed to find next activity log item");
+		return undef;
+	};
+
+	return $r->{id};
 }
 
 

@@ -74,7 +74,10 @@ require([
 		createdRow: function(row, data, index) {
 			if(data.completed_by_person_id) {
 				$(row).addClass("completed");
-			}	
+			}
+			if(data.is_next_task) {
+				$(row).addClass("next_task");
+			}
 		}
 	});
 
@@ -90,7 +93,6 @@ require([
 		var element = e.currentTarget;
 		var activity_log_id = element.value;
 		var checked = element.checked;
-
 
 		console.log("checkbox changed for activity_log id:", activity_log_id, checked);
 
@@ -108,12 +110,23 @@ require([
 			},
 			success: function(json, status_text, jq_xhr) {
 				console.log("activity log updated");
+				var data = JSON.parse(json);
 				var tr = $(element).closest("tr");
 				if(checked) {
+					tr.removeClass("next_task");
 					tr.addClass("completed");
 				}
 				else {
 					tr.removeClass("completed");
+				}
+
+				/* Remove next_task highlight from all items */
+				var tbody = $(element).closest("tbody");
+				tbody.find("tr").removeClass("next_task");
+
+				/* Then, highlight next_task if we have it and it's visible */
+				if(data.next_item_id) {
+					tbody.find("tr").has('input[value="' + data.next_item_id + '"]').addClass("next_task");
 				}
 			}
 		});

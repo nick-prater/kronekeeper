@@ -27,13 +27,6 @@
 			</tr>
 		</thead>
 		<tbody>
-			[% FOREACH entry IN activity_log %]
-			<tr>
-				<td>[% entry.log_timestamp | html %]</td>
-				<td>[% entry.by_person_name | html %]</td>
-				<td>[% entry.note | html %]</td>
-			</tr>
-			[% END %]
 		</tbody>
 	</table>
 </div>
