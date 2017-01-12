@@ -25,6 +25,12 @@ CREATE DATABASE kronekeeper;
 /* HOUSEKEEPING */
 /*--------------------------------------------------------------------------*/
 
+CREATE TABLE kronekeeper_data(
+	key TEXT NOT NULL PRIMARY KEY,
+	value TEXT
+);
+INSERT INTO kronekeeper_data(key, value) VALUES('db_version', '1');
+
 CREATE TABLE account(
         id SERIAL NOT NULL PRIMARY KEY,
         name TEXT NOT NULL
@@ -89,7 +95,6 @@ CREATE TABLE frame(
 	is_deleted BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-	
 CREATE TABLE vertical(
 	id SERIAL NOT NULL PRIMARY KEY,
 	frame_id INTEGER NOT NULL REFERENCES frame(id),
@@ -123,7 +128,6 @@ CREATE TABLE block_type(
 
 CREATE TABLE block(
 	id SERIAL NOT NULL PRIMARY KEY,
-	block_type_id REFERENCES block_type(id),
 	vertical_id INTEGER NOT NULL REFERENCES vertical(id),
 	position INTEGER NOT NULL CHECK(position > 0),
 	designation TEXT,
@@ -177,9 +181,9 @@ CREATE UNIQUE INDEX pin_designation_circuit_idx ON pin(designation, circuit_id);
 
 CREATE TABLE colour(
 	id SERIAL NOT NULL PRIMARY KEY,
-	html_code BYTEA NOT NULL,
 	name TEXT NOT NULL,
 	short_name TEXT NOT NULL,
+	html_code BYTEA NOT NULL,
 	contrasting_html_code BYTEA NOT NULL DEFAULT E'\\x000000'
 );
 CREATE UNIQUE INDEX colour_name_idx ON colour(name);
@@ -204,7 +208,7 @@ CREATE TABLE jumper_template(
 	designation TEXT,
 	account_id INTEGER NOT NULL REFERENCES account(id)
 );
-CREATE UNIQUE INDEX jumper_template_designation_idx ON jumper_template(designation);
+CREATE UNIQUE INDEX jumper_template_account_designation_idx ON jumper_template(account_id, designation);
 
 CREATE TABLE jumper_template_wire(
 	id SERIAL NOT NULL PRIMARY KEY,
@@ -263,17 +267,6 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-/* Insert Basic Jumper Templates 
- * This needs re-work now that we've made the templates per-account
-SELECT create_jumper_template(2, 'Analogue Right', 'R',     ARRAY['blu','y']);
-SELECT create_jumper_template(2, 'Analogue Left',  'L',     ARRAY['blu','red']);
-SELECT create_jumper_template(2, 'Analogue Mono',  'M',     ARRAY['red','white']);
-SELECT create_jumper_template(2, 'DC',             'DC',    ARRAY['green','yellow']);
-SELECT create_jumper_template(2, 'AES/EBU',        'AES',   ARRAY['blue','white']);
-SELECT create_jumper_template(2, 'Communications', 'COMMS', ARRAY['green','red']);
-SELECT create_jumper_template(2, 'ABS',            'ABS',   ARRAY['black','red','green']);
- */
-
 
 /*--------------------------------------------------------------------------*/
 /* JUMPERS */
@@ -331,17 +324,6 @@ GRANT SELECT, INSERT, DELETE, UPDATE ON ALL TABLES IN SCHEMA public TO kkdancer;
 GRANT SELECT, INSERT, DELETE, UPDATE ON ALL TABLES IN SCHEMA kris TO kkdancer;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO kkdancer;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA kris TO kkdancer;
-
-
-/* Adding an account */
--- insert initial block types
--- insert initial jumper templates
--- INSERT INTO block_type(account_id, name, colour_html_code, circuit_count, circuit_pin_count) VALUES (2, '237A', E'\\xfffacd', 10, 2);
--- INSERT INTO block_type(account_id, name, colour_html_code, circuit_count, circuit_pin_count) VALUES (2, '237B', E'\\xd6dddd', 10, 2);
--- INSERT INTO block_type(account_id, name, colour_html_code, circuit_count, circuit_pin_count) VALUES (2, 'EARTH', E'\\xffcccc', 10, 2);
--- INSERT INTO block_type(account_id, name, colour_html_code, circuit_count, circuit_pin_count) VALUES (2, 'ABS', E'\\xd6dddd', 6, 3);
-
-
 
 
 
