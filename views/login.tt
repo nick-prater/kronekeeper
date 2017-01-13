@@ -20,7 +20,7 @@
 					<li>
 						<label for="email">email address</label>
 						<input 
-							type="email"
+							type="text"
 							id="username"
 							name="username"
 							placeholder="enter your registered email address"
