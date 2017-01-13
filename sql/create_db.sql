@@ -19,7 +19,7 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-CREATE DATABASE kronekeeper;
+--CREATE DATABASE kronekeeper;
 
 /*--------------------------------------------------------------------------*/
 /* HOUSEKEEPING */
@@ -313,17 +313,6 @@ CREATE TABLE kris.jumper_type(
 
 CREATE UNIQUE INDEX kris_jumper_type_account_wiretype_idx ON kris.jumper_type(account_id, kris_wiretype_id);
 
-
-
-/*--------------------------------------------------------------------------*/
-/* PERMISSIONS */
-/*--------------------------------------------------------------------------*/
-
-GRANT USAGE ON SCHEMA kris TO kkdancer;
-GRANT SELECT, INSERT, DELETE, UPDATE ON ALL TABLES IN SCHEMA public TO kkdancer;
-GRANT SELECT, INSERT, DELETE, UPDATE ON ALL TABLES IN SCHEMA kris TO kkdancer;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO kkdancer;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA kris TO kkdancer;
 
 
 
