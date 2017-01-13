@@ -128,6 +128,67 @@ prefix '/user' => sub {
 
 prefix '/api/user' => sub {
 
+
+	get '/init' => sub {
+
+		# This can be called on first setup, to create the initial admin user
+		# It will only work if there are no users configured on the system
+		# It sets an initial user on the system:
+		#   u: kk_admin
+		#   p: kk_admin
+		# This should be used to login for the first time, then changed or deleted
+		# once local users have been setup
+
+		# Check the system hasn't yet been initialised
+		my $q = database->prepare("SELECT COUNT(*) AS user_count FROM person");
+		$q->execute;
+		my $r = $q->fetchrow_hashref;
+		if($r->{user_count} != 0) {
+			error("init called, but users have already been set up");
+			send_error("cannot call init - there are already users configured" => 403);
+		};
+
+		# Create user kk_admin
+		my $user_id = create_user(
+			username   => 'kk_admin',
+			account_id => param('account_id'),
+			name       => 'Kronekeeper Setup User',
+		) or do {
+			database->rollback;
+			send_error('error creating user' => 500);
+		};
+		my $user_info = user_info($user_id);
+
+		# Give it rights to add/manage other users
+		# Can't use add_role function as user doesn't yet have sufficient rights
+		$q = database->prepare("
+			INSERT INTO user_role(user_id, role_id)
+			SELECT ?, id FROM role WHERE role.role='manage_users'
+		");
+		$q->execute($user_id) or do {
+			database->rollback;
+			error("Failed to add manage_users role to new user");
+			send_error("Failed to add manage_users role to new user" => 500);
+		};
+
+		# Set the password...
+		user_password(
+			username     => $user_info->{email},
+			new_password => 'kk_admin',
+		) or do {
+			database->rollback;
+			error("error changing password");
+			send_error('error changing password' => 500);
+		};
+
+		# Done
+		database->commit;
+
+
+		return "OK :)";
+	};
+
+
 	post '' => require_login sub {
 
 		my $account_id = session('account')->{id};
@@ -236,6 +297,7 @@ prefix '/api/user' => sub {
 			username     => $email,
 			new_password => $new_password,
 		) or do {
+			database->rollback;
 			error("error changing password");
 			send_error('error changing password' => 500);
 		};
@@ -513,7 +575,6 @@ sub update_roles {
 	foreach my $role(@roles_to_remove) {
 		remove_role($role, $info);
 	}
-
 
 	my @roles_to_add = array_minus(
 		@{$roles},
