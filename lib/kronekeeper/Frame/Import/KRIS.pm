@@ -970,7 +970,7 @@ sub create_frame {
 
 	# Kris frame designations always run left-right, bottom-top
 	my $q = database->prepare("
-		SELECT create_regular_frame(?,?,?,?,?,?) AS new_frame_id
+		SELECT create_regular_frame(?,?,?,?,?,?,?) AS new_frame_id
 	");
 	$q->execute(
 		$account_id,
@@ -979,6 +979,7 @@ sub create_frame {
 		$info->{blocks},
 		'f', # don't reverse horizontal designations
 		'f', # don't reverse vertical designations
+		'f', # not a template frame
 	) or do {
 		return error_and_rollback("ERROR running create_regular_frame on database");
 	};
@@ -993,6 +994,7 @@ sub create_frame {
 
 sub map_block_ids {
 
+	debug("mapping block_ids");
 	my $frame_id = shift;
 	my $q = database->prepare("
 		UPDATE kris_blocks
@@ -1004,6 +1006,7 @@ sub map_block_ids {
 
 sub place_blocks {
 
+	debug("placing blocks");
 	my $block_type_id = shift;
 	my $q = database->prepare("
 		SELECT place_generic_block_type(kronekeeper_block_id, ?)
@@ -1015,6 +1018,7 @@ sub place_blocks {
 
 sub apply_block_labels {
 
+	debug("applying block_labels");
 	my $q = database->do("
 		UPDATE block
 		SET name = Block_Title
@@ -1028,6 +1032,7 @@ sub apply_block_labels {
 
 sub apply_circuit_labels {
 
+	debug("applying circuit_labels");
 	# We'll do this block-by-block
 	# Updates kris_circuits.kronekeeper_circuit_id field
 	my $q = database->prepare("SELECT * from kris_blocks");
@@ -1120,6 +1125,7 @@ sub apply_circuit_labels {
 
 sub apply_jumpers {
 
+	debug("applying jumpers");
 	my $account_id = session('account')->{id};
 	my $q = database->prepare("
 		SELECT
