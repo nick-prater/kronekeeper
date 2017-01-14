@@ -14,7 +14,7 @@
 				<input
 					type="hidden"
 					name="return_url"
-					value="[% params.return_url %]"
+					value="[% params.return_url | html %]"
 				/>
 				<ul>
 					<li>
