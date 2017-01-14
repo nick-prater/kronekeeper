@@ -27,6 +27,7 @@
 				[% END %]
 				</div>
 			<div class="menu">
+				[% IF session.logged_in_user %]
 				<a href="/frame/">frames</a>
 				<a href="/template/">templates</a>
 				[% IF user_roles.manage_users %]
@@ -34,6 +35,7 @@
 				[% END %]
 				<a href="/user/password">settings</a>
 				<a href="/logout">logout</a>
+				[% END %]
 			</div>
 		</div>
 [% content %]
