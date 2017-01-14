@@ -34,7 +34,7 @@ define([
 	var highlight_duration = 1000;
 
 	function highlight_element_change_applied(jq_context, selector) {
-		var element = jq_context.children(selector);
+		var element = jq_context.find(selector);
 		element.removeClass('change_pending');
 		element.effect("highlight", highlight_green, highlight_duration);
 	}
