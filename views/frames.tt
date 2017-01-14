@@ -7,10 +7,12 @@
 	[% END %]
 
 	<div class="menu">
-		[% IF show_templates %]
+		[% IF user_roles.edit %]
+		  [% IF show_templates %]
 			<a href="add">new template</a>
-		[% ELSE %]
+		  [% ELSE %]
 			<a href="add">new frame</a>
+		  [% END %]
 		[% END %]
 		[% IF user_roles.import %]
 		<a href="import/kris/">import</a>

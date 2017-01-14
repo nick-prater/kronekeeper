@@ -31,7 +31,9 @@
 				</dd>
 			</dl>
 			<div class="menu">
+				[% IF user_roles.view_activity_log %]
 				<a href="[% frame_info.id %]/activity_log" title="show activity log">activity log</a>
+				[% END %]
 			</div>
 		</caption>
 
@@ -137,6 +139,7 @@
 	
 	<ul class="context_menu" id="block_menu">
 		<li data-action="open"><div>Open</div></li>
+		[% IF user_roles.edit %]
 		<li data-action="place_submenu">
 			<div>Add Block</div>
 			<ul>
@@ -150,11 +153,15 @@
 		<li data-action="paste"><div>Paste</div></li>
 		<li data-action="remove"><div>Remove Block</div></li>
 		<li data-action="change_colour"><div>Change Colour</div></li>
+		[% END %]
 	</ul>
 	<ul class="context_menu" id="frame_menu">
+		[% IF user_roles.view_activity_log %]
 		<li data-action="show_activity_log">
 			<div>Activity Log</div>
 		</li>
+		[% END %]
+		[% IF user_roles.edit %]
 		<li data-action="reverse_designations">
 			<div>Reverse Designations</div>
 			<ul>
@@ -162,6 +169,7 @@
 				<li data-action="reverse_block_designations"><div>block</div></li>
 			</ul>
 		</li>
+		[% END %]
 	</ul>
 </div>
 
