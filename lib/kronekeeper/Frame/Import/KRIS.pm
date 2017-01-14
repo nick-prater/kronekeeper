@@ -213,6 +213,7 @@ sub wiretype_error {
 		wiretypes => wiretypes(),
 		wiretype_error_code => $wiretype_error_code,
 		jumper_templates => jumper_templates(),
+		block_types => block_types(),
 	};
 
 	$http_status and status($http_status);
