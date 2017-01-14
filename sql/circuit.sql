@@ -85,6 +85,29 @@ $$ LANGUAGE plpgsql;
 
 
 
+CREATE OR REPLACE FUNCTION circuit_ids_are_connected(
+	p_circuit_id_1 INTEGER,
+	p_circuit_id_2 INTEGER
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+	RETURN EXISTS (
+		SELECT 1
+		FROM connection AS connection1
+		JOIN pin AS pin1 ON (pin1.id = connection1.pin_id)
+		JOIN circuit AS circuit1 ON (circuit1.id = pin1.circuit_id)
+		JOIN jumper_wire AS jumper_wire1 ON (jumper_wire1.id = connection1.jumper_wire_id)
+		JOIN connection AS connection2 ON (connection2.jumper_wire_id = connection1.jumper_wire_id)
+		JOIN pin AS pin2 ON (pin2.id = connection2.pin_id)
+		JOIN circuit AS circuit2 ON (circuit2.id = pin2.circuit_id)
+		WHERE circuit1.id = p_circuit_id_1
+		AND circuit2.id = p_circuit_id_2
+	);
+END
+$$ LANGUAGE plpgsql;
+
+
+
 /* Given a circuit id, return a list of all the circuit
  * ids linked with it by jumpers. The returned list
  * includes the given circuit_id. All jumpers are followed
