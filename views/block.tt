@@ -82,10 +82,10 @@
 
 
 <!-- Dialogs hidden on page load -->
-<div id="jumper_connection_dialog" title="Jumper connection" class="dialog">
+<div id="jumper_connection_dialog" title="Jumper connection" class="dialog hidden">
 </div>
 
-<div id="circuit_note_dialog" title="Circuit comments" class="dialog">
+<div id="circuit_note_dialog" title="Circuit comments" class="dialog hidden">
 	<textarea>
 	</textarea>
 	<div class="message"></div>
