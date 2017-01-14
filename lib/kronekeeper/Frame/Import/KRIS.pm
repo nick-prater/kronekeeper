@@ -46,7 +46,7 @@ use Parse::CSV;
 our $VERSION = '0.01';
 
 my $al = kronekeeper::Activity_Log->new();
-
+my @missing_wiretypes;
 
 prefix '/frame/import/kris' => sub {
 
@@ -71,6 +71,7 @@ prefix '/frame/import/kris' => sub {
 		# The largest frame encountered at Global Radio is 4.7MB
 		# We'll therefore set a limit of 10MB
 		my $max_upload_bytes = 10_485_760;
+		@missing_wiretypes = ();
 
 		user_has_role('import') or do {
 			send_error('forbidden' => 403);
@@ -119,6 +120,9 @@ prefix '/frame/import/kris' => sub {
 		) or do {
 			error("Failed importing KRN file");
 			database->rollback;
+			if(@missing_wiretypes) {
+				return krn_error("ERROR_UNKNOWN_WIRETYPE");
+			}
 			return krn_error('ERROR_FAILED_IMPORT');
 		};
 
@@ -903,6 +907,7 @@ sub import_jumpers {
 
 sub validate_wiretype_mapping {
 
+	# This function updates global @missing_wiretypes if any wiretypes are missing
 	debug("checking KRIS Wiretypes are mapped to a Kronekeeper jumper_template");
 
 	# Locate any KRIS Wiretypes without Kronekeeper jumper template mapping
@@ -920,11 +925,12 @@ sub validate_wiretype_mapping {
 		session('account')->{id}
 	);
 	my $result = $q->fetchall_hashref('wiretype');
+	@missing_wiretypes = keys(%{$result});
 
-	if(keys(%{$result})) {
+	if(@missing_wiretypes) {
 		error(sprintf(
 			"ERROR: Found KRIS Wiretypes %s without Kronekeeper jumper_template mappings",
-			join(",", keys(%{$result}))
+			join(",", @missing_wiretypes)
 		));
 		return 0;
 	}

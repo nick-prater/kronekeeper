@@ -83,8 +83,12 @@
 					<p class="error">Unexpected error: invalid wiretype data.</p>
 				[% ELSIF krn_error_code == 'ERROR_INVALID_BLOCK_TYPE' %]
 					<p class="error">Unexpected error: invalid block type.</p>
+				[% ELSIF krn_error_code == 'ERROR_UNKNOWN_WIRETYPE' %]
+					<p class="error">ERROR: uploaded KRN file contains an unassigned wiretype.</p>
 				[% ELSIF krn_error_code == 'SUCCESS' %]
 					<p class="success">File uploaded OK.</p>
+				[% ELSE %]
+					<p class="error">ERROR: Failed to import the uploaded file.</p>
 				[% END %]
 				<p class="error" id="krn_too_big_message" hidden="hidden">ERROR: The selected file is bigger than the maximum size allowed. Please try again.</p>
 				<label for="block_type">Use block type:</label>
