@@ -3,6 +3,7 @@
 # Done in template so we can localise them for other languages
 role_names = {
 	view_activity_log => 'View Activity Log',
+	edit_activity_log => 'Edit Activity Log',
 	edit => 'Edit',
 	manage_users => 'Manage Users',
 	import => 'Import'
