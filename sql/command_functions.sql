@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2017 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -296,12 +296,6 @@ END
 $$ LANGUAGE plpgsql;
 
 
-SELECT circuit_id INTO circuit_id_1 FROM c_designation_to_circuit_id(p_frame_id, c_designation_1);
-	IF circuit_id_1 IS NULL THEN
-		RAISE EXCEPTION '% does not map to a valid circuit_id', c_designation_1;
-	END IF;
-
-
 
 CREATE OR REPLACE FUNCTION c_add_simple_jumper(
 	p_frame_id INTEGER,
@@ -385,8 +379,9 @@ END
 $$ LANGUAGE plpgsql;
 
 
-
+/* These commands below are for illustration and were used in testing... */
 /* Show block detail */
+/*
 SELECT
 	circuit.designation,
 	circuit.name,
@@ -413,10 +408,11 @@ WHERE vertical.frame_id = 5
 AND vertical.designation = 'A'
 AND block.designation = '02'
 ORDER BY block.position ASC, circuit.position ASC;
-
+*/
 
 
 /* Show jumpers for given circuit */
+/*
 SELECT DISTINCT CONCAT(vertical2.designation, block2.designation, '.', circuit2.designation)
 FROM connection AS connection1
 JOIN pin AS pin1 ON (pin1.id = connection1.pin_id)
@@ -429,46 +425,15 @@ JOIN pin AS pin2 ON (pin2.id = connection2.pin_id)
 JOIN circuit AS circuit2 ON (circuit2.id = pin2.circuit_id)
 JOIN block AS block2 ON (block2.id = circuit2.block_id)
 JOIN vertical AS vertical2 ON (vertical2.id = block2.vertical_id)
-WHERE circuit1.id = 10
-
+WHERE circuit1.id = 10;
+*/
 
 /* Show frame detail */
+/*
 SELECT CONCAT(vertical.designation, block.designation) AS designation, block.name
 FROM block
 JOIN vertical ON (vertical.id = block.vertical_id)
 WHERE vertical.frame_id = 5
 ORDER BY vertical.position ASC, block.position ASC;
-
-
-
-/* Work in progress to get JSON response directly from database */
-SELECT to_json(SELECT
-	circuit.designation,
-	circuit.name,
-	circuit.cable_reference,
-	ARRAY(
-		SELECT DISTINCT CONCAT(vertical2.designation, block2.designation, '.', circuit2.designation)
-		FROM connection AS connection1
-		JOIN pin AS pin1 ON (pin1.id = connection1.pin_id)
-		JOIN circuit AS circuit1 ON (circuit1.id = pin1.circuit_id)
-		JOIN connection AS connection2 ON (
-			connection2.jumper_wire_id = connection1.jumper_wire_id
-			AND connection2.id != connection1.id
-		)
-		JOIN pin AS pin2 ON (pin2.id = connection2.pin_id)
-		JOIN circuit AS circuit2 ON (circuit2.id = pin2.circuit_id)
-		JOIN block AS block2 ON (block2.id = circuit2.block_id)
-		JOIN vertical AS vertical2 ON (vertical2.id = block2.vertical_id)
-		WHERE circuit1.id = circuit.id
-	) AS jumpers
-FROM vertical
-JOIN block ON (block.vertical_id = vertical.id)
-JOIN circuit ON (circuit.block_id = block.id)
-WHERE vertical.frame_id = 5
-AND vertical.designation = 'A'
-AND block.designation = '02'
-ORDER BY block.position ASC, circuit.position ASC
-) ;
-
-
+*/
 
