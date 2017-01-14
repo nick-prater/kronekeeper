@@ -179,7 +179,9 @@ SELECT
 	colour.name AS colour_name,
 	colour.short_name AS colour_short_name,
 	CONCAT('#', ENCODE(colour.html_code, 'hex')) AS html_colour,
-	CONCAT('#', ENCODE(colour.contrasting_html_code, 'hex')) AS contrasting_html_colour
+	CONCAT('#', ENCODE(colour.contrasting_html_code, 'hex')) AS contrasting_html_colour,
+	circuit1.block_id AS a_block_id,
+	circuit2.block_id AS b_block_id
 FROM connection AS connection1
 JOIN pin AS pin1 ON (pin1.id = connection1.pin_id)
 JOIN circuit AS circuit1 ON (circuit1.id = pin1.circuit_id)
