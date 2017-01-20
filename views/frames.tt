@@ -14,14 +14,12 @@
 			<a href="add">new frame</a>
 		  [% END %]
 		[% END %]
-		[% IF user_roles.import %]
+		[% IF user_roles.import AND NOT show_templates %]
 		<a href="import/kris/">import</a>
 		[% END %]
 	</div>
 
 	<table>
-
-
 		<tr>
 			<th></th>
 			<th>name</th>
