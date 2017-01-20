@@ -11,7 +11,7 @@
 					Frame:
 				</dt>
 				<dd>
-					<a href="[% request.uri_base %]/frame/[% block_info.frame_id %]" title="frame view">[% block_info.frame_name | html %]</a>
+					<a href="[% request.uri_base %]/frame/[% block_info.frame_id %]##block-[% block_info.id %]" title="frame view">[% block_info.frame_name | html %]</a>
 				</dd>
 
 				<dt>

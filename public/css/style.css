@@ -203,6 +203,11 @@ div.credits.container {
 	border: 1px solid black;
 	font-size: 12pt;
 }
+.frame td.highlighted {
+	border: 1px solid red;
+	font-weight: bold;
+	box-shadow: 0px 0px 2px 2px #f00;
+}
 
 .frame .block.is_free div.label {
 	color: grey;

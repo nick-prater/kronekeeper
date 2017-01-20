@@ -22,6 +22,7 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 require([
 	'util',
+	'scroll_element',
 	'frame/remove_block',
 	'frame/title',
 	'frame/block_colour',
@@ -32,6 +33,7 @@ require([
 	'jqueryui'
 ], function (
 	util,
+	scroll_element,
 	remove_block,
 	title,
 	block_colour,
@@ -50,6 +52,32 @@ require([
 	$(".block .menu_button a").on("click", show_block_menu);
 	block_colour.initialise();
 	template.initialise();
+
+
+	/* If url contains a document fragment, highlight that element */
+	if(location.hash && (location.hash.length > 2)) {
+		
+		/* Kronekeeper uses a double-hash prefix for specifying the
+		 * document fragment. As this doesn't actually match an element
+		 * id, the browser will not scroll to position it. Instead
+		 * we handle highlighting and positoning according to our own rules
+		 */
+		var element = $(location.hash.substring(1));
+		if(!element.length) {
+			console.log("specified document fragment does not exist");
+			return;
+		}
+
+		console.log("highlighting element:", location.hash);
+		element.addClass("highlighted");
+
+		if(!scroll_element.completely_visible(element)) {
+			scroll_element.to_centre(element);
+		}
+		else {
+			console.log("no need to centre element");
+		}
+	}
 
 
 	function show_block_menu(e) {
