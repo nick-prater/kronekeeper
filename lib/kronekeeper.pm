@@ -78,6 +78,12 @@ prefix '/' => sub {
 	};
 
 	get '/login' => sub {
+
+		# Can't login if we're already logged in
+		if(logged_in_user) {
+			redirect '/frame/';
+		}
+
 		template 'login';
 	};
 
