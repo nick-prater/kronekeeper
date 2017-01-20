@@ -112,6 +112,7 @@ prefix '/' => sub {
 				account_id => $user->{account_id},
 				note       => sprintf("user '%s' logged in", param('username'))
 			});
+			database->commit;
 
 			# Authentication OK - forward to requested page or default 
 			# to frame view
@@ -140,6 +141,7 @@ prefix '/' => sub {
 				account_id => $user->{account_id},
 				note       => sprintf("user '%s' logged out", $user->{email}),
 			});
+			database->commit;
 		}
 
 		app->destroy_session;
