@@ -6,9 +6,8 @@
 	<h1>Add Frame</h1>
 	[% END %]
 
-	<form
-		method="post"
-	>
+	<form id="add_frame_form">
+
 		<ul>
 
 			<li>
@@ -30,7 +29,7 @@
 				<input
 					type="number"
 					min="1"
-					max="100"
+					max="[% max_width %]"
 					step="1"
 					name="frame_width"
 					id="frame_width"
@@ -43,7 +42,7 @@
 				<input
 					type="number"
 					min="1"
-					max="150"
+					max="[% max_height %]"
 					step="1"
 					name="frame_height"
 					id="frame_height"
@@ -72,10 +71,33 @@
 				</select>
 			</li>
 		</ul>
+
+		<div class="message" id="creating_frame_message">
+			[% IF is_template %]
+			Creating new template...
+			[% ELSE %]
+			Creating new frame...
+			[% END %]
+		</div>
+		<div class="message success" id="created_frame_message">
+			[% IF is_template %]
+			Created new template.
+			[% ELSE %]
+			Created new frame.
+			[% END %]
+		</div>
+		<div class="message error" id="create_error_message">
+			[% IF is_template %]
+			Error creating new template.
+			[% ELSE %]
+			Error creating new frame.
+			[% END %]
+		</div>
+		<div class="message error" id="validation_message"></div>
 	
 		<div class="buttons">
-			<button onclick="window.location='../'">Cancel</button>
-			<button type="submit">
+			<button type="button" onclick="window.location='../'">Cancel</button>
+			<button type="submit" id="create_frame_button">
 				[% IF is_template %]
 				Create Template
 				[% ELSE %]
@@ -97,4 +119,7 @@
 
 </div>
 
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/frames/add.js"></script>
 

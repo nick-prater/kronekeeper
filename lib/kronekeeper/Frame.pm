@@ -66,7 +66,7 @@ prefix '/template' => sub {
 		forward '/frame/' . param('frame_id');
 	};
 	any qr{/\d+(/\d+.*)} => require_login sub {
-		
+
 		# To keep a nice hierachy, allow access to 'block' routes
 		# responds to routes of the form: /template/[frame_id]/[block_id]/xxx...
 		# forwards them to /block/[block_id]/xxx...
@@ -105,89 +105,18 @@ prefix '/frame' => sub {
 
 	get '/add' => sub {
 
+		my $max_height = config->{frame_max_height} || 100;
+		my $max_width = config->{frame_max_width} || 100;
+
 		user_has_role('edit') or do {
 			send_error('forbidden' => 403);
 		};
 
 		template('add_frame', {
 			is_template => param('is_template') ? 1 : 0,
+			max_height  => $max_height,
+			max_width   => $max_width,
 		});
-	};
-
-	post '/add' => sub {
-
-		user_has_role('edit') or do {
-			send_error('forbidden' => 403);
-		};
-
-		debug request->body;
-
-		param('frame_name') or do {
-			debug("invalid frame_name parameter");
-			send_error("invalid frame name parameter" => 400);
-		};
-
-		param('frame_width') && param('frame_width') =~ m/^\d+$/ or do {
-			debug("invalid frame_width parameter");
-			send_error("invalid frame_width parameter" => 400);
-		};
-
-		param('frame_height') && param('frame_height') =~ m/^\d+$/ or do {
-			debug("invalid frame_height parameter");
-			send_error("invalid frame_height parameter" => 400);
-		};
-
-		my $designation_order_h = param('designation_order_h') || 'left-to-right';
-		$designation_order_h =~ m/^(left-to-right|right-to-left)$/ or do {
-			debug("invalid designation_order_h parameter");
-			send_error("invalid designation_order_h parameter" => 400);
-		};
-			
-		my $designation_order_v = param('designation_order_v') || 'bottom-to-top';
-		$designation_order_v =~ m/^(bottom-to-top|top-to-bottom)$/ or do {
-			debug("invalid designation_order_v parameter");
-			send_error("invalid designation_order_v parameter" => 400);
-		};
-
-		my $is_template = param('is_template') ? 1 : 0;
-
-
-		my $frame_id = create_frame(
-			param('frame_name'),
-			param('frame_width'),
-			param('frame_height'),
-			$designation_order_h,
-			$designation_order_v,
-			$is_template,
-		) or do {
-			error("Failed creating new frame");
-			database->rollback;
-			send_error("Failed creating new frame" => 500);
-		};
-
-		# Update Activity Log
-		my $note = sprintf(
-			'Created new %s "%s" with dimensions %d x %d',
-			$is_template ? 'template' : 'frame',
-			param('frame_name'),
-			param('frame_width'),
-			param('frame_height'),
-		);
-
-		$al->record({
-			function     => 'kronekeeper::Frame::add_frame',
-			frame_id     => $frame_id,
-			note         => $note,
-		});
-
-		database->commit;
-
-		my $next_url = $is_template ? '/template/' : '/frame/';
-		forward(
-			$next_url,
-			{},
-			{method => 'GET'}
-		);
 	};
 
 	get '/:frame_id' => require_login sub {
@@ -215,7 +144,7 @@ prefix '/frame' => sub {
 	};
 
 	any qr{/\d+(/\d+.*)} => require_login sub {
-		
+
 		# To keep a nice hierachy, allow access to 'block' routes
 		# responds to routes of the form: /frame/[frame_id]/[block_id]/xxx...
 		# forwards them to /block/[block_id]/xxx...
@@ -229,6 +158,94 @@ prefix '/frame' => sub {
 
 
 prefix '/api/frame' => sub {
+
+	post '/add' => sub {
+
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		# Validate parameters
+		$data->{frame_name} or do {
+			debug("invalid frame_name");
+			send_error("invalid frame name" => 400);
+		};
+		$data->{frame_width} && $data->{frame_width} =~ m/^\d+$/ or do {
+			debug("invalid frame_width");
+			send_error("invalid frame_width" => 400);
+		};
+		$data->{frame_height} && $data->{frame_height} =~ m/^\d+$/ or do {
+			debug("invalid frame_height");
+			send_error("invalid frame_height" => 400);
+		};
+
+		my $designation_order_h = $data->{designation_order_h} || 'left-to-right';
+		$designation_order_h =~ m/^(left-to-right|right-to-left)$/ or do {
+			debug("invalid designation_order_h");
+			send_error("invalid designation_order_h" => 400);
+		};
+			
+		my $designation_order_v = $data->{designation_order_v} || 'bottom-to-top';
+		$designation_order_v =~ m/^(bottom-to-top|top-to-bottom)$/ or do {
+			debug("invalid designation_order_v");
+			send_error("invalid designation_order_v" => 400);
+		};
+
+		my $is_template = $data->{is_template} ? 1 : 0;
+
+		# Limit maximum size of frame
+		my $max_height = config->{frame_max_height} || 100;
+		my $max_width = config->{frame_max_width} || 100;
+		my $error_code;
+
+		if($data->{frame_width} > $max_width) {
+			error("requested frame width exceeds configured maximum");
+			send_error("requested frame width exceeds configured maximum" => 400);
+		}
+		if($data->{frame_height} > $max_height) {
+			error("requested frame height exceeds configured maximum");
+			send_error("requested frame height exceeds configured maximum" => 400);
+		}
+
+		# Create frame
+		my $frame_id = create_frame(
+			$data->{frame_name},
+			$data->{frame_width},
+			$data->{frame_height},
+			$designation_order_h,
+			$designation_order_v,
+			$is_template,
+		) or do {
+			error("Failed creating new frame");
+			database->rollback;
+			send_error("Failed creating new frame" => 500);
+		};
+
+		# Update Activity Log
+		my $note = sprintf(
+			'Created new %s "%s" with dimensions %d x %d',
+			$is_template ? 'template' : 'frame',
+			$data->{frame_name},
+			$data->{frame_width},
+			$data->{frame_height},
+		);
+
+		$al->record({
+			function => 'kronekeeper::Frame::add_frame',
+			frame_id => $frame_id,
+			note     => $note,
+		});
+
+		database->commit;
+
+		return to_json {
+			frame_id => $frame_id,
+			is_template => $is_template, 
+		};
+	};
 
 
 	del '/:frame_id' => sub {
