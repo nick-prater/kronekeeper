@@ -181,11 +181,11 @@ require([
 				/* Display new standard or temporary frame */
 				if(json.is_template) {
 					console.log("displaying newly created template");
-					//window.location = "/template/" + json.frame_id;
+					window.location = "/template/" + json.frame_id;
 				}
 				else {
 					console.log("displaying newly created frame");
-					//window.location = "/frame/" + json.frame_id;
+					window.location = "/frame/" + json.frame_id;
 				}
 			}
 		});

@@ -1,0 +1,27 @@
+
+<div class="container add_frame">
+	[% IF is_template %]
+	<h1>Add Template</h1>
+	[% ELSE %]
+	<h1>Add Frame</h1>
+	[% END %]
+
+
+	<p>
+		Cannot add any more frames or templates.
+	</p>
+	<p>
+		Your account is limited to a combined total of
+		[% max_frames | html %] frames and templates, but currently has [% frame_count | html %].
+	</p>
+	<p>
+		You could delete an unwanted frame or template and try again, or increase your account's limit.
+	</p>
+
+
+</div>
+
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/frames/add.js"></script>
+

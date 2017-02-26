@@ -112,11 +112,31 @@ prefix '/frame' => sub {
 			send_error('forbidden' => 403);
 		};
 
-		template('add_frame', {
-			is_template => param('is_template') ? 1 : 0,
-			max_height  => $max_height,
-			max_width   => $max_width,
-		});
+		my $frame_count = frame_count();
+		my $max_frames = max_frames();
+		debug(" max_fraaes: ", ($max_frames || 'unlimited'));
+		debug("frame_count: ", $frame_count);
+
+		# Enforce account limit on maximum frames/template
+		if(defined $max_frames && ($frame_count >= $max_frames)) {
+			error("cannot add frame as account limit has been reached");
+
+			debug("frame_count", $frame_count);
+			debug("max_frames", $max_frames);
+
+			return template('too_many_frames', {
+				is_template => param('is_template') ? 1 : 0,
+				frame_count => $frame_count,
+				max_frames  => $max_frames,
+			});
+		}
+		else {
+			return template('add_frame', {
+				is_template => param('is_template') ? 1 : 0,
+				max_height  => $max_height,
+				max_width   => $max_width,
+			});
+		}
 	};
 
 	get '/:frame_id' => require_login sub {
@@ -165,7 +185,8 @@ prefix '/api/frame' => sub {
 			send_error('forbidden' => 403);
 		};
 
-		unless(frame_count() < max_frames()) {
+		# Enforce account limit on maximum frames/template
+		if(defined max_frames() && (frame_count() >= max_frames())) {
 			error("cannot add frame as account limit has been reached");
 
 			# We return a json status here as UI needs to distinguish and
@@ -582,7 +603,7 @@ sub max_frames {
 	$q->execute($account_id);
 	my $r = $q->fetchrow_hashref;
 
-	return $q->{max_frames};
+	return $r->{max_frames};
 }
 
 
@@ -597,7 +618,7 @@ sub frame_count {
 	$q->execute($account_id);
 	my $r = $q->fetchrow_hashref;
 
-	return $q->{frame_count};
+	return $r->{frame_count};
 }
 
 
