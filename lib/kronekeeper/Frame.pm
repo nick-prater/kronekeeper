@@ -165,6 +165,20 @@ prefix '/api/frame' => sub {
 			send_error('forbidden' => 403);
 		};
 
+		unless(frame_count() < max_frames()) {
+			error("cannot add frame as account limit has been reached");
+
+			# We return a json status here as UI needs to distinguish and
+			# report the reason for this error. Arguably all api routes should
+			# return json status, but elsewhere only the status code is checked.
+			content_type 'application/json';
+			status 403;
+			return to_json {
+				message    => 'Reached maximum frame limit for this account',
+				error_code => 'TOO_MANY_FRAMES',
+			};
+		}
+
 		debug request->body;
 		my $data = from_json(request->body);
 
@@ -241,6 +255,7 @@ prefix '/api/frame' => sub {
 
 		database->commit;
 
+		content_type 'application/json';
 		return to_json {
 			frame_id => $frame_id,
 			is_template => $is_template, 
@@ -553,6 +568,36 @@ sub frame_id_valid_for_account {
 	);
 
 	return $q->fetchrow_hashref;
+}
+
+
+
+sub max_frames {
+	my $account_id = shift || session('account')->{id};
+	my $q = database->prepare("
+		SELECT max_frame_count AS max_frames
+		FROM account
+		WHERE id = ?
+	");
+	$q->execute($account_id);
+	my $r = $q->fetchrow_hashref;
+
+	return $q->{max_frames};
+}
+
+
+sub frame_count {
+	my $account_id = shift || session('account')->{id};
+	my $q = database->prepare("
+		SELECT COUNT(*) AS frame_count
+		FROM frame
+		WHERE account_id = ?
+		AND is_deleted IS FALSE
+	");
+	$q->execute($account_id);
+	my $r = $q->fetchrow_hashref;
+
+	return $q->{frame_count};
 }
 
 

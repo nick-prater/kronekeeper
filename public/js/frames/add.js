@@ -157,26 +157,35 @@ require([
 			method: 'POST',
 			data: JSON.stringify(data),
 			error: function(jq_xhr, status_text, error_text) {
-				console.log("error adding frame", status_text, error_text);
+				console.log("error adding frame:", error_text);
 				$("#add_frame_form div.message").hide();
-				$("#create_error_message").show();
+
+				/* Special case error if user is exceeding their frame limit */
+				if(jq_xhr.responseJSON && jq_xhr.responseJSON.error_code == "TOO_MANY_FRAMES") {
+					console.log("Cannot add new frame - too many frames");
+					$("#too_many_frames_message").show();
+				}
+				else {
+					$("#create_error_message").show();
+				}
+
 				$("#create_frame_button").prop("disabled", false);
 			},
-			success: function(response, status_text, jq_xhr) {
-				var json = JSON.parse(response);
-				console.log("added frame_id", json.frame_id);
-				console.log(json);
+			success: function(json, status_text, jq_xhr) {
 
 				/* Display success message, then display new frame */
+				console.log("added frame_id", json.frame_id);
 				$("#add_frame_form div.message").hide();
 				$("#created_frame_message").show();
 
 				/* Display new standard or temporary frame */
-				if($("#is_template").prop("checked")) {
-					window.location = "/template/" + json.frame_id;
+				if(json.is_template) {
+					console.log("displaying newly created template");
+					//window.location = "/template/" + json.frame_id;
 				}
 				else {
-					window.location = "/frame/" + json.frame_id;
+					console.log("displaying newly created frame");
+					//window.location = "/frame/" + json.frame_id;
 				}
 			}
 		});

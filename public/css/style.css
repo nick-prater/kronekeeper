@@ -680,16 +680,24 @@ div.credits.container {
 	margin-top: 1em;
 }
 .edit_user .message div,
+.add_frame div.message,
 .dialog.password_result .message div,
 .change_password .message div {
 	display: none;
 }
+.add_frame .message {
+	margin-top: 1em;	
+	font-style: italic;
+	text-align: left;
+}
 .edit_user .message .error,
+.add_frame .message.error,
 .dialog.password_result .message .error,
 .change_password .message .error {
 	color: red;
 }
 .edit_user .message .success,
+.add_frame .message.success,
 .dialog.password_result .message .success,
 .change_password .message .success {
 	color: green;
@@ -978,6 +986,8 @@ p.small {
 }
 
 
-
+.validation_error {
+	box-shadow: 0px 0px 2px 2px red;
+}
 
 

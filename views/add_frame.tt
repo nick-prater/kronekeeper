@@ -86,6 +86,9 @@
 			Created new frame.
 			[% END %]
 		</div>
+		<div class="message error" id="too_many_frames_message">
+			Cannot create new frame: account limit has been reached.
+		</div>
 		<div class="message error" id="create_error_message">
 			[% IF is_template %]
 			Error creating new template.
