@@ -267,6 +267,9 @@ sub get_activity_log {
 	elsif($args{kk_filter}->{show_incomplete} && !$args{kk_filter}->{show_complete}) {
 		$filter_sql .= " AND completed_by_person_id IS NULL";
 	}
+	elsif(!$args{kk_filter}->{show_incomplete} && !$args{kk_filter}->{show_complete}) {
+		$filter_sql .= " AND FALSE";
+	}
 
 	my $q = database->prepare("
 		SELECT
