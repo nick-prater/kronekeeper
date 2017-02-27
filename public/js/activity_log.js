@@ -107,6 +107,9 @@ require([
 		var rv = {
 			show_complete: $("#checkbox_show_complete").prop("checked"),
 			show_incomplete: $("#checkbox_show_incomplete").prop("checked"),
+			show_jumpers: $("#checkbox_show_jumpering").prop("checked"),
+			show_blocks: $("#checkbox_show_blocks").prop("checked"),
+			show_other: $("#checkbox_show_other").prop("checked")
 		};
 	
 		/* No user_id parameter means show entries for all users */	

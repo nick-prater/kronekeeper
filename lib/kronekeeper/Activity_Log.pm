@@ -255,12 +255,14 @@ sub get_activity_log {
 	my $filter_sql = '';
 	my @filter_args = ();
 
+	# By User Filter
 	if($args{kk_filter}->{user_id}) {
 		debug("applying filter for user_id: " . $args{kk_filter}->{user_id});
 		$filter_sql .= " AND activity_log.by_person_id = ?";
 		push @filter_args, $args{kk_filter}->{user_id};
 	}
 
+	# Complete/Incomplete filter
 	if($args{kk_filter}->{show_complete} && !$args{kk_filter}->{show_incomplete}) {
 		$filter_sql .= " AND completed_by_person_id IS NOT NULL";
 	}
@@ -271,7 +273,37 @@ sub get_activity_log {
 		$filter_sql .= " AND FALSE";
 	}
 
-	my $q = database->prepare("
+	# Function type filter
+	my @function_filters = ("FALSE"); # Default is to show nothing
+	if($args{kk_filter}->{show_jumpers}) {
+		push(@function_filters, "function IN (
+			'kronekeeper::Jumper::add_simple_jumper',
+			'kronekeeper::Jumper::add_custom_jumper',
+			'kronekeeper::Jumper::delete_jumper'
+		)");
+	}
+
+	if($args{kk_filter}->{show_blocks}) {
+		push(@function_filters, "function IN (
+			'kronekeeper::Frame::place_block',
+			'kronekeeper::Frame::remove_block'
+		)");
+	}
+
+	if ($args{kk_filter}->{show_other}) {
+		push(@function_filters, "function NOT IN (
+			'kronekeeper::Jumper::add_simple_jumper',
+			'kronekeeper::Jumper::add_custom_jumper',
+			'kronekeeper::Jumper::delete_jumper',
+			'kronekeeper::Frame::place_block',
+			'kronekeeper::Frame::remove_block'
+		)");
+	}
+
+	$filter_sql .= " AND (" . join(" OR ", @function_filters) . ")";
+
+
+	my $sql = "
 		SELECT
 			activity_log.id,
 			log_timestamp AT TIME ZONE ? AS log_timestamp,
@@ -287,7 +319,7 @@ sub get_activity_log {
 		WHERE frame_id = ?
 		$filter_sql
 		$limit_sql
-	");
+	";
 	my @query_args = (
 		$args{timezone},
 		$args{next_task_id},
@@ -295,7 +327,9 @@ sub get_activity_log {
 		@filter_args,
 		@limit_args,
 	);
-	
+
+	debug ("query: $sql");
+	my $q = database->prepare($sql);
 	$q->execute(@query_args);
 
 	# Return value depends on which arguments were provided	
