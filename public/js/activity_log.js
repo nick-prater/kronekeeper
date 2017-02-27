@@ -104,7 +104,10 @@ require([
 
 	function get_filter_parameters() {
 
-		var rv = {};
+		var rv = {
+			show_complete: $("#checkbox_show_complete").prop("checked"),
+			show_incomplete: $("#checkbox_show_incomplete").prop("checked"),
+		};
 	
 		/* No user_id parameter means show entries for all users */	
 		if($("#select_user").val()) {

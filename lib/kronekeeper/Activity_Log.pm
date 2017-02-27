@@ -251,10 +251,18 @@ sub get_activity_log {
 	# Apply filters if specified
 	my $filter_sql = '';
 	my @filter_args = ();
+
 	if($args{kk_filter}->{user_id}) {
 		debug("applying filter for user_id: " . $args{kk_filter}->{user_id});
 		$filter_sql .= " AND activity_log.by_person_id = ?";
 		push @filter_args, $args{kk_filter}->{user_id};
+	}
+
+	if($args{kk_filter}->{show_complete} && !$args{kk_filter}->{show_incomplete}) {
+		$filter_sql .= " AND completed_by_person_id IS NOT NULL";
+	}
+	elsif($args{kk_filter}->{show_incomplete} && !$args{kk_filter}->{show_complete}) {
+		$filter_sql .= " AND completed_by_person_id IS NULL";
 	}
 
 	my $q = database->prepare("
