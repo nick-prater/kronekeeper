@@ -172,6 +172,9 @@ prefix '/api/activity_log' => sub {
 			$rv->{next_item_id} = next_frame_task_id($row->{frame_id});
 		}
 
+		database->commit;
+
+		content_type 'application/json';
 		return to_json $rv;
 	};
 };

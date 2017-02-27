@@ -140,7 +140,6 @@ require([
 			},
 			success: function(json, status_text, jq_xhr) {
 				console.log("activity log updated");
-				var data = JSON.parse(json);
 				var tr = $(element).closest("tr");
 				if(checked) {
 					tr.removeClass("next_task");
@@ -155,8 +154,8 @@ require([
 				tbody.find("tr").removeClass("next_task");
 
 				/* Then, highlight next_task if we have it and it's visible */
-				if(data.next_item_id) {
-					tbody.find("tr").has('input[value="' + data.next_item_id + '"]').addClass("next_task");
+				if(json.next_item_id) {
+					tbody.find("tr").has('input[value="' + json.next_item_id + '"]').addClass("next_task");
 				}
 			}
 		});
