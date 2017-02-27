@@ -105,19 +105,14 @@ prefix '/frame' => sub {
 
 	get '/add' => sub {
 
-		my $max_height = config->{frame_max_height} || 100;
-		my $max_width = config->{frame_max_width} || 100;
-
 		user_has_role('edit') or do {
 			send_error('forbidden' => 403);
 		};
 
+		# Enforce account limit on maximum frames/template
 		my $frame_count = frame_count();
 		my $max_frames = max_frames();
-		debug(" max_fraaes: ", ($max_frames || 'unlimited'));
-		debug("frame_count: ", $frame_count);
-
-		# Enforce account limit on maximum frames/template
+		my $max_size = max_frame_size(); 
 		if(defined $max_frames && ($frame_count >= $max_frames)) {
 			error("cannot add frame as account limit has been reached");
 
@@ -133,8 +128,8 @@ prefix '/frame' => sub {
 		else {
 			return template('add_frame', {
 				is_template => param('is_template') ? 1 : 0,
-				max_height  => $max_height,
-				max_width   => $max_width,
+				max_height  => $max_size->{height},
+				max_width   => $max_size->{width},
 			});
 		}
 	};
@@ -186,7 +181,8 @@ prefix '/api/frame' => sub {
 		};
 
 		# Enforce account limit on maximum frames/template
-		if(defined max_frames() && (frame_count() >= max_frames())) {
+		my $max_frames = max_frames();
+		if(defined $max_frames && (frame_count() >= $max_frames)) {
 			error("cannot add frame as account limit has been reached");
 
 			# We return a json status here as UI needs to distinguish and
@@ -232,15 +228,12 @@ prefix '/api/frame' => sub {
 		my $is_template = $data->{is_template} ? 1 : 0;
 
 		# Limit maximum size of frame
-		my $max_height = config->{frame_max_height} || 100;
-		my $max_width = config->{frame_max_width} || 100;
-		my $error_code;
-
-		if($data->{frame_width} > $max_width) {
+		my $max_size = max_frame_size(); 
+		if($data->{frame_width} > $max_size->{width}) {
 			error("requested frame width exceeds configured maximum");
 			send_error("requested frame width exceeds configured maximum" => 400);
 		}
-		if($data->{frame_height} > $max_height) {
+		if($data->{frame_height} > $max_size->{height}) {
 			error("requested frame height exceeds configured maximum");
 			send_error("requested frame height exceeds configured maximum" => 400);
 		}
@@ -619,6 +612,21 @@ sub frame_count {
 	my $r = $q->fetchrow_hashref;
 
 	return $r->{frame_count};
+}
+
+
+sub max_frame_size {
+	my $account_id = shift || session('account')->{id};
+	# Default size limit defined in this query
+	my $q = database->prepare("
+		SELECT 
+			COALESCE(max_frame_height, 100) AS height,
+			COALESCE(max_frame_width, 100) AS width
+		FROM account
+		WHERE id = ?
+	");
+	$q->execute($account_id);
+	return $q->fetchrow_hashref;
 }
 
 

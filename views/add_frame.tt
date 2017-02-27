@@ -81,19 +81,19 @@
 		</div>
 		<div class="message success" id="created_frame_message">
 			[% IF is_template %]
-			Created new template.
+			Created new template - loading...
 			[% ELSE %]
-			Created new frame.
+			Created new frame - loading...
 			[% END %]
 		</div>
 		<div class="message error" id="too_many_frames_message">
-			Cannot create new frame: account limit has been reached.
+			Cannot create new frame: account limit has been reached
 		</div>
 		<div class="message error" id="create_error_message">
 			[% IF is_template %]
-			Error creating new template.
+			Error creating new template
 			[% ELSE %]
-			Error creating new frame.
+			Error creating new frame
 			[% END %]
 		</div>
 		<div class="message error" id="validation_message"></div>

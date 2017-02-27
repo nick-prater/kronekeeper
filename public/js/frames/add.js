@@ -133,11 +133,9 @@ require([
 		}
 
 
-		/* Highlight errors and build message to display to user */
-		$.each(errors, function(i, e) {
-			$("#"+e.id).addClass("validation_error");
-		});
+		/* Highlight first error */
 		if(errors.length > 0) {
+			$("#" + errors[0].id).addClass("validation_error");
 			$("#validation_message").text("ERROR: " + errors[0].message);
 			$("#validation_message").show();
 		}
