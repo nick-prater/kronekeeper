@@ -3,18 +3,60 @@
 
 	<h1>Activity Log</h1>
 
-		<dl>
-			<dt>
-				[% IF frame_info.is_template %]
-				Template:
-				[% ELSE %]
-				Frame:
-				[% END %]
-			</dt>
-			<dd>
-				<a href="[% request.uri_base %]/frame/[% frame_info.id %]">[% frame_info.name | html %]</a>
-			</dd>
-		</dl>
+	<dl>
+		<dt>
+			[% IF frame_info.is_template %]
+			Template:
+			[% ELSE %]
+			Frame:
+			[% END %]
+		</dt>
+		<dd>
+			<a href="[% request.uri_base %]/frame/[% frame_info.id %]">[% frame_info.name | html %]</a>
+		</dd>
+
+		<dt>
+			Display:
+		</dt>
+		<dd class="filter_selection">
+			<label>
+				<input type="checkbox" id="checkbox_show_jumpering" checked="checked" />
+				jumpering
+			</label>
+			<label>
+				<input type="checkbox" id="checkbox_show_blocks" checked="checked" />
+				blocks
+			</label>
+			<label>
+				<input type="checkbox" id="checkbox_show_other" />
+				other activity
+			</label>
+			&emsp;
+			<label>
+				by
+				<select id="select_user">
+					<option value="0">anyone</option>
+					[% FOREACH person IN account_users %]		
+					<option value="[% person.id %]">[% person.name | html %]</option>
+					[% END %]
+				</select>
+			</label>
+		</dd>
+
+		<dt>
+			Status:
+		</dt>
+		<dd class="status_selection">
+			<label>
+				<input type="checkbox" id="checkbox_show_complete" />
+				complete
+			</label>
+			<label>
+				<input type="checkbox" id="checkbox_show_incomplete" checked="checked" />
+				incomplete
+			</label>
+		</dd>
+	</dl>
 
 
 	<table id="activity_log_table" style="display:none" class="hover row-border">

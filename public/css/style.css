@@ -978,6 +978,9 @@ p.small {
 }
 
 
+.activity_log dl {
+	margin-bottom: 10px;
+}
 #activity_log_table tr.completed {
 	background: #ccffcc
 }

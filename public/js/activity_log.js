@@ -34,6 +34,11 @@ require([
 		$("#activity_log_table").show();
 	});
 
+	/* Reload table when filter selection changes */
+	$(".filter_selection input").change(handle_filter_change);
+	$(".filter_selection select").change(handle_filter_change);
+	$(".status_selection input").change(handle_filter_change);
+
 	$("#activity_log_table").DataTable({
 		serverSide: true,
 		searching: false, /* Not yet implemented in our perl api */
@@ -43,6 +48,7 @@ require([
 			url: "activity_log/query",
 			type: "POST",
 			data: function(d) {
+				console.log(d);
 				return JSON.stringify(d);
 			}
 		},
@@ -86,6 +92,13 @@ require([
 		console.log("draw.dt");
 		$("input.completed").change(handle_checkbox_change);
 	});
+
+
+	function handle_filter_change(e) {
+
+		console.log("filter changed");
+
+	}
 
 
 	function handle_checkbox_change(e) {

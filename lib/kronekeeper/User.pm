@@ -25,11 +25,17 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
 use warnings;
+use Exporter qw(import);
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
 use kronekeeper::Activity_Log;
 use Array::Utils qw(array_minus);
+our $VERSION = '0.01';
+our @EXPORT_OK = qw(
+	account_users
+);
+
 
 my $al = kronekeeper::Activity_Log->new();
 
@@ -42,17 +48,8 @@ prefix '/user' => sub {
 			send_error('forbidden' => 403);
 		};
 
-		my $q = database->prepare("
-			SELECT * FROM user_info
-			WHERE account_id = ?
-			ORDER BY name ASC
-		");
-		$q->execute(
-			session('account')->{id}
-		);
-
 		template('users', {
-			users => $q->fetchall_arrayref({})
+			users => account_users(),
 		});
 	};
 
@@ -385,6 +382,19 @@ prefix '/api/user' => sub {
 	};
 };
 
+
+sub account_users {
+	my $account_id = shift || session('account')->{id};
+	my $q = database->prepare("
+		SELECT * FROM user_info
+		WHERE account_id = ?
+		ORDER BY name ASC
+	");
+	$q->execute(
+		session('account')->{id}
+	);
+	return $q->fetchall_arrayref({})
+}
 
 
 sub user_email_valid_for_account {

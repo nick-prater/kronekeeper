@@ -31,6 +31,7 @@ use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
 use Moo;
 use kronekeeper::Frame;
+use kronekeeper::User;
 our $VERSION = '0.02';
 
 
@@ -60,6 +61,7 @@ prefix '/frame/:frame_id/activity_log' => sub {
 			'activity_log',
 			{
 				frame_info => kronekeeper::Frame::frame_info(param("frame_id")),
+				account_users => kronekeeper::User::account_users(),
 			}
 		);
 	};
@@ -103,6 +105,7 @@ prefix '/frame/:frame_id/activity_log' => sub {
 			recordsFiltered => activity_log_count($id),
 		};
 
+		content_type 'application/json';
 		return to_json $rv;
 	};
 };
