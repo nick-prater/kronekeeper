@@ -26,6 +26,7 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
 use warnings;
+use Exporter qw(import);
 use Dancer2 appname => 'kronekeeper';
 use Dancer2::Plugin::Database;
 use Dancer2::Plugin::Auth::Extensible;
@@ -91,18 +92,31 @@ prefix '/frame/:frame_id/activity_log' => sub {
 		};
 		$data->{draw} += 0; # Recast as numeric
 
+		if($data->{kk_filter} && $data->{kk_filter}->{user_id}) {
+			error("kk_filter uses invalid user_id");
+			kronekeeper::User::user_id_valid_for_account($data->{kk_filter}->{user_id}) or do {
+				send_error("filter uses invalid user_id" => 403);
+			};
+		}
+
 		my $results = get_activity_log(
 			max_items => $data->{length},
 			skip_records => $data->{start},
 			frame_id => $id,
 			next_task_id => next_frame_task_id($id),
+			kk_filter => $data->{kk_filter},
+		);
+
+		my $filtered_count = get_activity_log(
+			frame_id => $id,
+			kk_filter => $data->{kk_filter},
 		);
 
 		my $rv = {
 			draw => $data->{draw},
 			data => $results,
 			recordsTotal => activity_log_count($id),
-			recordsFiltered => activity_log_count($id),
+			recordsFiltered => $filtered_count,
 		};
 
 		content_type 'application/json';
@@ -209,12 +223,39 @@ sub record {
 
 sub get_activity_log {
 
+	# If called without max_items and skip_records arguments, this returns a count
+	# of the available records with filters applied. If max_items and skip_records
+	# are supplied, returns an arrayref of filtered records
+
 	my %args = @_;
-	$args{max_items} ||= 500;
 	$args{skip_records} ||= 0;
 	$args{frame_id} or die "missing frame_id argument";
 	$args{timezone} ||= 'UTC';
+	$args{kk_filter} ||= {};
 
+	# Apply result limit if provided
+	my $limit_sql = '';
+	my @limit_args = ();
+	if(defined $args{max_items}) {
+		$limit_sql = "
+			ORDER BY log_timestamp DESC, activity_log.id DESC
+			LIMIT ?
+			OFFSET ?
+		";
+		@limit_args = (
+			$args{max_items},
+			$args{skip_records},
+		);
+	}
+
+	# Apply filters if specified
+	my $filter_sql = '';
+	my @filter_args = ();
+	if($args{kk_filter}->{user_id}) {
+		debug("applying filter for user_id: " . $args{kk_filter}->{user_id});
+		$filter_sql .= " AND activity_log.by_person_id = ?";
+		push @filter_args, $args{kk_filter}->{user_id};
+	}
 
 	my $q = database->prepare("
 		SELECT
@@ -230,20 +271,27 @@ sub get_activity_log {
 		FROM activity_log
 		JOIN person ON (person.id = activity_log.by_person_id)
 		WHERE frame_id = ?
-		ORDER BY log_timestamp DESC, activity_log.id DESC
-		LIMIT ?
-		OFFSET ?
+		$filter_sql
+		$limit_sql
 	");
-	$q->execute(
+	my @query_args = (
 		$args{timezone},
 		$args{next_task_id},
 		$args{frame_id},
-		$args{max_items},
-		$args{skip_records},
+		@filter_args,
+		@limit_args,
 	);
-		
-	my $result = $q->fetchall_arrayref({});
-	return $result;
+	
+	$q->execute(@query_args);
+
+	# Return value depends on which arguments were provided	
+	if(defined $args{max_items}) {
+		my $result = $q->fetchall_arrayref({});
+		return $result;
+	}
+	else {
+		return $q->rows;
+	}
 }
 
 

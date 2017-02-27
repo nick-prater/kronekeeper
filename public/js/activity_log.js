@@ -48,6 +48,7 @@ require([
 			url: "activity_log/query",
 			type: "POST",
 			data: function(d) {
+				d.kk_filter = get_filter_parameters();
 				console.log(d);
 				return JSON.stringify(d);
 			}
@@ -97,7 +98,20 @@ require([
 	function handle_filter_change(e) {
 
 		console.log("filter changed");
+		$("#activity_log_table").DataTable().draw();
+	}
 
+
+	function get_filter_parameters() {
+
+		var rv = {};
+	
+		/* No user_id parameter means show entries for all users */	
+		if($("#select_user").val()) {
+			rv.user_id = $("#select_user").val();
+		}
+
+		return rv;
 	}
 
 
