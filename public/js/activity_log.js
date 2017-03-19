@@ -38,6 +38,7 @@ require([
 	$(".filter_selection input").change(handle_filter_change);
 	$(".filter_selection select").change(handle_filter_change);
 	$(".status_selection input").change(handle_filter_change);
+	set_download_url();
 
 	$("#activity_log_table").DataTable({
 		serverSide: true,
@@ -98,9 +99,18 @@ require([
 	function handle_filter_change(e) {
 
 		console.log("filter changed");
+		set_download_url();
 		$("#activity_log_table").DataTable().draw();
 	}
 
+
+	function set_download_url() {
+
+		/* Update XLSX download link with new parameters */
+		var filter_params = JSON.stringify(get_filter_parameters());
+		console.log("filter_params");
+		$("#download_xlsx_link").attr("href", "activity_log/xlsx?filter=" + filter_params);
+	}
 
 	function get_filter_parameters() {
 

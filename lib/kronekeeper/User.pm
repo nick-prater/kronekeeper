@@ -35,6 +35,7 @@ our $VERSION = '0.01';
 our @EXPORT_OK = qw(
 	account_users
 	user_id_valid_for_account
+	user_info
 );
 
 

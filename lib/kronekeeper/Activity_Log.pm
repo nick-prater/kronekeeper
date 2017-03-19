@@ -33,7 +33,9 @@ use Dancer2::Plugin::Auth::Extensible;
 use Moo;
 use kronekeeper::Frame;
 use kronekeeper::User;
-our $VERSION = '0.02';
+use Excel::Writer::XLSX;
+use Time::Piece;
+our $VERSION = '0.03';
 
 
 
@@ -65,6 +67,48 @@ prefix '/frame/:frame_id/activity_log' => sub {
 				account_users => kronekeeper::User::account_users(),
 			}
 		);
+	};
+
+
+	get '/xlsx' => require_login sub {
+
+		user_has_role('view_activity_log') or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $id = param('frame_id');
+		kronekeeper::Frame::frame_id_valid_for_account($id) or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $filter = param('filter') || '{}';
+
+		debug "filter: $filter";
+
+		my $kk_filter = from_json($filter);
+
+		use Data::Dumper;
+		debug Dumper $kk_filter;
+
+		if($kk_filter && $kk_filter->{user_id}) {
+			error("kk_filter uses invalid user_id");
+			kronekeeper::User::user_id_valid_for_account($kk_filter->{user_id}) or do {
+				send_error("filter uses invalid user_id" => 403);
+			};
+		}
+
+		my $results = get_activity_log(
+			max_items => undef,
+			frame_id => $id,
+			kk_filter => $kk_filter,
+		);
+
+		content_type 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+		return activity_log_as_xlsx({
+			rows => $results,
+			frame_info => kronekeeper::Frame::frame_info($id),
+			kk_filter => $kk_filter,
+		});
 	};
 
 
@@ -271,6 +315,7 @@ sub get_activity_log {
 	}
 	elsif(!$args{kk_filter}->{show_incomplete} && !$args{kk_filter}->{show_complete}) {
 		$filter_sql .= " AND FALSE";
+		debug("Neither complete nor incomplete log entries have been requested. This will return no results");
 	}
 
 	# Function type filter
@@ -308,14 +353,20 @@ sub get_activity_log {
 			activity_log.id,
 			log_timestamp AT TIME ZONE ? AS log_timestamp,
 			by_person_id,
-			person.name AS by_person_name,
+			created_by_person.name AS by_person_name,
 			frame_id,
 			function,
 			note,
 			completed_by_person_id,
+			completed_by_person.name AS completed_by_person_name,
 			(? = activity_log.id) AS is_next_task
 		FROM activity_log
-		JOIN person ON (person.id = activity_log.by_person_id)
+		JOIN person AS created_by_person ON (
+			created_by_person.id = activity_log.by_person_id
+		)
+		LEFT JOIN person AS completed_by_person ON (
+			completed_by_person.id = activity_log.completed_by_person_id
+		)
 		WHERE frame_id = ?
 		$filter_sql
 		$limit_sql
@@ -333,7 +384,7 @@ sub get_activity_log {
 	$q->execute(@query_args);
 
 	# Return value depends on which arguments were provided	
-	if(defined $args{max_items}) {
+	if(exists $args{max_items}) {
 		my $result = $q->fetchall_arrayref({});
 		return $result;
 	}
@@ -420,6 +471,150 @@ sub next_frame_task_id {
 
 	return $r->{id};
 }
+
+
+sub activity_log_as_xlsx {
+
+	my $args = shift;
+
+	# Write spreadsheet to an in-memory filehandle, rather than usimg
+	# temporary files. Maybe we'll need to revisit this if they get
+	# very big...
+	open my $fh, '>', \my $xlsx or die "failed to open filehandle for xlsx spreadsheet: $!\n";
+
+	my $workbook  = Excel::Writer::XLSX->new( $fh );
+	my $worksheet = $workbook->add_worksheet();
+	my $row = 0;
+	my $col = 0;
+
+	# Define some formats
+	my $column_heading = $workbook->add_format(
+		bold => 1,
+	);
+	my $align_left = $workbook->add_format(
+		align => 'left',
+	);
+	my $timestamp_format = $workbook->add_format(
+		align => 'left',
+		num_format => 'DD/MM/YYYY HH:MM:SS',
+	);
+	my $info_heading = $workbook->add_format(
+		bold => 1,
+		align => 'right',
+	);
+
+	# Set column widths and formats
+	$worksheet->set_column(0, 0, 25, $align_left);       # ID
+	$worksheet->set_column(1, 1, 20, $timestamp_format); # Timestamp
+	$worksheet->set_column(2, 2, 15);                    # Created By
+	$worksheet->set_column(3, 3, 40);                    # Activity
+	$worksheet->set_column(4, 4, 10);                    # Complete
+	$worksheet->set_column(5, 5, 15);                    # Completed By
+	$worksheet->set_column(6, 6, 30);                    # Function
+
+	# Insert Kronekeeper logo
+	my $logo_image = config->{kronekeeper_logo};
+	if($logo_image && -e $logo_image) {
+		$worksheet->set_row($row, 60);
+		$worksheet->insert_image(
+			$row, $col,
+			$logo_image,
+			20, 20,
+			2, 2,
+		);
+	}
+	else {
+		error("Kronekeeper logo image missing or not defined");
+	}
+	
+	# Insert heading
+	$row ++;
+	$row ++;
+	$col = 0;
+	$worksheet->write($row, $col ++, "Report:", $info_heading);
+	$worksheet->write($row, $col ++, "Activity Log");
+
+	$row ++;
+	$col = 0;
+	$worksheet->write($row, $col ++, "Frame:", $info_heading);
+	$worksheet->write($row, $col ++, $args->{frame_info}->{name});
+
+	$row ++;
+	$col = 0;
+	$worksheet->write($row, $col ++, "Report Created (UTC):", $info_heading);
+	$worksheet->write_date_time($row, $col ++, gmtime->datetime(), $timestamp_format);
+
+	$row ++;
+	$col = 0;
+	my $filter_by_person = kronekeeper::User::user_info($args->{kk_filter}->{user_id});
+	$worksheet->write($row, $col ++, "Show Activity By:", $info_heading);
+	$worksheet->write($row, $col ++, $filter_by_person ? $filter_by_person->{name} : 'anybody');
+
+	$row ++;
+	$col = 0;
+	$worksheet->write($row, $col ++, "Show Complete:", $info_heading);
+	$worksheet->write($row, $col ++, $args->{kk_filter}->{show_complete} ? 'yes' : 'no');
+
+	$row ++;
+	$col = 0;
+	$worksheet->write($row, $col ++, "Show Incomplete:", $info_heading);
+	$worksheet->write($row, $col ++, $args->{kk_filter}->{show_incomplete} ? 'yes' : 'no');
+
+	$row ++;
+	$col = 0;
+	$worksheet->write($row, $col ++, "Show Jumpering:", $info_heading);
+	$worksheet->write($row, $col ++, $args->{kk_filter}->{show_jumpers} ? 'yes' : 'no');
+
+	$row ++;
+	$col = 0;
+	$worksheet->write($row, $col ++, "Show Blocks:", $info_heading);
+	$worksheet->write($row, $col ++, $args->{kk_filter}->{show_blocks} ? 'yes' : 'no');
+
+	$row ++;
+	$col = 0;
+	$worksheet->write($row, $col ++, "Show Other Activity:", $info_heading);
+	$worksheet->write($row, $col ++, $args->{kk_filter}->{show_other} ? 'yes' : 'no');
+
+
+	# Add column headings
+	$row ++;	
+	$row ++;	
+	$col = 0;
+	$worksheet->set_row($row, undef, $column_heading);
+	$worksheet->write($row, $col ++, 'ID');
+	$worksheet->write($row, $col ++, 'Timestamp (UTC)');
+	$worksheet->write($row, $col ++, 'Created By');
+	$worksheet->write($row, $col ++, 'Activity');
+	$worksheet->write($row, $col ++, 'Complete');
+	$worksheet->write($row, $col ++, 'Completed By');
+	$worksheet->write($row, $col ++, 'Function');
+
+
+	foreach my $r(@{$args->{rows}}) {
+		$row ++;
+		$col = 0;
+
+		# Convert format of timestamp field
+		# Excel::Writer::XLSX requires date and time parts to be separated by 'T'
+		# whereas postgres returns them separated by space
+		$r->{log_timestamp} =~ s/ /T/;
+
+		$worksheet->write($row, $col ++, $r->{id});
+		$worksheet->write_date_time($row, $col ++, $r->{log_timestamp});
+		$worksheet->write($row, $col ++, $r->{by_person_name});
+		$worksheet->write($row, $col ++, $r->{note});
+		$worksheet->write($row, $col ++, $r->{completed_by_person_id} ? 'yes' : 'no');
+		$worksheet->write($row, $col ++, $r->{completed_by_person_name});
+		$worksheet->write($row, $col ++, $r->{function});
+	}
+
+	$workbook->close();
+	close $fh;
+
+	debug "written xlsx with $row rows";
+	return $xlsx;
+}
+
 
 
 1;

@@ -59,6 +59,8 @@
 	</dl>
 
 
+	<a id="download_xlsx_link" href="#" filename="">download (.xlsx)</a>
+
 	<table id="activity_log_table" style="display:none" class="hover row-border">
 		<thead>
 			<tr>
