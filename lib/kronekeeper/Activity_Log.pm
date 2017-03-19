@@ -104,6 +104,7 @@ prefix '/frame/:frame_id/activity_log' => sub {
 		);
 
 		content_type 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+		header 'Content-Disposition' => 'inline; filename="Kronekeeper-activity_log.xlsx';
 		return activity_log_as_xlsx({
 			rows => $results,
 			frame_info => kronekeeper::Frame::frame_info($id),
