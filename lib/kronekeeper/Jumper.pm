@@ -567,6 +567,9 @@ sub describe_jumper_connections {
 	else {
 		my @wire_descriptions;
 		foreach my $wire(@{$connections}) {
+			$wire or die "NP";
+			use Data::Dumper;
+			$wire->{full_pin_designations} or die Dumper $wire;
 			push(
 				@wire_descriptions,
 				join('->', @{$wire->{full_pin_designations}})
@@ -644,7 +647,7 @@ sub delete_jumper {
 
 	# Remove jumper and it's connections
 	my $q = database->prepare(
-		"SELECT delete_jumper(?)"
+		"SELECT delete_jumper(?) AS success"
 	);
 	$q->execute(
 		$id,
@@ -652,6 +655,14 @@ sub delete_jumper {
 		database->rollback;
 		send_error('error deleting jumper' => 500);
 	};
+	my $r = $q->fetchrow_hashref;
+
+	# If we didn't find a jumper with this id, no error
+	# is raised, but don't record it in the activity log.
+	unless($r->{success}) {
+		debug "tried to delete jumper id $id, but it seems it is already gone";
+		return;
+	}
 
 	# Update Activity Log
 	my $note = sprintf(
