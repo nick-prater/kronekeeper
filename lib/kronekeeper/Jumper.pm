@@ -56,6 +56,30 @@ my $al = kronekeeper::Activity_Log->new();
 
 prefix '/jumper' => sub {
 
+	get '/:jumper_id' => require_login sub {
+
+		my $id = param('jumper_id');
+		jumper_id_valid_for_account($id) or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $q = database->prepare("
+			SELECT circuit.block_id
+			FROM jumper_circuits
+			JOIN circuit ON (circuit.id = jumper_circuits.a_circuit_id)
+			WHERE jumper_id = ?
+			LIMIT 1
+		");
+		$q->execute($id);
+		my $r = $q->fetchrow_hashref or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug("jumper $id connects onto block $r->{block_id}");
+		redirect("/block/$r->{block_id}#jumper_id=$id");
+	};
+
+
 	post '/connection_choice' => require_login sub {
 
 		debug("connection_choice");

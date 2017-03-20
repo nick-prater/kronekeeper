@@ -359,16 +359,28 @@ sub get_activity_log {
 			created_by_person.name AS by_person_name,
 			frame_id,
 			function,
-			note,
+			activity_log.note AS note,
 			completed_by_person_id,
 			completed_by_person.name AS completed_by_person_name,
-			(? = activity_log.id) AS is_next_task
+			(? = activity_log.id) AS is_next_task,
+			block.id AS active_block_id,
+			circuit.id AS active_circuit_id,
+			jumper.id AS active_jumper_id
 		FROM activity_log
 		JOIN person AS created_by_person ON (
 			created_by_person.id = activity_log.by_person_id
 		)
 		LEFT JOIN person AS completed_by_person ON (
 			completed_by_person.id = activity_log.completed_by_person_id
+		)
+		LEFT JOIN block ON (
+			block.id = activity_log.block_id_a
+		)
+		LEFT JOIN circuit ON (
+			circuit.id = activity_log.circuit_id_a
+		)
+		LEFT JOIN jumper ON (
+			jumper.id = activity_log.jumper_id
 		)
 		WHERE frame_id = ?
 		$filter_sql

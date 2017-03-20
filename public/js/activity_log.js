@@ -67,7 +67,21 @@ require([
 			},
 			{
 				data: 'note',
-				className: "dt-left"
+				className: "dt-left",
+				render: function(data, type, row, meta) {
+					if(row.active_jumper_id) {
+						return '<a href="/jumper/' + row.active_jumper_id + '">' + data + '</a>';
+					}
+					else if(row.active_block_id && row.active_circuit_id) {
+						return '<a href="/block/' + row.active_block_id + '#circuit_id=' + row.active_circuit_id + '">' + data + '</a>';
+					}
+					else if(row.active_block_id) {
+						return '<a href="/block/' + row.active_block_id + '">' + data + '</a>';
+					}
+					else {
+						return data;
+					}
+				}
 			},
 			{
 				data: 'completed_by_person_id',
