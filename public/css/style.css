@@ -719,8 +719,9 @@ div.credits.container {
 	margin-left: 10.5em;
 }
 
-.highlight {
-	background: yellow !important;
+td.jumper.highlight,
+.highlight td:not(.circuit_buttons) {
+	background: yellow;
 }
 
 

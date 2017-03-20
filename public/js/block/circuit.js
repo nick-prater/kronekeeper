@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2017 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -220,8 +220,6 @@ define([
 				return !jumper_model.id;
 			});
 		}
-		
-
 	});
 
 
@@ -298,6 +296,21 @@ define([
 				"jumper_model_changed",
 				this.render_jumpers
 			);
+
+			/* Bind to window events to handle highlighting. If
+			 * this view is ever destroyed, we need to take care to
+			 * unbind them
+			 */
+			var view = this;
+			$(window).on("hashchange", function(e) {
+				view.handle_hash_change(e);
+			});
+			$(window).on("click", function(e) {
+				view.remove_highlighting(e);
+			});
+			$(window).on("keydown", function(e) {
+				view.remove_highlighting(e);
+			});
 		},
 
 		template: _.template( $('#row_template').html() ),
@@ -500,8 +513,21 @@ define([
 				td_buttons.before(template);
 				jumper_cell_count ++;
 			}
-		}
+		},
 
+		handle_hash_change: function(e) {
+			this.$el.removeClass("highlight");
+			if(window.location.hash == ("#circuit_id=" + this.model.id)) {
+				this.$el.addClass("highlight");
+			}
+		},
+
+		remove_highlighting: function(e) {
+			this.$el.removeClass("highlight");
+			if(window.location.hash == ("#circuit_id=" + this.model.id)) {
+				window.location.hash = "";
+			}
+		}
 	});
 
 	console.log("loaded circuit.js");
