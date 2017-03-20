@@ -245,8 +245,9 @@ sub record {
 			note,
 			block_id_a,
 			circuit_id_a,
-			to_person_id
-		) VALUES (?,?,?,?,?,?,?,?)"
+			to_person_id,
+			jumper_id
+		) VALUES (?,?,?,?,?,?,?,?,?)"
 	);
 
 	$q->execute(
@@ -258,6 +259,7 @@ sub record {
 		$args->{block_id_a},
 		$args->{circuit_id_a},
 		$args->{to_person_id},
+		$args->{jumper_id},
 	);
 		
 	debug sprintf(

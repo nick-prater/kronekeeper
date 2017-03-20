@@ -70,7 +70,8 @@ CREATE TABLE activity_log(
 	circuit_id_a INTEGER REFERENCES circuit(id),
 	to_person_id INTEGER REFERENCES person(id),
 	comment TEXT,
-	completed_by_person_id INTEGER REFERENCES person(id)
+	completed_by_person_id INTEGER REFERENCES person(id),
+	jumper_id INTEGER --References jumper.id, but persists after the jumper is deleted
 );
 CREATE INDEX activity_log_frame_id_timestamp_idx ON activity_log(frame_id, log_timestamp);
 

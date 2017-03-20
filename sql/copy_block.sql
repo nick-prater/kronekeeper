@@ -19,6 +19,52 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
+CREATE OR REPLACE FUNCTION al_log_activity(
+	p_by_person_id INTEGER,
+	p_to_frame_id INTEGER,
+	p_function TEXT,
+	p_note TEXT,
+	p_to_block_id INTEGER,
+	p_circuit_id INTEGER,
+	p_jumper_id INTEGER
+)
+RETURNS VOID AS $$
+DECLARE p_account_id INTEGER;
+BEGIN
+
+	/* Look up account_id */
+	SELECT account_id
+	INTO p_account_id
+	FROM person
+	WHERE id = p_by_person_id;
+
+	/* Write log entry */
+	INSERT INTO activity_log(
+		by_person_id,
+		account_id,
+		frame_id,
+		function,
+		note,
+		block_id_a,
+		circuit_id_a,
+		jumper_id
+	) VALUES (
+		p_by_person_id,
+		p_account_id,
+		p_to_frame_id,
+		p_function,
+		p_note,
+		p_to_block_id,
+		p_circuit_id,
+		p_jumper_id
+	);
+
+END
+$$ LANGUAGE plpgsql;
+
+
+
+
 CREATE OR REPLACE FUNCTION copy_block(
 	p_from_block_id INTEGER,
 	p_to_block_id INTEGER
@@ -149,6 +195,7 @@ BEGIN
 			' ---'
 		),
 		p_to_block_id,
+		NULL,
 		NULL
 	);
 
@@ -164,6 +211,7 @@ BEGIN
 			p_to_block_designation
 		),
 		p_to_block_id,
+		NULL,
 		NULL
 	)
 	FROM block
@@ -182,6 +230,7 @@ BEGIN
 			'" (was "")' 
 		),
 		p_to_block_id,
+		NULL,
 		NULL
 	)
 	FROM block
@@ -201,6 +250,7 @@ BEGIN
 			' (was default)' 
 		),
 		p_to_block_id,
+		NULL,
 		NULL
 	)
 	FROM block
@@ -221,7 +271,8 @@ BEGIN
 			'" (was "")' 
 		),
 		p_to_block_id,
-		circuit.id
+		circuit.id,
+		NULL
 	)
 	FROM block
 	JOIN circuit ON (circuit.block_id = block.id)
@@ -243,7 +294,8 @@ BEGIN
 			'" (was "")' 
 		),
 		p_to_block_id,
-		circuit.id
+		circuit.id,
+		NULL
 	)
 	FROM block
 	JOIN circuit ON (circuit.block_id = block.id)
@@ -265,7 +317,8 @@ BEGIN
 			'" (was "")' 
 		),
 		p_to_block_id,
-		circuit.id
+		circuit.id,
+		NULL
 	)
 	FROM block
 	JOIN circuit ON (circuit.block_id = block.id)
@@ -287,7 +340,8 @@ BEGIN
 			'" (was "")' 
 		),
 		p_to_block_id,
-		circuit.id
+		circuit.id,
+		NULL
 	)
 	FROM block
 	JOIN circuit ON (circuit.block_id = block.id)
@@ -311,7 +365,8 @@ BEGIN
 			'" (was "")' 
 		),
 		p_to_block_id,
-		circuit.id
+		circuit.id,
+		NULL
 	)
 	FROM block
 	JOIN circuit ON (circuit.block_id = block.id)
@@ -334,7 +389,8 @@ BEGIN
 			'" (was "")' 
 		),
 		p_to_block_id,
-		circuit.id
+		circuit.id,
+		NULL
 	)
 	FROM block
 	JOIN circuit ON (circuit.block_id = block.id)
@@ -363,69 +419,12 @@ BEGIN
 			' ---'
 		),
 		p_to_block_id,
+		NULL,
 		NULL
 	);
 
 END
 $$ LANGUAGE plpgsql;
-
-
-
-CREATE OR REPLACE FUNCTION al_log_activity(
-	p_by_person_id INTEGER,
-	p_to_frame_id INTEGER,
-	p_function TEXT,
-	p_note TEXT,
-	p_to_block_id INTEGER,
-	p_circuit_id INTEGER
-)
-RETURNS VOID AS $$
-DECLARE p_account_id INTEGER;
-BEGIN
-
-	/* Look up account_id */
-	SELECT account_id
-	INTO p_account_id
-	FROM person
-	WHERE id = p_by_person_id;
-
-	/* Write log entry */
-	INSERT INTO activity_log(
-		by_person_id,
-		account_id,
-		frame_id,
-		function,
-		note,
-		block_id_a,
-		circuit_id_a
-	) VALUES (
-		p_by_person_id,
-		p_account_id,
-		p_to_frame_id,
-		p_function,
-		p_note,
-		p_to_block_id,
-		p_circuit_id
-	);
-
-END
-$$ LANGUAGE plpgsql;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

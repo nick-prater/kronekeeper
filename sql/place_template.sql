@@ -72,6 +72,7 @@ BEGIN
 		'place_template',
 		CONCAT('--- BEGIN PLACING TEMPLATE "', p_template_name, '" at ', p_destination_designation, ' ---'),
 		p_block_id,
+		NULL,
 		NULL
 	);
 
@@ -112,6 +113,7 @@ BEGIN
 		'place_template',
 		CONCAT('--- END PLACING TEMPLATE "', p_template_name, '" at ', p_destination_designation, ' ---'),
 		p_block_id,
+		NULL,
 		NULL
 	);
 
@@ -312,7 +314,8 @@ BEGIN
 		'place_template',
 		a_note,
 		NULL,
-		NULL
+		NULL,
+		p_jumper_id
 	);
 
 	RETURN 1;
@@ -362,7 +365,8 @@ BEGIN
 		'place_template',
 		a_note,
 		NULL,
-		NULL
+		NULL,
+		p_jumper_id
 	);
 
 	RETURN 1;
