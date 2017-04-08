@@ -526,7 +526,8 @@ sub activity_log_as_xlsx {
 	$worksheet->set_column(3, 3, 40);                    # Activity
 	$worksheet->set_column(4, 4, 10);                    # Complete
 	$worksheet->set_column(5, 5, 15);                    # Completed By
-	$worksheet->set_column(6, 6, 30);                    # Function
+	$worksheet->set_column(6, 6, 15, $align_left);       # Comment
+	$worksheet->set_column(7, 7, 30);                    # Function
 
 	# Insert Kronekeeper logo
 	my $logo_image = config->{kronekeeper_logo};
@@ -603,6 +604,7 @@ sub activity_log_as_xlsx {
 	$worksheet->write($row, $col ++, 'Activity');
 	$worksheet->write($row, $col ++, 'Complete');
 	$worksheet->write($row, $col ++, 'Completed By');
+	$worksheet->write($row, $col ++, 'Comment');
 	$worksheet->write($row, $col ++, 'Function');
 
 
@@ -621,6 +623,7 @@ sub activity_log_as_xlsx {
 		$worksheet->write($row, $col ++, $r->{note});
 		$worksheet->write($row, $col ++, $r->{completed_by_person_id} ? 'yes' : 'no');
 		$worksheet->write($row, $col ++, $r->{completed_by_person_name});
+		$worksheet->write($row, $col ++, $r->{comment});
 		$worksheet->write($row, $col ++, $r->{function});
 	}
 
