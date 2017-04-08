@@ -22,6 +22,7 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 require([
 	'moment',
+	'underscore',
 	'datatables.net'
 ], function (
 	moment
@@ -63,23 +64,27 @@ require([
 				className: "dt-left"
 			},
 			{
-			 	data: 'by_person_name' 
+				data: 'by_person_name',
+				render: function(data, type, row, meta) {
+					return _.escape(data);
+				}
 			},
 			{
 				data: 'note',
 				className: "dt-left",
 				render: function(data, type, row, meta) {
+					var html = _.escape(data);
 					if(row.active_jumper_id) {
-						return '<a href="/jumper/' + row.active_jumper_id + '">' + data + '</a>';
+						return '<a href="/jumper/' + row.active_jumper_id + '">' + html + '</a>';
 					}
 					else if(row.active_block_id && row.active_circuit_id) {
-						return '<a href="/block/' + row.active_block_id + '#circuit_id=' + row.active_circuit_id + '">' + data + '</a>';
+						return '<a href="/block/' + row.active_block_id + '#circuit_id=' + row.active_circuit_id + '">' + html + '</a>';
 					}
 					else if(row.active_block_id) {
-						return '<a href="/block/' + row.active_block_id + '">' + data + '</a>';
+						return '<a href="/block/' + row.active_block_id + '">' + html + '</a>';
 					}
 					else {
-						return data;
+						return html;
 					}
 				}
 			},
@@ -87,7 +92,8 @@ require([
 				data: 'completed_by_person_id',
 				render: function(data, type, row, meta) {
 					var checked = data ? 'checked="checked" ' : '';
-					return '<input type="checkbox" ' + checked + 'value="' + row.id + '" class="completed" />';
+					var title = data ? ' title="' + _.escape(row.completed_by_person_name) + '"' : ' title="incomplete"';
+					return '<input type="checkbox" ' + checked + 'value="' + row.id + '" class="completed"' + title + ' />';
 				},
 				className: "dt-center",
 				width: "5em"
