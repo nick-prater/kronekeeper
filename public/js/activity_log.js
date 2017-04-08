@@ -22,10 +22,12 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 require([
 	'moment',
+	'activity_log/comments',
 	'underscore',
 	'datatables.net'
 ], function (
-	moment
+	moment,
+	comments
 ) {
         'use strict';
 
@@ -40,6 +42,11 @@ require([
 	$(".filter_selection select").change(handle_filter_change);
 	$(".status_selection input").change(handle_filter_change);
 	set_download_url();
+
+	/* Pre-compile templates */
+	var comments_link_template = _.template(
+		$('#comments_link_template').html()
+	);
 
 	$("#activity_log_table").DataTable({
 		serverSide: true,
@@ -101,12 +108,7 @@ require([
 			{
 				data: 'comment',
 				render: function(data, type, row, meta) {
-					if(data) {
-						return '<a class="notes_button lsf has_note" href="javascript:void(0)" title="Comment">comments</a>';
-					}
-					else {
-						return '<a class="notes_button lsf" href="javascript:void(0)" title="Comment">comments</a>';
-					}
+					return comments_link_template(row);
 				},
 				className: "dt-center"
 			}
@@ -118,6 +120,7 @@ require([
 			if(data.is_next_task) {
 				$(row).addClass("next_task");
 			}
+			$(row).attr("data-id", data.id);
 		}
 	});
 
@@ -125,6 +128,7 @@ require([
 	$("#activity_log_table").on("draw.dt", function () {
 		console.log("draw.dt");
 		$("input.completed").change(handle_checkbox_change);
+		$("#activity_log_table").on("click", "a.notes_button", comments.display);
 	});
 
 
@@ -205,7 +209,5 @@ require([
 			}
 		});
 	}
-
-
 
 });

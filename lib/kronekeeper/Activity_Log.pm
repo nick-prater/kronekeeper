@@ -189,27 +189,26 @@ prefix '/api/activity_log' => sub {
 
 		my $data = from_json(request->body);
 		my $completed_by = $data->{completed} ? $user->{id} : undef;
-
-		debug("updating completed_by_person_id for activity_log id $id");
-
-		my $q = database->prepare("
-			UPDATE activity_log
-			SET completed_by_person_id = ?
-			WHERE activity_log.id = ?
-		");
-		$q->execute(
-			$completed_by,
-			$id,
-		) or do {
-			database->rollback;
-			error("ERROR updating activity log");
-			send_error("database error updating activity log" => 500);
-		};
-
 		my $rv = {
 			id => $id,
-			completed_by_person_id => $completed_by,
 		};
+
+		# Update completed flag if status is provided
+		if(exists $data->{completed}) {
+			$rv->{completed_by_person_id} = $completed_by;
+			update_completed_flag(
+				$id,
+				$completed_by,
+			);
+		}
+
+		# Update comment if provided
+		if(exists $data->{comment}) {
+			update_comment(
+				$id,
+				$data->{comment},
+			);
+		}
 
 		# If this is a frame log item, include the next item id in returned data
 		my $row;
@@ -224,6 +223,51 @@ prefix '/api/activity_log' => sub {
 	};
 };
 
+
+sub update_completed_flag {
+
+	my $id = shift;
+	my $completed_by = shift;
+
+	debug("updating completed_by_person_id for activity_log id $id");
+
+	my $q = database->prepare("
+		UPDATE activity_log
+		SET completed_by_person_id = ?
+		WHERE activity_log.id = ?
+	");
+	$q->execute(
+		$completed_by,
+		$id,
+	) or do {
+		database->rollback;
+		error("ERROR updating activity log");
+		send_error("database error updating activity log" => 500);
+	};
+}
+
+
+sub update_comment {
+
+	my $id = shift;
+	my $comment = shift;
+
+	debug("updating comment for activity_log id $id");
+
+	my $q = database->prepare("
+		UPDATE activity_log
+		SET comment = ?
+		WHERE activity_log.id = ?
+	");
+	$q->execute(
+		$comment,
+		$id,
+	) or do {
+		database->rollback;
+		error("ERROR updating activity log");
+		send_error("database error updating activity log" => 500);
+	};
+}
 
 
 sub record {
