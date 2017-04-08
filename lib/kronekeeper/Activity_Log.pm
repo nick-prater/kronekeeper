@@ -365,7 +365,8 @@ sub get_activity_log {
 			(? = activity_log.id) AS is_next_task,
 			block.id AS active_block_id,
 			circuit.id AS active_circuit_id,
-			jumper.id AS active_jumper_id
+			jumper.id AS active_jumper_id,
+			comment
 		FROM activity_log
 		JOIN person AS created_by_person ON (
 			created_by_person.id = activity_log.by_person_id

@@ -477,7 +477,7 @@ div.credits.container {
 	text-align: center;
 }
 
-
+.activity_log, a.notes_button,
 .user_list .buttons a,
 .frame_list td a,
 .block .circuit_buttons a {
@@ -486,6 +486,7 @@ div.credits.container {
 	color: black;
 	border-radius: 3px;
 }
+.activity_log a.notes_button:hover,
 .user_list .buttons a:hover,
 .frame_list td a:hover,
 .block .circuit_buttons a:hover {
@@ -497,10 +498,12 @@ div.credits.container {
 .frame_list .buttons a {
 	font-size: 16pt;
 }
+.activity_log a.notes_button,
 .block a.notes_button {
 	font-size: 16pt;
 	color: #999;
 }
+.activity_log a.notes_button.has_note,
 .block a.notes_button.has_note {
 	font-size: 16pt;
 	color: black;

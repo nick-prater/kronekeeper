@@ -91,6 +91,18 @@ require([
 				},
 				className: "dt-center",
 				width: "5em"
+			},
+			{
+				data: 'comment',
+				render: function(data, type, row, meta) {
+					if(data) {
+						return '<a class="notes_button lsf has_note" href="javascript:void(0)" title="Comment">comments</a>';
+					}
+					else {
+						return '<a class="notes_button lsf" href="javascript:void(0)" title="Comment">comments</a>';
+					}
+				},
+				className: "dt-center"
 			}
 		],
 		createdRow: function(row, data, index) {

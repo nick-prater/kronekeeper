@@ -68,6 +68,7 @@
 				<th>person</th>
 				<th>activity</th>
 				<th>complete</th>
+				<th></th>
 			</tr>
 		</thead>
 		<tbody>
