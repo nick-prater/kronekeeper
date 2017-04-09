@@ -23,11 +23,13 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 require([
 	'moment',
 	'activity_log/comments',
+	'activity_log/task_menu',
 	'underscore',
 	'datatables.net'
 ], function (
 	moment,
-	comments
+	comments,
+	task_menu
 ) {
         'use strict';
 
@@ -125,6 +127,7 @@ require([
 			}
 			$(row).attr("data-id", data.id);
 			$(row).on("click", "a.notes_button", comments.display);
+			$(row).on("click", "a.menu_button", task_menu.show);
 		}
 	});
 

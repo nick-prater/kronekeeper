@@ -99,6 +99,11 @@
 	</a>
 </script>
 
+<ul class="context_menu" id="task_menu">
+	<li data-action="complete-this"><div>Complete this task</div></li>
+	<li data-action="complete-this-and-previous"><div>Complete this and previous tasks</div></li>
+</ul>
+
 
 <!-- Comments dialog - hidden on page load -->
 <div id="comments_dialog" title="Comments" class="dialog hidden">
