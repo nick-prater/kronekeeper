@@ -127,7 +127,7 @@ define([
 
 				/* Write updated comment back to html */
 				var template = _.template(
-					$('#comments_link_template').html()
+					$('#comments_button_template').html()
 				);
 				$(element).replaceWith(
 					template(data)

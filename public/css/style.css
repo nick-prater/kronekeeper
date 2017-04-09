@@ -478,6 +478,7 @@ div.credits.container {
 }
 
 .activity_log, a.notes_button,
+.activity_log, a.menu_button,
 .user_list .buttons a,
 .frame_list td a,
 .block .circuit_buttons a {
@@ -487,6 +488,7 @@ div.credits.container {
 	border-radius: 3px;
 }
 .activity_log a.notes_button:hover,
+.activity_log a.menu_button:hover,
 .user_list .buttons a:hover,
 .frame_list td a:hover,
 .block .circuit_buttons a:hover {
@@ -502,6 +504,10 @@ div.credits.container {
 .block a.notes_button {
 	font-size: 16pt;
 	color: #999;
+}
+.activity_log a.menu_button {
+	font-size: 11pt;
+	color: black;
 }
 .activity_log a.notes_button.has_note,
 .block a.notes_button.has_note {

@@ -44,8 +44,11 @@ require([
 	set_download_url();
 
 	/* Pre-compile templates */
-	var comments_link_template = _.template(
-		$('#comments_link_template').html()
+	var comments_button_template = _.template(
+		$('#comments_button_template').html()
+	);
+	var menu_button_template = _.template(
+		$('#menu_button_template').html()
 	);
 
 	$("#activity_log_table").DataTable({
@@ -108,7 +111,7 @@ require([
 			{
 				data: 'comment',
 				render: function(data, type, row, meta) {
-					return comments_link_template(row);
+					return comments_button_template(row) + menu_button_template(row);
 				},
 				className: "dt-center"
 			}
@@ -121,6 +124,7 @@ require([
 				$(row).addClass("next_task");
 			}
 			$(row).attr("data-id", data.id);
+			$(row).on("click", "a.notes_button", comments.display);
 		}
 	});
 
@@ -128,7 +132,6 @@ require([
 	$("#activity_log_table").on("draw.dt", function () {
 		console.log("draw.dt");
 		$("input.completed").change(handle_checkbox_change);
-		$("#activity_log_table").on("click", "a.notes_button", comments.display);
 	});
 
 

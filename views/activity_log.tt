@@ -76,8 +76,8 @@
 	</table>
 </div>
 
-<!-- template for activity log comments column -->
-<script type="text/template" id="comments_link_template">
+<!-- templates for activity log butons column -->
+<script type="text/template" id="comments_button_template">
 	<a 
 	    <% if(comment) { %>
 		class="notes_button lsf has_note" 
@@ -87,9 +87,15 @@
 		title="Add comment"
 	    <% } %>
 		href="javascript:void(0)" 
+	>comments<span hidden="hidden" class="comment_text"><%- comment %></span></a>
+</script>
+<script type="text/template" id="menu_button_template">
+	<a 
+		class="menu_button"
+		title="Menu"
+		href="javascript:void(0)"
 	>
-		comments
-		<span hidden="hidden" class="comment_text"><%- comment %></span>
+		&#9776;
 	</a>
 </script>
 
