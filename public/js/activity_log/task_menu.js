@@ -66,9 +66,12 @@ define([
 
 	function set_allowed_menu_options() {
 
-		/* All menu options enabled */
-
+		enable_menu_action_if_true(
+			"complete-this",
+			!jq_row.find("input.completed").first().prop("checked")
+		);
 	}
+
 
 	function enable_menu_action_if_true(action, t) {
 
