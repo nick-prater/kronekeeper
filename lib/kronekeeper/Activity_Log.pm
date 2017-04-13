@@ -138,8 +138,8 @@ prefix '/frame/:frame_id/activity_log' => sub {
 		$data->{draw} += 0; # Recast as numeric
 
 		if($data->{kk_filter} && $data->{kk_filter}->{user_id}) {
-			error("kk_filter uses invalid user_id");
 			kronekeeper::User::user_id_valid_for_account($data->{kk_filter}->{user_id}) or do {
+				error("kk_filter uses invalid user_id");
 				send_error("filter uses invalid user_id" => 403);
 			};
 		}
@@ -167,6 +167,67 @@ prefix '/frame/:frame_id/activity_log' => sub {
 		content_type 'application/json';
 		return to_json $rv;
 	};
+
+
+	post '/bulk_complete' => require_login sub {
+
+		user_has_role('edit_activity_log') or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $id = param('frame_id');
+		kronekeeper::Frame::frame_id_valid_for_account($id) or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $data = from_json(request->body);
+
+		if($data->{kk_filter} && $data->{kk_filter}->{user_id}) {
+			kronekeeper::User::user_id_valid_for_account($data->{kk_filter}->{user_id}) or do {
+				error("kk_filter uses invalid user_id");
+				send_error("filter uses invalid user_id" => 403);
+			};
+		}
+
+		# Although we could construct a single query to do this, it's advantageous
+		# to code the filter queries in just one place so that there is no risk of
+		# a bug causing inconsistencies in the way they are applied. We therefore
+		# retrieve a list of all matching rows, then apply update as a separate query
+
+		# Regardless of user-specified filter, we are only going to change rows
+		# that are currently marked incomplete. There is therefore no point in returning
+		# already completed rows.
+		$data->{kk_filter}->{show_complete} = 0;
+
+		my $results = get_activity_log(
+			max_items => undef,
+			frame_id => $id,
+			kk_filter => $data->{kk_filter},
+		);
+		my $user = logged_in_user;
+
+		# Build list of rows to update
+		# Again, we could combine this into a single query, but we use
+		# existing code paths to minimise the change of inconsistency.
+		# It's not an expensive operation, but we'll revisit if it's too slow.
+		foreach my $result(@{$results}) {
+			debug("marking activity_log id $result->{id} as completed");
+			update_completed_flag(
+				$result->{id},
+				$user->{id},
+			);
+		}
+
+		my $rv = {};
+		$rv->{next_item_id} = next_frame_task_id(param('frame_id'));
+
+		database->commit;
+		debug("completed activity log bulk complete");
+
+		content_type 'application/json';
+		return to_json $rv;
+	};
+
 };
 
 
@@ -345,6 +406,13 @@ sub get_activity_log {
 	# Apply filters if specified
 	my $filter_sql = '';
 	my @filter_args = ();
+
+	# Max activity_log_id filter
+	if($args{kk_filter}->{max_activity_log_id}) {
+		debug("applying filter for max activity_log.id: " . $args{kk_filter}->{max_activity_log_id});
+		$filter_sql .= " AND activity_log.id <= ?";
+		push @filter_args, $args{kk_filter}->{max_activity_log_id};
+	}
 
 	# By User Filter
 	if($args{kk_filter}->{user_id}) {

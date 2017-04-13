@@ -21,10 +21,11 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 define([
-	'backbone',
+	'activity_log/filter',
         'jquery',
 	'jqueryui'
 ], function (
+	filter
 ) {
         'use strict';
 
@@ -34,6 +35,39 @@ define([
 	var $el = $("#task_menu");
 	$el.menu({
 		select: handle_menu_selection
+	});
+
+	/* Intialise needed dialogs */
+	var cancel_button = {
+		text: "Cancel",
+		icon: "ui-icon-close",
+		click: function(e) {
+			$(this).dialog("close");
+		}
+	};
+	var complete_button = {
+		text: "Complete",
+		icon: "ui-icon-check",
+		click: function(e) {
+			mark_this_and_previous_tasks_complete();
+		}
+	};
+
+	$("#bulk_complete_dialog").dialog({
+		autoOpen: false,
+		modal: true,
+		buttons: [cancel_button, complete_button],
+		open: function() {
+			/* Close dialog on Escape key, even if we don't have focus. */
+			$(document).on("keydown", function(e) {
+				if(e.which == 27) {
+					$("#bulk_complete_dialog").dialog("close");
+				}
+			});
+		},
+		close: function() {
+			$(document).off("keydown");
+		}
 	});
 
 
@@ -102,7 +136,7 @@ define([
 				break;
 
 			case "complete-this-and-previous" :
-				console.log("marking this and previous tasks as complete");
+				display_bulk_complete_dialog();
 				break;
 		}
 	}
@@ -112,6 +146,62 @@ define([
 		var checkbox = jq_row.find("input.completed").first();
 		checkbox.prop("checked", true);
 		checkbox.trigger("change");
+	}
+
+
+	function display_bulk_complete_dialog() {
+		$("#bulk_complete_dialog div.section.messages div.message").hide();
+		$("#bulk_complete_dialog div.section.main").show();
+		$("#bulk_complete_dialog").dialog("open");
+	}
+
+
+
+	function mark_this_and_previous_tasks_complete() {
+
+		$("#bulk_complete_dialog div.section.main").hide();
+		$("#bulk_complete_dialog div.section.messages div.message").hide();
+		$("#bulk_complete_update_message").show();
+
+		var data = {
+			kk_filter: filter.get_parameters(),
+		};
+		data.kk_filter.max_activity_log_id = jq_row.data("id")
+		console.log(data);
+
+		$.ajax({
+			url: "activity_log/bulk_complete",
+			method: 'POST',
+			data: JSON.stringify(data),
+			error: function(jq_xhr, status_text, error_text) {
+				console.log("error doing bulk complete operation", status_text, error_text);
+				$("#bulk_complete_dialog div.section.messages div.message").hide();
+				$("#bulk_complete_error_message").show();
+			},
+			success: function(json, status_text, jq_xhr) {
+				console.log("completed bulk complete operation", json);
+
+				/* Update the selected row */
+				jq_row.find("input.completed").prop("checked", true);
+				jq_row.addClass("completed");
+
+				/* Update other rows on view */
+				jq_row.nextAll().find("input.completed").prop("checked", true);
+				jq_row.nextAll().addClass("completed");
+
+				/* Remove next_task highlight from all items */
+				var tbody = jq_row.closest("tbody");
+				tbody.find("tr").removeClass("next_task");
+
+				/* Then, highlight next_task if we have it and it's visible */
+				if(json.next_item_id) {
+					tbody.find("tr").has('input[value="' + json.next_item_id + '"]').addClass("next_task");
+				}
+
+				$("#bulk_complete_dialog").dialog("close");
+			}
+		});
+
 	}
 
 

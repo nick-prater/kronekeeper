@@ -76,6 +76,7 @@
 	</table>
 </div>
 
+
 <!-- templates for activity log butons column -->
 <script type="text/template" id="comments_button_template">
 	<a 
@@ -119,6 +120,31 @@
 <script type="text/template" id="failed_saving_comment_message">
 	Failed to save comments.
 </script>
+
+<!-- Confirm bulk complete - hidden on page load -->
+<div id="bulk_complete_dialog" title="Bulk Complete" class="dialog hidden">
+	<div class="section main">
+		<p>
+			<span class="ui-icon ui-icon-alert"></span>
+			This will mark the selected task and all earlier tasks matching the filter selection
+			as completed.
+		</p>
+		<p>
+			Are you sure?
+		</p>
+	</div>
+	<div class="section messages">
+		<div class="message" id="bulk_complete_update_message">
+			<span class="lsf">sync</span>
+			Marking tasks as complete...
+		</div>
+
+		<div class="message error" id="bulk_complete_error_message">
+			<span class="ui-icon ui-icon-alert"></span>
+			Error marking tasks as complete.
+		</div>
+	</div>
+</div>
 
 
 

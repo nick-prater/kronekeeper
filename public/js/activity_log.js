@@ -24,12 +24,14 @@ require([
 	'moment',
 	'activity_log/comments',
 	'activity_log/task_menu',
+	'activity_log/filter',
 	'underscore',
 	'datatables.net'
 ], function (
 	moment,
 	comments,
-	task_menu
+	task_menu,
+	filter
 ) {
         'use strict';
 
@@ -62,7 +64,7 @@ require([
 			url: "activity_log/query",
 			type: "POST",
 			data: function(d) {
-				d.kk_filter = get_filter_parameters();
+				d.kk_filter = filter.get_parameters();
 				console.log(d);
 				return JSON.stringify(d);
 			}
@@ -149,27 +151,9 @@ require([
 	function set_download_url() {
 
 		/* Update XLSX download link with new parameters */
-		var filter_params = JSON.stringify(get_filter_parameters());
+		var filter_params = JSON.stringify(filter.get_parameters());
 		console.log("filter_params");
 		$("#download_xlsx_link").attr("href", "activity_log/xlsx?filter=" + filter_params);
-	}
-
-	function get_filter_parameters() {
-
-		var rv = {
-			show_complete: $("#checkbox_show_complete").prop("checked"),
-			show_incomplete: $("#checkbox_show_incomplete").prop("checked"),
-			show_jumpers: $("#checkbox_show_jumpering").prop("checked"),
-			show_blocks: $("#checkbox_show_blocks").prop("checked"),
-			show_other: $("#checkbox_show_other").prop("checked")
-		};
-	
-		/* No user_id parameter means show entries for all users */	
-		if($("#select_user").val()) {
-			rv.user_id = $("#select_user").val();
-		}
-
-		return rv;
 	}
 
 
