@@ -58,23 +58,6 @@ CREATE TABLE user_role(
 );
 CREATE UNIQUE INDEX user_role_idx ON user_role(user_id, role_id);
 
-CREATE TABLE activity_log(
-	id SERIAL NOT NULL PRIMARY KEY,
-	log_timestamp TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),	
-	by_person_id INTEGER REFERENCES person(id),
-	account_id INTEGER REFERENCES account(id),
-	frame_id INTEGER REFERENCES frame(id),
-	function TEXT,
-	note TEXT,
-	block_id_a INTEGER REFERENCES block(id),
-	circuit_id_a INTEGER REFERENCES circuit(id),
-	to_person_id INTEGER REFERENCES person(id),
-	comment TEXT,
-	completed_by_person_id INTEGER REFERENCES person(id),
-	jumper_id INTEGER --References jumper.id, but persists after the jumper is deleted
-);
-CREATE INDEX activity_log_frame_id_timestamp_idx ON activity_log(frame_id, log_timestamp);
-
 /* Initialise Roles */
 INSERT INTO role(role) VALUES ('edit');
 INSERT INTO role(role) VALUES ('view_activity_log');
@@ -293,6 +276,26 @@ CREATE INDEX connection_pin_idx ON connection(pin_id);
 /* TODO: add constraint/trigger so a jumper wire has exactly two connections */
 
 
+/*--------------------------------------------------------------------------*/
+/* ACTIVITY LOG */
+/*--------------------------------------------------------------------------*/
+
+CREATE TABLE activity_log(
+	id SERIAL NOT NULL PRIMARY KEY,
+	log_timestamp TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),	
+	by_person_id INTEGER REFERENCES person(id),
+	account_id INTEGER REFERENCES account(id),
+	frame_id INTEGER REFERENCES frame(id),
+	function TEXT,
+	note TEXT,
+	block_id_a INTEGER REFERENCES block(id),
+	circuit_id_a INTEGER REFERENCES circuit(id),
+	to_person_id INTEGER REFERENCES person(id),
+	comment TEXT,
+	completed_by_person_id INTEGER REFERENCES person(id),
+	jumper_id INTEGER --References jumper.id, but persists after the jumper is deleted
+);
+CREATE INDEX activity_log_frame_id_timestamp_idx ON activity_log(frame_id, log_timestamp);
 
 
 /*--------------------------------------------------------------------------*/
