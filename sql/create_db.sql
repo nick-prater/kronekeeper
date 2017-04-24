@@ -29,11 +29,14 @@ CREATE TABLE kronekeeper_data(
 	key TEXT NOT NULL PRIMARY KEY,
 	value TEXT
 );
-INSERT INTO kronekeeper_data(key, value) VALUES('db_version', '1');
+INSERT INTO kronekeeper_data(key, value) VALUES('db_version', '2');
 
 CREATE TABLE account(
         id SERIAL NOT NULL PRIMARY KEY,
-        name TEXT NOT NULL
+        name TEXT NOT NULL,
+	max_frame_count INTEGER,
+	max_frame_width INTEGER,
+	max_frame_height INTEGER
 );
 
 CREATE TABLE person(
