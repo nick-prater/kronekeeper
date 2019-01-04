@@ -22,7 +22,7 @@
 			<div>
 			<ul class="fields">	
 				<li>
-					<label for="max_frame_count">maximum frames:</label>
+					<label for="max_frame_count">number of frames:</label>
 					<input 
 						type="number"
 						min="0"
@@ -35,7 +35,7 @@
 					/>
 				</li>
 				<li>
-					<label for="max_frame_width">maximum width:</label>
+					<label for="max_frame_width">width (blocks):</label>
 					<input 
 						type="number"
 						min="1"
@@ -48,7 +48,7 @@
 					/>
 				</li>
 				<li>
-					<label for="max_frame_width">maximum height:</label>
+					<label for="max_frame_width">height (blocks):</label>
 					<input 
 						type="number"
 						min="1"
