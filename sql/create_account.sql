@@ -20,14 +20,17 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 CREATE OR REPLACE FUNCTION create_account(
-	p_account_name TEXT
+	p_account_name TEXT,
+	p_max_frame_count INTEGER,
+        p_max_frame_width INTEGER,
+	p_max_frame_height INTEGER
 )
 RETURNS INTEGER AS $$
 DECLARE p_account_id INTEGER;
 BEGIN
 
-	INSERT INTO account(name)
-	VALUES(p_account_name)
+	INSERT INTO account(name, max_frame_count, max_frame_width, max_frame_height)
+	VALUES(p_account_name, p_max_frame_count, p_max_frame_width, p_max_frame_height)
 	RETURNING id INTO p_account_id;
 
 
