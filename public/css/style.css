@@ -353,6 +353,7 @@ div.credits.container {
 .block table,
 .user_list table,
 .frame_list table,
+.account_list table,
 .kris_jumper_colours table {
 	border-collapse: collapse;
 }
@@ -361,6 +362,8 @@ div.credits.container {
 .block th,
 .frame_list td,
 .frame_list th,
+.account_list td,
+.account_list th,
 .user_list td,
 .user_list th,
 .kris_jumper_colours td,
@@ -372,6 +375,7 @@ div.credits.container {
 .block th,
 .user_list th,
 .frame_list th,
+.account_list th,
 .kris_jumper_colours th {
 	background: #aaaaaa;
 }
@@ -383,6 +387,7 @@ div.credits.container {
 
 .block td,
 .user_list td,
+.account_list td,
 .kris_jumper_colours td {
 	background: white;
 	height: 10pt;
@@ -467,7 +472,7 @@ div.credits.container {
 	vertical-align: middle;
 }
 
-
+.account_list td.buttons,
 .user_list td.buttons {
 	min-width: 4em;
 	text-align: center;

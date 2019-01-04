@@ -1,0 +1,37 @@
+
+<div class="container add_frame account_list">
+	<h1>Accounts</h1>
+
+	<div class="menu">
+		<a href="new">new account</a>
+	</div>
+
+	<table>
+		<tr>
+			<th></th>
+			<th>name</th>
+			<th>frame limit</th>
+			<th>width limit</th>
+			<th>height limit</th>
+		</tr>
+		[% FOREACH account IN accounts %]
+		<tr>
+			<td class="buttons"><a href="/account/[% account.id %]" title="edit account" class="lsf">edit</a></td>
+			<td class="name">[% account.name | html %]</td>
+			<td class="frame_limit">[% 
+				(account.max_frame_count.defined ? account.max_frame_count : '-') | html;
+                	-%]</td>
+			<td class="frame_limit">[% 
+				(account.max_frame_width.defined ? account.max_frame_width : '-') | html;
+                	-%]</td>
+			<td class="frame_limit">[% 
+				(account.max_frame_height.defined ? account.max_frame_height : '-') | html;
+                	-%]</td>
+		</tr>
+		[% END %]
+	</table>
+
+</div>
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+

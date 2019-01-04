@@ -27,15 +27,14 @@
 				[% END %]
 				</div>
 			<div class="menu">
-				[% IF session.logged_in_user %]
+			    [% IF session.logged_in_user %]
 				<a href="/frame/">frames</a>
 				<a href="/template/">templates</a>
-				[% IF user_roles.manage_users %]
- 				<a href="/user/">users</a>
-				[% END %]
+				[% IF user_roles.manage_users %]<a href="/user/">users</a>[% END %]
+				[% IF user_roles.manage_accounts %]<a href="/account/">accounts</a>[% END %]
 				<a href="/user/password">settings</a>
 				<a href="/logout">logout</a>
-				[% END %]
+			    [% END %]
 			</div>
 		</div>
 [% content %]
