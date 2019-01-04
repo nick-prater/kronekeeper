@@ -484,6 +484,7 @@ div.credits.container {
 
 .activity_log, a.notes_button,
 .activity_log, a.menu_button,
+.account_list .buttons a,
 .user_list .buttons a,
 .frame_list td a,
 .block .circuit_buttons a {
@@ -495,6 +496,7 @@ div.credits.container {
 .activity_log a.notes_button:hover,
 .activity_log a.menu_button:hover,
 .user_list .buttons a:hover,
+.account_list .buttons a:hover,
 .frame_list td a:hover,
 .block .circuit_buttons a:hover {
         color: white;
@@ -502,6 +504,7 @@ div.credits.container {
 	border-color: black;
 }
 .user_list .buttons a,
+.account_list .buttons a,
 .frame_list .buttons a {
 	font-size: 16pt;
 }
