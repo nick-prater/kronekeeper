@@ -664,6 +664,7 @@ div.credits.container {
 }
 
 .change_password form ul,
+.edit_account form ul,
 .edit_user form ul,
 .add_frame form ul {
 	list-style-type: none;
@@ -672,12 +673,14 @@ div.credits.container {
 	padding: 0px;
 }
 .change_password form li,
+.edit_account form li,
 .edit_user form li,
 .add_frame form li {
 	padding: 3px;
 	position: relative;
 }
 .change_password form label,
+.edit_account form label,
 .edit_user form label,
 .add_frame form label {
 	width: 8em;
@@ -697,6 +700,7 @@ div.credits.container {
 	margin-top: 1em;
 }
 .edit_user .message div,
+.edit_account .message div,
 .add_frame div.message,
 .dialog.password_result .message div,
 .change_password .message div {
@@ -708,12 +712,14 @@ div.credits.container {
 	text-align: left;
 }
 .edit_user .message .error,
+.edit_account .message .error,
 .add_frame .message.error,
 .dialog.password_result .message .error,
 .change_password .message .error {
 	color: red;
 }
 .edit_user .message .success,
+.edit_account .message .success,
 .add_frame .message.success,
 .dialog.password_result .message .success,
 .change_password .message .success {
@@ -940,11 +946,17 @@ td.arrow {
 .edit_user form .roles input {
 	margin-left: -2em;
 }
+.edit_account form input.name,
 .edit_user form input.email,
 .edit_user form input.name {
 	width: 25em;
 }
+.edit_account form input.frame_limit {
+	width: 4em;
+}
 
+.edit_account form li.buttons,
+.edit_account form li.message,
 .edit_user form li.message,
 .edit_user form li.buttons {
 	min-width: 5em;
@@ -954,11 +966,21 @@ td.arrow {
 	margin-right: auto;
 }
 
+.edit_account form fieldset,
 .edit_user form fieldset {
-	max-width: 60em;
 	margin-left: auto;
 	margin-right: auto;
 }
+
+.edit_account fieldset {
+	max-width: 40em;
+}
+
+.edit_account form fieldset,
+.edit_user form fieldset {
+	max-width: 60em;
+}
+.edit_account form fieldset div,
 .edit_user form fieldset div {
 	max-width: 50em;
 	margin-left: auto;
@@ -966,9 +988,11 @@ td.arrow {
 	text-align: center;
 }
 
+.edit_account form fieldset label,
 .edit_user form fieldset label {
-	min-width: 10em;
+	min-width: 15em;
 }
+.edit_account form ul.fields,
 .edit_user form ul.fields {
 	width: 40em;
 	margin-left: auto;

@@ -1,0 +1,97 @@
+
+<div class="container edit_account">
+	<h1>Account details</h1>
+
+	<form id="account_form">
+		<ul class="fields">
+			<li>
+				<label for="name">name:</label>
+				<input 
+					type="text"
+					id="name"
+					name="name"
+					class="name"
+					autocomplete="off"
+					value="[% account.name | html %]"
+				/>
+			</li>
+		</ul>
+
+		<fieldset class="">
+			<legend>frame limits</legend>
+			<div>
+			<ul class="fields">	
+				<li>
+					<label for="max_frame_count">maximum frames:</label>
+					<input 
+						type="number"
+						min="0"
+						max="1000"
+						id="max_frame_count"
+						name="max_frame_count"
+						class="frame_limit"
+						autocomplete="off"
+						value="[% account.max_frame_count | html %]"
+					/>
+				</li>
+				<li>
+					<label for="max_frame_width">maximum width:</label>
+					<input 
+						type="number"
+						min="1"
+						max="1000"
+						id="max_frame_width"
+						name="max_frame_width"
+						class="frame_limit"
+						autocomplete="off"
+						value="[% account.max_frame_width | html %]"
+					/>
+				</li>
+				<li>
+					<label for="max_frame_width">maximum height:</label>
+					<input 
+						type="number"
+						min="1"
+						max="1000"
+						id="max_frame_height"
+						name="max_frame_height"
+						class="frame_limit"
+						autocomplete="off"
+						value="[% account.max_frame_height | html %]"
+					/>
+				</li>
+			</ul>
+			</div>
+		</fieldset>
+
+		<ul>
+			<li class="message">
+				<div id="saving_message">Saving data...</div>
+				<div id="saving_error_message" class="error">Error saving data.</div>
+				<div id="saving_ok_message" class="success">&#10004; Account details saved OK.</div>
+				<div id="no_change_message" class="success">&#10004; No changes to save.</div>
+				<div id="permission_denied_message" class="error">Permission denied when trying to update account.</div>
+			</li>
+
+			<li class="buttons">
+				<button
+					type="button"
+					id="update_button"
+					autocomplete="off"
+				><span class="lsf">check</span> Update</button>
+			</li>
+		</ul>
+	</form>
+</div>
+
+<script type="text/javascript">
+[% IF account.id %]
+var account_id = [% account.id %]
+[% ELSE %]
+var account_id = null;
+[% END %]
+</script>
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/account.js"></script>
+

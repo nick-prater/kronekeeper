@@ -76,40 +76,66 @@ prefix '/account' => sub {
 
 	get '/:account_id' => require_login sub {
 
-		my $user_id = param('account_id');
-		my $current_user = logged_in_user;
+		my $account_id = param('account_id');
 
-		# A user can edit their own details, otherwise
-		# must have the manage_users role
-		unless(
-			($user_id == $current_user->{id}) ||
-			user_has_role('manage_users') 
-		) {
+		# Viewing and editing account details is an admin task
+		unless(user_has_role('manage_accounts')) {
+			error("user does not have manage_accounts role");
 			send_error('forbidden' => 403);
 		}
 
-		# Can only view details of users on one's own account
-		unless(user_id_valid_for_account($user_id)) {
-			error("user is invalid for this account");
-			send_error("user is invalid for this account" => 403);
-		}
-
-		my $user = user_info($user_id);
-		$user->{roles} = user_roles($user->{email});
-
-		# Build hash of roles to help UI construction
-		my $roles = roles();
-		foreach my $role(@{$user->{roles}}) {
-			$roles->{$role}->{assigned} = 1;
-		}
+		my $account = account_info($account_id);
 
 		my $template_data = {
-			role_max_rank => user_role_max_rank($current_user->{id}),
-			user => $user,
-			roles => $roles,
+			account => $account,
 		};
-		template('user', $template_data);
+		template('account', $template_data);
 	};
+};
+
+
+prefix '/api/account' => sub {
+
+	patch '/:account_id' => require_login sub {
+
+		# Changing account details is an admin task
+		unless(user_has_role('manage_accounts')) {
+			error("user does not have manage_accounts role");
+			send_error('forbidden' => 403);
+		}
+
+		my $account_id = param('account_id');
+		my $info = account_info($account_id);
+
+		debug request->body;
+		my $data = from_json(request->body);
+		my $changes = {};
+
+		foreach my $field(keys %{$data}) {
+			my $value = $data->{$field};
+			for($field) {
+				m/^name$/ and do {
+					update_name($info, $value);
+					$changes->{name} = $value;
+					last;
+				};
+				m/^max_frame_(count|width|height)$/ and do {
+					update_frame_limit($info, $field, $value);
+					$changes->{$field} = $value;
+					last;
+				};
+				# else
+				error "failed to update unrecognised account field '$field'";
+			}
+		};
+
+		database->commit;
+
+		content_type 'application/json';
+		return to_json $changes;
+	};
+
+
 };
 
 
@@ -121,6 +147,95 @@ sub accounts {
 	");
 	$q->execute();
 	return $q->fetchall_arrayref({})
+}
+
+
+sub account_info {
+	my $account_id = shift;
+	my $q = database->prepare("
+		SELECT *
+		FROM account
+		WHERE id = ?
+	");
+	$q->execute($account_id);
+	return $q->fetchrow_hashref;
+}
+
+
+sub update_name {
+	my $info = shift;
+	my $name = shift;
+
+	# Rename user
+	my $q = database->prepare('
+		UPDATE account
+		SET name = ?
+		WHERE id = ?
+	');
+
+	$q->execute(
+		$name,
+		$info->{id},
+	) or do {
+		database->rollback;
+		send_error('error updating account name' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'account renamed "%s" (was "%s")',
+		$name,
+		$info->{name} || '',
+	);
+
+	$al->record({
+		function     => 'kronekeeper::Account::update_name',
+                account_id   => $info->{id},
+		note         => $note,
+	});
+}
+
+
+sub update_frame_limit {
+
+	my $info = shift;
+	my $field = shift;
+	my $value = shift;
+
+	# Field name is used to build query - constrain to valid field names
+	$field =~ m/^max_frame_(count|width|height)$/ or do {
+		send_error("invalid field $field" => 400);
+	};
+
+	# An empty value is recorded as NULL - no limit
+	if($value eq '') {
+		$value = undef;
+	}
+
+	my $q = database->prepare("
+		UPDATE account
+		SET $field = ?
+		WHERE id = ?
+	");
+
+	$q->execute(
+		$value,
+		$info->{id},
+	);
+
+	# Update Activity Log
+	my $note = sprintf(
+		'account limit %s changed to "%s" (was "%s")',
+		$field,
+		$value,
+		$info->{$field} || '',
+	);
+
+	$al->record({
+		function     => 'kronekeeper::Account::update_frame_limit',
+                account_id   => $info->{id},
+		note         => $note,
+	});
 }
 
 
