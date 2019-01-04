@@ -71,6 +71,7 @@
 				<div id="saving_ok_message" class="success">&#10004; Account details saved OK.</div>
 				<div id="no_change_message" class="success">&#10004; No changes to save.</div>
 				<div id="permission_denied_message" class="error">Permission denied when trying to update account.</div>
+				<div id="validation_error_message" class="error">Invalid data. Plese correct the highlighted fields and try again.</div>
 			</li>
 
 			<li class="buttons">
