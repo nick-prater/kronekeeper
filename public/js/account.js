@@ -29,7 +29,7 @@ require([
         'use strict';
 
 	function data_from_form() {
-		/* Extracts the user attributes from the form on-screen */
+		/* Extracts the account attributes from the form on-screen */
 		var rv = {
 			name: $("#name").val(),
 			max_frame_count: $("#max_frame_count").val(),
@@ -59,7 +59,7 @@ require([
 					success: function(model, data, options) {
 						if(data.id) {
 							console.log("updated account_id:", data.id);
-							window.user_id = data.id;
+							window.account_id = data.id;
 						}
 					},
 					error: function(model, xhr, options) {
@@ -152,6 +152,6 @@ require([
 	});
 
 
-	console.log("loaded user.js");
+	console.log("loaded account.js");
 });
 

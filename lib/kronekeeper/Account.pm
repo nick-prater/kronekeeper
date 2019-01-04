@@ -53,8 +53,6 @@ prefix '/account' => sub {
 
 	get '/new' => require_login sub {
 
-		my $current_user = logged_in_user;
-
 		unless(user_has_role('manage_accounts')) {
 			error("user does not have manage_accounts role");
 			send_error('forbidden' => 403);
@@ -63,15 +61,15 @@ prefix '/account' => sub {
 		my $account = {
 			id => undef,
 			name => '',
-			roles => [],
+			max_frame_count => '',
+			max_frame_width => '',
+			max_frame_height => '',
 		};
 
 		my $template_data = {
-			role_max_rank => user_role_max_rank($current_user->{id}),
-			#user => $user,
-			roles => roles(),
+			account => $account,
 		};
-		template('user', $template_data);
+		template('account', $template_data);
 	};
 
 	get '/:account_id' => require_login sub {
@@ -95,6 +93,40 @@ prefix '/account' => sub {
 
 
 prefix '/api/account' => sub {
+
+	post '' => require_login sub {
+
+		# Adding account details is an admin task
+		unless(user_has_role('manage_accounts')) {
+			error("user does not have manage_accounts role");
+			send_error('forbidden' => 403);
+		}
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		unless($data->{name}) {
+			error("name parameter missing or invalid");
+			send_error("INVALID NAME" => 400);
+		}
+
+		# frame limits must be numeric
+		# empty frame limits are interpreted as NULL - unlimited
+		foreach my $field (qw(max_frame_count max_frame_width max_frame_height)) {
+			if($data->{$field} eq '') {
+				$data->{$field} = undef;
+			}
+			elsif($data->{$field} !~ m/^\d+$/) {
+				send_error("INVALID $field" => 400);
+			}
+		}
+
+		my $account_id = create_account($data);
+
+		database->commit;
+		return to_json account_info($account_id);
+	};
+
 
 	patch '/:account_id' => require_login sub {
 
@@ -134,8 +166,6 @@ prefix '/api/account' => sub {
 		content_type 'application/json';
 		return to_json $changes;
 	};
-
-
 };
 
 
@@ -207,10 +237,14 @@ sub update_frame_limit {
 		send_error("invalid field $field" => 400);
 	};
 
-	# An empty value is recorded as NULL - no limit
+	# Validate value - must be numeric
+	# An empty or whitespace value is recorded as NULL - unlimited
 	if($value eq '') {
 		$value = undef;
 	}
+	elsif($value !~ m/^\d+$/) {
+		send_error("$field is not a valid integer" => 400);
+        }
 
 	my $q = database->prepare("
 		UPDATE account
@@ -238,5 +272,37 @@ sub update_frame_limit {
 	});
 }
 
+
+sub create_account {
+
+	my $data = shift;
+
+	my $q = database->prepare("SELECT create_account(?,?,?,?) AS account_id");
+	$q->execute(
+		$data->{name},
+		$data->{max_frame_count},
+		$data->{max_frame_width},
+		$data->{max_frame_height},
+	) or do {
+		database->rollback;
+		send_error('error creating user' => 500);
+	};
+
+	my $account_id = $q->fetchrow_hashref->{account_id} or die;
+
+	# Update Activity Log
+	my $note = sprintf(
+		'created new account "%s"',
+		$data->{name},
+	);
+
+	$al->record({
+		function    => '/api/account/new',
+		note        => $note,
+		account_id  => $account_id,
+	});
+
+	return $account_id;
+}
 
 1;
