@@ -41,7 +41,7 @@
 [% content %]
 
 		<div class="footer">
-			&copy; NP Broadcast Limited 2016-2017<br />
+			&copy; NP Broadcast Limited 2016-2019<br />
 			<div class="menu">
 				<ul>
 					<li><a href="/agpl-3.0-standalone.html">licence</a></li>
