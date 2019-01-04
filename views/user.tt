@@ -6,6 +6,7 @@ role_names = {
 	edit_activity_log => 'Edit Activity Log',
 	edit => 'Edit',
 	manage_users => 'Manage Users',
+	manage_accounts => 'Manage Accounts',
 	import => 'Import'
 }
 %]
