@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2019 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -17,25 +17,6 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-
-
-/* Initialises a new account record. 
- * Returns the id of the newly created acccount.
- */
-CREATE OR REPLACE FUNCTION create_account(p_account_name TEXT)
-RETURNS INTEGER AS $$
-DECLARE rv INTEGER;
-BEGIN
-
-	INSERT INTO account(name)
-	VALUES(p_account_name)
-	RETURNING id INTO rv;
-
-	RETURN rv;
-END
-$$ LANGUAGE plpgsql;
-
 
 
 /* Given a vertical position number (between 1 and 676),
