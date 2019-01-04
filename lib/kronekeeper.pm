@@ -37,8 +37,6 @@ use kronekeeper::Activity_Log;
 use kronekeeper::Frame::Import::KRIS;
 use kronekeeper::Frame::Template;
 
-use Carp::Always;
-
 my $al = kronekeeper::Activity_Log->new();
 
 our $VERSION = '0.3';
