@@ -117,7 +117,7 @@ role_names = {
 					id="save_button"
 					autocomplete="off"
 					[% IF user.id %]hidden="hidden"[% END %]
-				><span class="lsf">check</span> Save</button>
+				><span class="lsf">check</span> Create User</button>
 			</li>
 		</ul>
 	</form>
