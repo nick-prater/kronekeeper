@@ -271,7 +271,9 @@ prefix '/api/user' => sub {
 			send_error('missing password parameter' => 400);
 		}
 
-		unless(user_email_valid_for_account($email)) {
+		# Only users with 'manage_accounts' role can change passwords for
+		# users on another account.
+		unless(user_email_valid_for_account($email) || user_has_role('manage_accounts')) {
 			error("email is invalid for this account");
 			send_error("email is invalid for this account" => 403);
 		}
