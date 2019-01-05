@@ -152,11 +152,17 @@ require([
 		},
 
 		do_update: function(e) {
-			this.disable_buttons();
-			this.show_message("#saving_message");
-			var result = this.model.save_data(
-				data_from_form()
-			);
+			var form_is_valid = $("#user_form").get(0).reportValidity();
+			if(form_is_valid) {
+				this.disable_buttons();
+				this.show_message("#saving_message");
+				var result = this.model.save_data(
+					data_from_form()
+				);
+			}
+			else {
+				this.show_message("#validation_error_message");
+			}
 		},
 
 		disable_buttons: function(e) {

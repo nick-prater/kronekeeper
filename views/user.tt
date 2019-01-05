@@ -28,6 +28,7 @@ role_names = {
 					class="email"
 					autocomplete="off"
 					value="[% user.email | html %]"
+					required="required"
 				/>
 			</li>
 
@@ -40,6 +41,7 @@ role_names = {
 					class="name"
 					autocomplete="off"
 					value="[% user.name | html %]"
+					required="required"
 				/>
 			</li>
 
@@ -50,7 +52,7 @@ role_names = {
 					name="enabled"
 					id="enabled_checkbox"
 					autocomplete="off"
-					[% IF user.is_active %]
+					[% IF user.is_active OR !user.id %]
 					checked="checked"
 					[% END %]
 				/>
@@ -92,6 +94,7 @@ role_names = {
 				<div id="no_change_message" class="success">&#10004; No changes to save.</div>
 				<div id="login_conflict_message" class="error">Error: the new login conflicts with an existing user.</div>
 				<div id="permission_denied_message" class="error">Permission denied when trying to update user.</div>
+				<div id="validation_error_message" class="error">Error: Plese correct the highlighted fields and try again.</div>
 			</li>
 
 			<li class="buttons">
