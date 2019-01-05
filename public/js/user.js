@@ -61,18 +61,17 @@ require([
 			 */
 			if(this.isNew()) {
 				data.account_id = window.account_id
-				//this.set("account_id", window.account_id);
 			}
 
 			this.set(data);
 			var need_password_reset = false;
 			var changes = this.changedAttributes();
-			
+
 			/* Strip any attempt to enable a user via this route.
 			 * Enabling users is done by resetting their password,
 			 * we can only disable users this way.
 			 */
-			if(changes.is_active) {
+			if(changes.is_active || (data.is_active && this.isNew)) {
 				console.log("update requires password reset");
 				need_password_reset = true;
 				delete changes.is_active;
@@ -125,6 +124,7 @@ require([
 
 		events: {
 			'click #update_button' : 'do_update',
+			'click #save_button' : 'do_update',
 			'click #reset_password_button' : reset_password.click
 		},
 
@@ -148,6 +148,7 @@ require([
 				this.upload_success
 			);
 
+			this.enable_buttons();
 			console.log("view initialised");
 		},
 
@@ -166,12 +167,23 @@ require([
 		},
 
 		disable_buttons: function(e) {
-			$("#reset_password_button").attr("disabled", "disabled");
-			$("#update_button").attr("disabled", "disabled");
+			$(".buttons button").attr("disabled", "disabled");
 		},
+
 		enable_buttons: function(e) {
-			$("#reset_password_button").removeAttr("disabled");
-			$("#update_button").removeAttr("disabled");
+
+			$(".buttons button").removeAttr("disabled");
+
+			if(this.model.isNew()) {
+				$("#save_button").show();
+				$("#reset_password_button").hide();
+				$("#update_button").hide();
+			}
+			else {
+				$("#save_button").hide();
+				$("#reset_password_button").show();
+				$("#update_button").show();
+			}
 		},
 
 		show_message: function(selector) {

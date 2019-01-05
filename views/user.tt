@@ -102,13 +102,22 @@ role_names = {
 					type="button"
 					id="reset_password_button"
 					autocomplete="off"
+					[% UNLESS user.id %]hidden="hidden"[% END %]
 				><span class="lsf">key</span> Reset Password</button>
 
 				<button
 					type="button"
 					id="update_button"
 					autocomplete="off"
+					[% UNLESS user.id %]hidden="hidden"[% END %]
 				><span class="lsf">check</span> Update</button>
+
+				<button
+					type="button"
+					id="save_button"
+					autocomplete="off"
+					[% IF user.id %]hidden="hidden"[% END %]
+				><span class="lsf">check</span> Save</button>
 			</li>
 		</ul>
 	</form>
