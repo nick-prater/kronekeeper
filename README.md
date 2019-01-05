@@ -2,10 +2,10 @@
 
 Kronekeeper is an open source web application for documenting connection block wiring frames ('Krone Frames') and their jumpering details.
 
-Kronekeeper can be used replace the KRIS software, once supplied by [Clyde Broadcast](http://www.clydebroadcast.com/),
-which has been used by many major UK broadcasters to document their wiring. As of 2016, 
-this software is still in use, but as it is unsupported and cannot run on modern operating 
-systems, a replacement is needed.
+Kronekeeper can be used replace the KRIS software, once supplied by Clyde Broadcast,
+which has been used by many major UK broadcasters to document their wiring. This
+is now unsupported and unable to run on modern operating systems, so a replacement
+is needed
 
 In replacing KRIS, Kronekeeper also seeks to address some of its weaknesses:
 
@@ -41,8 +41,9 @@ Development of Kronekeeper is being supported by [Global Radio](http://www.thisi
 
 # Development Status
 
-Kronekeeper is under active development, lead by [Nick Prater](https://twitter.com/npbroadcast). 
-The first release is expected in July 2016. Collaboration and code contributions are welcome.
+Kronekeeper is considered stable and has been in active use by Global Radio and other broadcasters
+since 2017. The project continues to be maintained by lead developer [Nick Prater](https://twitter.com/npbroadcast).
+Collaboration and code contributions are welcome. 
 
 # See Also
 
