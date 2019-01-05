@@ -1,0 +1,198 @@
+## Installation of Kronekeeper on a clean Debian 9 Stretch machine
+#
+#  If you require the KRIS import facilities, standard x86 architecture is
+#  needed, so that the closed-source Microsoft utilites will run under wine.
+#  Otherwise this should run on anything that supports Perl.
+#
+#  Instructions tested 2019-01-05 on a base-spec VPS from Bytemark
+
+
+# Install needed system packages
+# Running as root:
+apt-get update
+apt-get upgrade
+apt install git postgresql nginx libdbd-pg-perl starman \
+  libexcel-writer-xlsx-perl libdancer2-perl libarray-utils-perl \
+  libtext-csv-xs-perl libcrypt-saltedhash-perl \
+  libjson-xs-perl libjson-perl libdancer2-plugin-database-perl \
+  libfile-sharedir-install-perl libfile-share-perl libsession-token-perl \
+  libtest-deep-perl libdatetime-perl libdatetime-format-dateparse-perl \
+  libtest-warnings-perl libhttp-browserdetect-perl libtest-exception-perl \
+  libdbd-sqlite3-perl libmoose-perl dh-make-perl
+
+# Some perl modules are not packaged by Debian - make and install
+# them ourselves
+dh-make-perl --install --cpan Parse::CSV
+dh-make-perl --install --cpan Test::MockDateTime
+dh-make-perl --install --cpan Template::Plugin::JSON
+dh-make-perl --install --cpan Dancer2::Plugin::Auth::Extensible
+dh-make-perl --install --cpan Dancer2::Plugin::Auth::Extensible::Provider::Database
+dh-make-perl --install --cpan Dancer2::Session::JSON
+
+# Set up kronekeeper user
+mkdir /srv/kronekeeper
+useradd --home-dir /srv/kronekeeper kronekeeper
+
+# Install Kronekeeper app
+cd /srv
+git clone https://github.com/nick-prater/kronekeeper.git
+
+# Set ownership. We run as user kronekeeper, which allows us to access
+# our own perl libraries and, for KRIS import, wine configuration
+chown -Rv kronekeeper:kronekeeper /srv/kronekeeper
+
+# Configure kronekeeper application
+# Pick a database password of your choice for MY_KK_DB_PASSWORD
+# The commands below automate changes to the config file. You can just open
+# it in an editor and make the changes manually.
+cp /srv/kronekeeper/config.yml.example /srv/kronekeeper/config.yml
+sed -i "s|database:.*$|database: 'kronekeeper'|"     /srv/kronekeeper/config.yml
+sed -i "s|username:.*$|username: 'kkdancer'|"        /srv/kronekeeper/config.yml
+sed -i "s|password:.*$|password: 'MY_KK_DB_PASSWORD'|" /srv/kronekeeper/config.yml
+
+# The logo used on spreadsheet exports
+sed -i "s|kronekeeper_logo:.*$|kronekeeper_logo: '/srv/kronekeeper/public/images/logo.png'|" /srv/kronekeeper/config.yml
+
+# Only needed if you will be using the legacy KRIS import facility
+sed -i "s|krn_to_csv:.*$|krn_to_csv: '/srv/kronekeeper/KRNtoCSV/KRNtoCSV.exe'|" kronekeeper/config.yml
+
+
+# Create systemd service file to start and manage kronekeeper application
+cat > /lib/systemd/system/starman-kronekeeper.service <<END_OF_SERVICE
+[Unit]
+Description=Starman:kronekeeper
+After=network.target
+
+[Service]
+User=kronekeeper
+Group=kronekeeper
+WorkingDirectory=/srv/kronekeeper
+Restart=always
+ExecStart=/usr/bin/starman --listen localhost:5000 --workers 2 --user kronekeeper /srv/kronekeeper/bin/app.psgi
+
+[Install]
+WantedBy=multi-user.target
+END_OF_SERVICE
+
+
+# Configure database authentication method
+# edit and add line to /etc/postgresql/9.6/main/pg_hba.conf
+# insert before line 'local   all    postgres     peer' which would otherwise
+# take precedence. Ordering of directives in this file is important. The
+# following command automates the change, but you can just open the file in an
+# editor to make the change manually.
+sed -i \
+  's/^local\s*all\s*postgres\s*peer$/local   kronekeeper     kkdancer    md5\n&/' \
+  /etc/postgresql/9.6/main/pg_hba.conf
+
+
+# Configure nginx as a reverse proxy for Kronekeeper.
+# It will directly serve static files more quickly and avoids exposing
+# starman web server directly to the internet.
+# You should probably configure this for ssl/https, especially if it will
+# be accessed over the public internet. In this case, you'll need to change
+# the ports in the below configuration, and the line which sets header
+# X-FORWARDED_PROTO from 'http' to 'https'
+cat > /etc/nginx/sites-available/default <<END_OF_NGINX_CONFIGURATION
+server {
+        listen 80;
+        listen [::]:80;
+
+        root /srv/kronekeeper/public;
+        client_max_body_size 10M;
+
+        # Redirect / to login page
+        location = / {
+                return 301 /login;
+        }
+
+        # Directly serve any files we can
+        location / {
+                try_files \$uri \$uri/ @starman;
+        }
+
+        # Otherwise be a proxy
+        location @starman {
+                proxy_pass http://localhost:5000;
+                proxy_set_header Host \$host;
+                proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Host \$host;
+                proxy_set_header X-Dorwarded-Server \$host;
+		proxy_set_header X-FORWARDED_PROTO http;
+		proxy_set_header Request-Base /;
+
+		# Prevent click-jacking
+		add_header X-Frame-Options DENY;
+        }
+}
+END_OF_NGINX_CONFIGURATION
+
+
+# Load database tables, views, procedures
+# As postgres user:
+# Use the database password you chose earlier for $KK_DB_PASSWORD
+su postgres
+echo "CREATE USER kkdancer WITH PASSWORD 'MY_KK_DB_PASSWORD'" | psql
+echo "CREATE DATABASE kronekeeper" | psql
+psql kronekeeper < /srv/kronekeeper/sql/create_db.sql
+psql kronekeeper < /srv/kronekeeper/sql/block.sql
+psql kronekeeper < /srv/kronekeeper/sql/block_type.sql
+psql kronekeeper < /srv/kronekeeper/sql/copy_block.sql
+psql kronekeeper < /srv/kronekeeper/sql/create_account.sql
+psql kronekeeper < /srv/kronekeeper/sql/frame.sql
+psql kronekeeper < /srv/kronekeeper/sql/functions.sql
+psql kronekeeper < /srv/kronekeeper/sql/jumper.sql
+psql kronekeeper < /srv/kronekeeper/sql/pin.sql
+psql kronekeeper < /srv/kronekeeper/sql/place_block.sql
+psql kronekeeper < /srv/kronekeeper/sql/place_template.sql
+psql kronekeeper < /srv/kronekeeper/sql/user.sql
+psql kronekeeper < /srv/kronekeeper/sql/circuit.sql
+psql kronekeeper < /srv/kronekeeper/sql/command_functions.sql
+psql kronekeeper < /srv/kronekeeper/sql/grant_permisions.sql
+
+# Create an account... note the id returned - normally 1 for a fresh install
+echo "SELECT create_account('My Kronekeeper Account', NULL, NULL, NULL);" | psql kronekeeper
+
+# back to root user:
+exit
+
+
+# Follow KRN2CSV installation instructions if you need legacy KRIS import:
+# https://github.com/nick-prater/kronekeeper/blob/master/KRNtoCSV/INSTALL
+
+
+# Then start/refresh services
+systemctl enable starman-kronekeeper
+systemctl enable nginx
+systemctl enable postgresql
+systemctl reload postgresql
+systemctl reload nginx
+systemctl start starman-kronekeeper
+
+# Application and services should now be running
+systemctl status
+journalctl -u starman-kronekeeper
+
+
+# Create initial admin user for this account
+# Use the account id returned when you created the account.
+# This is normally 1 for a fresh install. Specify an
+# e-mail address as the login and a password of your choice.
+curl 'http://localhost:5000/api/user/init?account_id=1&login=my_name@example.com&password=kk_admin'
+
+# You can now browse to the web app with the login name and password you
+# provided.
+#
+# Once logged-in, change the paassword by clicking on 'settings'
+#
+# Note that this initial user only has user admin rights, it cannot yet
+# create frames or wiring records. Click on 'users' to edit the user
+# and give it additional rights if you wish.
+#
+# Then you can add a 'normal' user:
+#  * click 'users' -> 'new user'
+#  * fill in e-mail address and name
+#  * select wanted roles
+#  * click 'Create User'
+
+
