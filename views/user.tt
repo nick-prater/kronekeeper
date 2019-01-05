@@ -20,7 +20,7 @@ role_names = {
 
 		<ul class="fields">
 			<li>
-				<label for="login">login:</label>
+				<label for="login">email:</label>
 				<input 
 					type="email"
 					id="login"
