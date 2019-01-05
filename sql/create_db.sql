@@ -29,7 +29,7 @@ CREATE TABLE kronekeeper_data(
 	key TEXT NOT NULL PRIMARY KEY,
 	value TEXT
 );
-INSERT INTO kronekeeper_data(key, value) VALUES('db_version', '2');
+INSERT INTO kronekeeper_data(key, value) VALUES('db_version', '3');
 
 CREATE TABLE account(
         id SERIAL NOT NULL PRIMARY KEY,
@@ -62,12 +62,13 @@ CREATE TABLE user_role(
 CREATE UNIQUE INDEX user_role_idx ON user_role(user_id, role_id);
 
 /* Initialise Roles */
-INSERT INTO role(role) VALUES ('edit');
-INSERT INTO role(role) VALUES ('view_activity_log');
-INSERT INTO role(role) VALUES ('edit_activity_log');
-INSERT INTO role(role) VALUES ('import');
-INSERT INTO role(role, rank) VALUES ('manage_users', 1000);
-
+INSERT INTO role(role, rank) VALUES
+	('edit', 200),
+	('view_activity_log', 200),
+	('edit_activity_log', 100),
+	('import', 200),
+	('manage_users', 1000),
+	('manage_accounts', 2000);
 
 
 /*--------------------------------------------------------------------------*/
