@@ -139,11 +139,12 @@ prefix '/api/user' => sub {
 
 		# This can be called on first setup, to create the initial admin user
 		# It will only work if there are no users configured on the system
-		# It sets an initial user on the system:
-		#   u: kk_admin
-		#   p: kk_admin
-		# This should be used to login for the first time, then changed or deleted
-		# once local users have been setup
+		# It sets an initial user on the system, with username and password
+		# specified by the `login` and `password` request parameters.
+		#
+		# The login should be in the form of an e-mail address to prevent validation
+		# errors when later manipulating the account via the UI forms, but this is
+		# not enforced.
 
 		# Check the system hasn't yet been initialised
 		my $q = database->prepare("SELECT COUNT(*) AS user_count FROM person");
@@ -154,9 +155,18 @@ prefix '/api/user' => sub {
 			send_error("cannot call init - there are already users configured" => 403);
 		};
 
-		# Create user kk_admin
+		my $login = param('login');
+		unless($login) {
+			send_error('missing "login" parameter' => 400);
+		}
+
+		my $password = param('password');
+		unless($login) {
+			send_error('missing "password" parameter' => 400);
+		}
+
 		my $user_id = create_user(
-			username   => 'kk_admin',
+			username   => $login,
 			account_id => param('account_id'),
 			name       => 'Kronekeeper Setup User',
 		) or do {
@@ -180,7 +190,7 @@ prefix '/api/user' => sub {
 		# Set the password...
 		user_password(
 			username     => $user_info->{email},
-			new_password => 'kk_admin',
+			new_password => $password,
 		) or do {
 			database->rollback;
 			error("error changing password");
