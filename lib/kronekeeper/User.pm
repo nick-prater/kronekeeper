@@ -107,7 +107,8 @@ prefix '/user' => sub {
 		}
 
 		# Can only view details of users on one's own account
-		unless(user_id_valid_for_account($user_id)) {
+		# unless one has manage_accounts superuser role
+		unless(user_id_valid_for_account($user_id) || user_has_role('manage_accounts')) {
 			error("user is invalid for this account");
 			send_error("user is invalid for this account" => 403);
 		}
