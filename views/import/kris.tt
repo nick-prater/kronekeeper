@@ -87,7 +87,7 @@
 					<p class="error">ERROR: uploaded KRN file contains an unassigned wiretype.</p>
 				[% ELSIF krn_error_code == 'SUCCESS' %]
 					<p class="success">File uploaded OK.</p>
-				[% ELSE %]
+				[% ELSIF krn_error_code != '' %]
 					<p class="error">ERROR: Failed to import the uploaded file.</p>
 				[% END %]
 				<p class="error" id="krn_too_big_message" hidden="hidden">ERROR: The selected file is bigger than the maximum size allowed. Please try again.</p>
