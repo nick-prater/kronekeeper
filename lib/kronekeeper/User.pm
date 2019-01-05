@@ -46,12 +46,15 @@ prefix '/user' => sub {
 
 	get '/' => require_login sub {
 
-		user_has_role('manage_users') or do {
-			send_error('forbidden' => 403);
-		};
+		# Specify which account to view users for
+		# Default is the logged-in user's account
+		my $account_id = param('account_id') || session('account')->{id};
+		debug('list users for account_id: ', $account_id);
+
+		require_user_admin_rights($account_id);
 
 		template('users', {
-			users => account_users(),
+			users => account_users($account_id),
 		});
 	};
 
@@ -65,10 +68,12 @@ prefix '/user' => sub {
 		my $user_id = param('user_id');
 		my $current_user = logged_in_user;
 
-		unless(user_has_role('manage_users')) {
-			error("user does not have manage_users role");
-			send_error('forbidden' => 403);
-		}
+		# Specify which account to create user for
+		# Default is the logged-in user's account
+		my $account_id = param('account_id') || session('account')->{id};
+		debug('list users for account_id: ', $account_id);
+
+		require_user_admin_rights($account_id);
 
 		my $user = {
 			id => undef,
@@ -76,6 +81,7 @@ prefix '/user' => sub {
 			email => '',
 			is_active => 0,
 			roles => [],
+			account_id => $account_id,
 		};
 
 		my $template_data = {
@@ -190,15 +196,11 @@ prefix '/api/user' => sub {
 
 	post '' => require_login sub {
 
-		my $account_id = session('account')->{id};
-
-		unless(user_has_role('manage_users')) {
-			error("user does not have manage_users role");
-			send_error('forbidden' => 403);
-		}
-
 		debug request->body;
 		my $data = from_json(request->body);
+		my $account_id = $data->{account_id} || session('account')->{id};
+
+		require_user_admin_rights($account_id);
 
 		unless($data->{email}) {
 			error("email parameter missing or invalid");
@@ -393,7 +395,7 @@ sub account_users {
 		ORDER BY name ASC
 	");
 	$q->execute(
-		session('account')->{id}
+		$account_id,
 	);
 	return $q->fetchall_arrayref({})
 }
@@ -729,6 +731,25 @@ sub disable_user {
 		note         => $note,
 		to_person_id => $info->{id},
 	});
+}
+
+
+sub require_user_admin_rights {
+
+	my $for_account_id = shift;
+
+	# Return an error unless user has rights to create/add/edit users
+	if($for_account_id != session('account')->{id}) {
+		# Manipulating users for a different account
+		user_has_role('manage_accounts') or do {
+			send_error('forbidden' => 403);
+		};
+	}
+	else {
+		user_has_role('manage_users') or do {
+			send_error('forbidden' => 403);
+		};
+	}
 }
 
 

@@ -16,7 +16,10 @@
 		</tr>
 		[% FOREACH account IN accounts %]
 		<tr>
-			<td class="buttons"><a href="/account/[% account.id %]" title="edit account" class="lsf">edit</a></td>
+			<td class="buttons">
+				<a href="/account/[% account.id %]" title="edit account" class="lsf">edit</a>
+				<a href="/account/[% account.id %]/user/" title="users" class="lsf">users</a>
+			</td>
 			<td class="name">[% account.name | html %]</td>
 			<td class="frame_limit">[% 
 				(account.max_frame_count.defined ? account.max_frame_count : '-') | html;

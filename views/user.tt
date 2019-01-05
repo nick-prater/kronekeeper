@@ -148,11 +148,12 @@ role_names = {
 
 
 <script type="text/javascript">
-[% IF user.id %]
-var user_id = [% user.id %]
-[% ELSE %]
+var account_id = [% user.account_id %];
+[% IF user.id -%]
+var user_id = [% user.id %];
+[% ELSE -%]
 var user_id = null;
-[% END %]
+[% END -%]
 </script>
 
 <script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>

@@ -56,9 +56,17 @@ require([
 		urlRoot: '/api/user',
 		save_data: function(data) {
 
+			/* If we're saving for the first time, specify which
+			 * account_id the new user should be attached to.
+			 */
+			if(this.isNew()) {
+				data.account_id = window.account_id
+				//this.set("account_id", window.account_id);
+			}
+
 			this.set(data);
-			var changes = this.changedAttributes();
 			var need_password_reset = false;
+			var changes = this.changedAttributes();
 			
 			/* Strip any attempt to enable a user via this route.
 			 * Enabling users is done by resetting their password,

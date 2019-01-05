@@ -89,6 +89,14 @@ prefix '/account' => sub {
 		};
 		template('account', $template_data);
 	};
+
+	get '/:account_id/user/' => require_login sub {
+		forward '/user/', { account_id => param('account_id') };
+	};
+
+	get '/:account_id/user/new' => require_login sub {
+		forward '/user/new', { account_id => param('account_id') };
+	};
 };
 
 
