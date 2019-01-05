@@ -71,7 +71,7 @@ require([
 			 * Enabling users is done by resetting their password,
 			 * we can only disable users this way.
 			 */
-			if(changes.is_active || (data.is_active && this.isNew)) {
+			if(changes.is_active || (data.is_active && !data.id)) {
 				console.log("update requires password reset");
 				need_password_reset = true;
 				delete changes.is_active;
