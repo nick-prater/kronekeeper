@@ -86,7 +86,7 @@ END_OF_SERVICE
 # editor to make the change manually.
 sed -i \
   's/^local\s*all\s*postgres\s*peer$/local   kronekeeper     kkdancer    md5\n&/' \
-  /etc/postgresql/9.6/main/pg_hba.conf
+  /etc/postgresql/10/main/pg_hba.conf
 
 
 # Configure nginx as a reverse proxy for Kronekeeper.
