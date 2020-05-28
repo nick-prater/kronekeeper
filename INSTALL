@@ -20,6 +20,9 @@ apt install git postgresql nginx libdbd-pg-perl starman \
   libtest-warnings-perl libhttp-browserdetect-perl libtest-exception-perl \
   libdbd-sqlite3-perl libmoose-perl dh-make-perl
 
+# If installing on recent versions of Ubuntu - install required Perl module required for next steps
+dh-make-perl --install --cpan Test::Fatal
+
 # Some perl modules are not packaged by Debian - make and install
 # them ourselves
 dh-make-perl --install --cpan Parse::CSV
