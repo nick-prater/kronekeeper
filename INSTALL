@@ -5,6 +5,7 @@
 #  Otherwise this should run on anything that supports Perl.
 #
 #  Instructions tested 2019-01-05 on a base-spec VPS from Bytemark
+#  Instructions tested 2020-05-28 on Ubuntu 18.04
 
 
 # Install needed system packages
