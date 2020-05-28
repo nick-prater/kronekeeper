@@ -12,7 +12,7 @@
 # Running as root:
 apt-get update
 apt-get upgrade
-apt install git postgresql nginx libdbd-pg-perl starman \
+apt install git postgresql-10 nginx libdbd-pg-perl starman \
   libexcel-writer-xlsx-perl libdancer2-perl libarray-utils-perl \
   libtext-csv-xs-perl libcrypt-saltedhash-perl \
   libjson-xs-perl libjson-perl libdancer2-plugin-database-perl \
