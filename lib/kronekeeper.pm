@@ -31,6 +31,7 @@ use kronekeeper::Account;
 use kronekeeper::Frame;
 use kronekeeper::Block;
 use kronekeeper::Circuit;
+use kronekeeper::Configuration;
 use kronekeeper::Jumper;
 use kronekeeper::User;
 use kronekeeper::Activity_Log;

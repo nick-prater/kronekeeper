@@ -1,0 +1,17 @@
+
+<div class="container add_frame account_list">
+	<h1>Configuration</h1>
+
+	<div class="menu">
+		[% IF user_roles.configure_block_types %]
+		<a href="/configuration/">block types</a>
+		[% END %]
+                [% IF user_roles.configure_jumper_templates %]
+		<a href="/configuration/">jumper templates</a>
+		[% END %]
+	</div>
+
+</div>
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+
