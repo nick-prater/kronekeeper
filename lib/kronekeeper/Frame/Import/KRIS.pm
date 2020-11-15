@@ -509,8 +509,17 @@ sub import_krn {
 	};
 
 	# Build krn2csv command
+	config->{wine} or do {
+		error("path to wine executable is not defined in the kronekeeper configuration file");
+		goto CLEANUP;
+	};
+	config->{krn_to_csv} or do {
+		error("path to krn_to_csv executable is not defined in the kronekeeper configuration file");
+		goto CLEANUP;
+	};
 	my $command = sprintf(
-		"DISPLAY=:1 wine32 %s %s",
+		"DISPLAY=:1 %s %s %s",
+		config->{wine},
 		config->{krn_to_csv},
 		$filename,
 	);

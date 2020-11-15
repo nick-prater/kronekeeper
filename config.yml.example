@@ -4,6 +4,7 @@ layout: "main"
 session: 'JSON'
 template: 'template_toolkit'
 behind_proxy: 1
+wine: '/usr/bin/wine'
 krn_to_csv: 'path-to-kronekeeper/KRNtoCSV/KRNtoCSV.exe'
 kronekeeper_logo: 'path-to-kronekeeper/public/images/logo.png'
 
