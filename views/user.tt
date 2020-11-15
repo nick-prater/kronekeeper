@@ -7,7 +7,9 @@ role_names = {
 	edit => 'Edit',
 	manage_users => 'Manage Users',
 	manage_accounts => 'Manage Accounts',
-	import => 'Import'
+	import => 'Import',
+	configure_block_types => 'Configure Block Types',
+	configure_jumper_templates => 'Configure Jumper Templates'
 }
 %]
 
