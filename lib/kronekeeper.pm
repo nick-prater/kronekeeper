@@ -30,6 +30,7 @@ use Dancer2::Plugin::Auth::Extensible;
 use kronekeeper::Account;
 use kronekeeper::Frame;
 use kronekeeper::Block;
+use kronekeeper::BlockType;
 use kronekeeper::Circuit;
 use kronekeeper::Configuration;
 use kronekeeper::Jumper;

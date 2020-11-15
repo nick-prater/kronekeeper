@@ -1,4 +1,4 @@
-package kronekeeper::Configuration;
+package kronekeeper::BlockType;
 
 =head1 LICENCE
 
@@ -37,14 +37,31 @@ our @EXPORT_OK = qw();
 my $al = kronekeeper::Activity_Log->new();
 
 
-prefix '/configuration' => sub {
+prefix '/block_type' => sub {
 
 	get '/' => require_login sub {
 
-		template('configuration', {
+		template('block_types', {
+			block_types => account_block_types(),
 		});
 	};
 };
 
+
+sub account_block_types {
+	my $account_id = shift || session('account')->{id};
+	my $q = database->prepare("
+		SELECT * FROM block_type_info
+		WHERE account_id = ?
+		ORDER BY name ASC
+	");
+	$q->execute(
+		$account_id,
+	);
+
+
+	debug("got block types");
+	return $q->fetchall_arrayref({})
+}
 
 1;

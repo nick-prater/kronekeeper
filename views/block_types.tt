@@ -1,0 +1,34 @@
+
+<div class="container add_frame block_type_list">
+	<h1>Block Types</h1>
+
+	<div class="menu">
+		<a href="new">new block type</a>
+	</div>
+
+	<table>
+		<tr>
+			<th></th>
+			<th>name</th>
+			<th>circuits</th>
+			<th>pins per circuit</th>
+			<th>colour</th>
+		</tr>
+		[% FOREACH block_type IN block_types %]
+		<tr>
+			<td class="buttons">
+				<a href="/account/[% account.id %]" title="edit account" class="lsf">edit</a>
+				<a href="javascript:void(0)" title="delete" class="lsf delete">delete</a>
+			</td>
+			<td class="name">[% block_type.name | html %]</td>
+			<td class="name">[% block_type.circuit_count | html %]</td>
+			<td class="name">[% block_type.circuit_pin_count | html %]</td>
+			<td class="name" style="background:[% block_type.html_colour %]">[% block_type.html_colour | html %]</td>
+		</tr>
+		[% END %]
+	</table>
+
+</div>
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+

@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -25,7 +25,8 @@ SELECT
 	block_type.account_id,
 	block_type.name,
 	block_type.circuit_count,
-	block_type.circuit_pin_count
+	block_type.circuit_pin_count,
+        CONCAT('#', ENCODE(block_type.colour_html_code, 'hex')) AS html_colour
 FROM block_type;
 
 
