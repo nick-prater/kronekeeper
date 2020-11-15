@@ -32,6 +32,7 @@
 				<a href="/template/">templates</a>
 				[% IF user_roles.manage_users %]<a href="/user/">users</a>[% END %]
 				[% IF user_roles.manage_accounts %]<a href="/account/">accounts</a>[% END %]
+				[% IF user_roles.configure_block_types OR user_roles.configure_jumper_templates %]<a href="/configuration/">configuration</a>[% END %]
 				<a href="/user/password">settings</a>
 				<a href="/logout">logout</a>
 			    [% END %]
