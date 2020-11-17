@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2017 NP Broadcast Limited
+Copyright (C) 2017-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -48,7 +48,7 @@ BEGIN
 	PERFORM create_jumper_template(p_account_id, 'DC',             'DC',    ARRAY['green','yellow']);
 	PERFORM create_jumper_template(p_account_id, 'AES/EBU',        'AES',   ARRAY['blue','white']);
 	PERFORM create_jumper_template(p_account_id, 'Communications', 'COMMS', ARRAY['green','red']);
-	PERFORM create_jumper_template(p_account_id, 'ABS',            'ABS',   ARRAY['black','red','green']);
+	PERFORM create_jumper_template(p_account_id, 'ABS',            'ABS',   ARRAY['red','black','green']);
 
 	RETURN p_account_id;
 END
