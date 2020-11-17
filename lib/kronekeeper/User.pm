@@ -113,7 +113,9 @@ prefix '/user' => sub {
 			send_error("user is invalid for this account" => 403);
 		}
 
-		my $user = user_info($user_id);
+		my $user = user_info($user_id) or do {
+			send_error('not found' => 404);	
+		};
 		$user->{roles} = user_roles($user->{email});
 
 		# Build hash of roles to help UI construction
