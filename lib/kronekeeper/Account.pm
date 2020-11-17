@@ -5,7 +5,7 @@ package kronekeeper::Account;
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2019 NP Broadcast Limited
+Copyright (C) 2019-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -295,7 +295,7 @@ sub create_account {
 		$data->{max_frame_height},
 	) or do {
 		database->rollback;
-		send_error('error creating user' => 500);
+		send_error('error creating account' => 500);
 	};
 
 	my $account_id = $q->fetchrow_hashref->{account_id} or die;
