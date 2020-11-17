@@ -11,23 +11,21 @@
 		<script src="[% request.uri_base %]/js/require-2.2.0.min.js"></script>
 	</head>
 	<body>
-
 		<div class="masthead">
-				<div class="logo">
-					<a href="[% request.uri_base %]/">
-						<img src="[% request.uri_base %]/images/logo.png" alt="Kronekeeper logo" />
-					</a>
-				</div>
-
-				<div class="message">
-				[% IF session.logged_in_user %]
-					[% session.user.name | html %] : [% session.account.name | html %]
-				[% ELSE %]
-					not logged in
-				[% END %]
-				</div>
+			<div class="logo">
+				<a href="[% request.uri_base %]/">
+					<img src="[% request.uri_base %]/images/logo.png" alt="Kronekeeper logo" />
+				</a>
+			</div>
+			<div class="message">
+				[%- IF session.logged_in_user %]
+				[% session.user.name | html %] : [% session.account.name | html %]
+				[%- ELSE %]
+				not logged in
+				[%- END %]
+			</div>
 			<div class="menu">
-			    [% IF session.logged_in_user %]
+			    [%- IF session.logged_in_user %]
 				<a href="/frame/">frames</a>
 				<a href="/template/">templates</a>
 				[% IF user_roles.manage_users %]<a href="/user/">users</a>[% END %]
@@ -35,9 +33,10 @@
 				[% IF user_roles.configure_block_types OR user_roles.configure_jumper_templates %]<a href="/configuration/">configuration</a>[% END %]
 				<a href="/user/password">settings</a>
 				<a href="/logout">logout</a>
-			    [% END %]
+			    [%- END %]
 			</div>
 		</div>
+
 [% content %]
 
 		<div class="footer">
