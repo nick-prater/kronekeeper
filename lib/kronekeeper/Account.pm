@@ -82,7 +82,9 @@ prefix '/account' => sub {
 			send_error('forbidden' => 403);
 		}
 
-		my $account = account_info($account_id);
+		my $account = account_info($account_id) or do {
+			send_error('not found' => 404);	
+		};
 
 		my $template_data = {
 			account => $account,
