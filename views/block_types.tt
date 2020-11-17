@@ -17,8 +17,10 @@
 		[% FOREACH block_type IN block_types %]
 		<tr>
 			<td class="buttons">
-				<a href="/account/[% account.id %]" title="edit account" class="lsf">edit</a>
+				<a href="/block_type/[% block_type.id %]" title="edit block_type" class="lsf">edit</a>
+				[% UNLESS block_type.is_used %]
 				<a href="javascript:void(0)" title="delete" class="lsf delete">delete</a>
+				[% END %]
 			</td>
 			<td class="name">[% block_type.name | html %]</td>
 			<td class="name">[% block_type.circuit_count | html %]</td>

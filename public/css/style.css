@@ -3,7 +3,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -674,6 +674,7 @@ div.credits.container {
 
 .change_password form ul,
 .edit_account form ul,
+.edit_block_type form ul,
 .edit_user form ul,
 .add_frame form ul {
 	list-style-type: none;
@@ -683,6 +684,7 @@ div.credits.container {
 }
 .change_password form li,
 .edit_account form li,
+.edit_block_type form li,
 .edit_user form li,
 .add_frame form li {
 	padding: 3px;
@@ -690,6 +692,7 @@ div.credits.container {
 }
 .change_password form label,
 .edit_account form label,
+.edit_block_type form label,
 .edit_user form label,
 .add_frame form label {
 	width: 8em;
@@ -710,6 +713,7 @@ div.credits.container {
 }
 .edit_user .message div,
 .edit_account .message div,
+.edit_block_type .message div,
 .add_frame div.message,
 .dialog.password_result .message div,
 .change_password .message div {
@@ -722,6 +726,7 @@ div.credits.container {
 }
 .edit_user .message .error,
 .edit_account .message .error,
+.edit_block_type .message .error,
 .add_frame .message.error,
 .dialog.password_result .message .error,
 .change_password .message .error {
@@ -729,6 +734,7 @@ div.credits.container {
 }
 .edit_user .message .success,
 .edit_account .message .success,
+.edit_block_type .message .success,
 .add_frame .message.success,
 .dialog.password_result .message .success,
 .change_password .message .success {

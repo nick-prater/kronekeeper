@@ -19,6 +19,25 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
+CREATE OR REPLACE FUNCTION create_block_type(
+	p_account_id INTEGER,
+	p_name TEXT,
+	p_circuit_count INTEGER,
+        p_circuit_pin_count INTEGER,
+	p_colour_html_code BYTEA
+)
+RETURNS INTEGER AS $$
+DECLARE p_block_type_id INTEGER;
+BEGIN
+	INSERT INTO block_type(account_id, name, colour_html_code, circuit_count, circuit_pin_count)
+	VALUES (p_account_id, p_name, p_colour_html_code, p_circuit_count, p_circuit_pin_count)
+	RETURNING id INTO p_block_type_id;
+
+	RETURN p_block_type_id;
+END
+$$ LANGUAGE plpgsql;
+
+
 /* Returns true if the specified block type is in use, or false otherwise.
  * Can be used to determine if a block type can be deleted.
  */

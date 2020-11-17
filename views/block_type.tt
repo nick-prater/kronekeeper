@@ -1,0 +1,99 @@
+
+<div class="container edit_block_type">
+	<h1>Block Type</h1>
+
+	<form id="block_type_form">
+		<ul class="fields">
+			<li>
+				<label for="name">name:</label>
+				<input 
+					type="text"
+					id="name"
+					name="name"
+					class="name"
+					autocomplete="off"
+					required="required"
+					value="[% block_type.name | html %]"
+				/>
+			</li>
+
+			<li>
+				<label for="circuit_count">circuit count:</label>
+				<input 
+					type="number"
+					min="0"
+					max="20"
+					id="circuit_count"
+					name="circuit_count"
+					class="circuit_count"
+					autocomplete="off"
+					value="[% block_type.circuit_count | html %]"
+					[%- IF block_type.is_used %]
+					readonly="readonly"
+					title="locked because block type is in use"
+					[%- END %]
+				/>
+				[% IF block_type.is_used %]<span class="lsf">lock</span>[% END %]
+			</li>
+			<li>
+				<label for="circuit_pin_count">pins per circuit:</label>
+				<input 
+					type="number"
+					min="1"
+					max="10"
+					id="circuit_pin_count"
+					name="circuit_pin_count"
+					class="circuit_count"
+					autocomplete="off"
+					value="[% block_type.circuit_pin_count | html %]"
+					[%- IF block_type.is_used %]
+					readonly="readonly"
+					title="locked because block type is in use"
+					[%- END %]
+				/>
+				[% IF block_type.is_used %]<span class="lsf">lock</span>[% END %]
+			</li>
+			<li>
+				<label for="html_colour">default colour:</label>
+				<input 
+					type="color"
+					id="html_colour"
+					name="html_colour"
+					class="html_colour"
+					value="[% block_type.html_colour %]"
+				/>
+			</li>
+		</ul>
+
+		<ul>
+			<li class="message">
+				<div id="saving_message">Saving data...</div>
+				<div id="saving_error_message" class="error">Error saving data.</div>
+				<div id="saving_ok_message" class="success">&#10004; Block type saved OK.</div>
+				<div id="no_change_message" class="success">&#10004; No changes to save.</div>
+				<div id="permission_denied_message" class="error">Permission denied when trying to update block type.</div>
+				<div id="validation_error_message" class="error">Invalid data. Plese correct the highlighted fields and try again.</div>
+			</li>
+
+			<li class="buttons">
+				<button
+					type="button"
+					id="update_button"
+					autocomplete="off"
+				><span class="lsf">check</span> Update</button>
+			</li>
+		</ul>
+	</form>
+</div>
+
+<script type="text/javascript">
+[%- IF block_type.id %]
+	var block_type_id = [% block_type.id %];
+[%- ELSE %]
+	var block_type_id = null;
+[%- END %]
+</script>
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/block_type.js"></script>
+
