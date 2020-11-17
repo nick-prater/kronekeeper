@@ -76,15 +76,60 @@ prefix '/api/jumper_template' => sub {
 		}
 
 		# Confirm jumper template exists and belongs to the session's account
-		my $info = block_type_info($jumper_template_id) or do {
-			send_error('block type does not exist or is invalid for this account' => 403);
+		my $info = jumper_template_info($jumper_template_id) or do {
+			send_error('jumper template does not exist or is invalid for this account' => 403);
 		};
 
-		delete_block_type($info);
+		delete_jumper_template($info);
 		database->commit;
 		return to_json({id => $jumper_template_id});
 	};
 };
+
+
+sub jumper_template_info {
+
+	# This will only return info for jumper templates belonging to the
+	# current session's account
+	my $account_id = session('account')->{id};
+	my $jumper_template_id = shift;
+	my $q = database->prepare("
+		SELECT * FROM jumper_template
+		WHERE account_id = ?
+		AND id = ?
+	");
+	$q->execute(
+		$account_id,
+		$jumper_template_id,
+	);
+
+	return $q->fetchrow_hashref;
+}
+
+
+sub delete_jumper_template {
+
+	my $info = shift;
+	my $account_id = session('account')->{id};
+
+	my $q = database->prepare("SELECT delete_jumper_template(?)");
+	$q->execute($info->{id});
+
+	# Update Activity Log
+	my $note = sprintf(
+		'deleted jumper template "%s" (id %u)',
+		$info->{name},
+		$info->{id},
+	);
+
+	$al->record({
+		function   => 'kronekeeper::JumperTemplate::delete_jumper_template',
+                account_id => $account_id,
+		note       => $note,
+	});
+
+	return;
+}
 
 
 1;
