@@ -351,7 +351,6 @@ div.credits.container {
 
 
 .block table,
-.block_type_list table,
 .user_list table,
 .frame_list table,
 .list table,
@@ -362,8 +361,6 @@ div.credits.container {
 
 .block td,
 .block th,
-.block_type_list td,
-.block_type_list th,
 .frame_list td,
 .frame_list th,
 .account_list td,
@@ -379,7 +376,6 @@ div.credits.container {
 
 .activity_log th,
 .block th,
-.block_type_list th,
 .user_list th,
 .frame_list th,
 .account_list th,
@@ -394,7 +390,6 @@ div.credits.container {
 
 
 .block td,
-.block_type_list td,
 .user_list td,
 .account_list td,
 .list td,
@@ -483,7 +478,6 @@ div.credits.container {
 }
 
 .account_list td.buttons,
-.block_type_list td.buttons,
 .list td.buttons,
 .user_list td.buttons {
 	min-width: 4em;
@@ -497,7 +491,6 @@ div.credits.container {
 .activity_log, a.notes_button,
 .activity_log, a.menu_button,
 .account_list .buttons a,
-.block_type_list .buttons a,
 .list .buttons a,
 .user_list .buttons a,
 .frame_list td a,
@@ -511,7 +504,6 @@ div.credits.container {
 .activity_log a.menu_button:hover,
 .user_list .buttons a:hover,
 .account_list .buttons a:hover,
-.block_type_list .buttons a:hover,
 .list .buttons a:hover,
 .frame_list td a:hover,
 .block .circuit_buttons a:hover {
@@ -521,7 +513,6 @@ div.credits.container {
 }
 .user_list .buttons a,
 .account_list .buttons a,
-.block_type_list .buttons a,
 .list .buttons a,
 .frame_list .buttons a {
 	font-size: 16pt;
