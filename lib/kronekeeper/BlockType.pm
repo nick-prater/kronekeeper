@@ -153,14 +153,13 @@ prefix '/api/block_type' => sub {
 					$changes->{name} = $value;
 					last;
 				};
-
-#			name: $("#name").val(),
-#			circuit_count: $("#circuit_count").val(),
-#			circuit_pin_count: $("#circuit_pin_count").val(),
-#			html_colour: $("#html_colour").val(),
-
-				m/^max_frame_(count|width|height)$/ and do {
-					update_frame_limit($info, $field, $value);
+				m/^html_colour$/ and do {
+					update_colour($info, $value);
+					$changes->{html_colour} = $value;
+					last;
+				};
+				m/^circuit_count|circuit_pin_count$/ and do {
+					update_dimension($info, $field, $value);
 					$changes->{$field} = $value;
 					last;
 				};
@@ -247,27 +246,140 @@ sub create_block_type {
 	);
 
 	$al->record({
-		function    => '/api/block_type/new',
-		note        => $note,
-		account_id  => $account_id,
+		function   => '/api/block_type/new',
+		note       => $note,
+		account_id => $account_id,
 	});
 
 	return $block_type_id;
 }
 
 
-sub update_colour {
+sub update_name {
 
+	my $info = shift;
+	my $name = shift;
+	my $account_id = session('account')->{id};
 
-	# Strip leading # from the colour code		
-	#$html_colour and $html_colour =~ s/^#//;
-
-	# Rename circuit
 	my $q = database->prepare("
-		UPDATE block SET colour_html_code = DECODE(?, 'hex')
+		UPDATE block_type SET name = ?
 		WHERE id = ?
 	");
 
+	$q->execute(
+		$name,
+		$info->{id},
+	) or do {
+		database->rollback;
+		send_error('error updating block_type name' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'block type with id %u renamed to "%s" (was "%s")',
+		$info->{id},
+		$name,
+		$info->{name},
+	);
+
+	$al->record({
+		function   => 'kronekeeper::BlockType::update_name',
+                account_id => $account_id,
+		note       => $note,
+	});
+
+	return;
 }
+
+
+sub update_colour {
+
+	my $info = shift;
+	my $html_colour = shift;
+	my $account_id = session('account')->{id};
+
+	# Strip leading # from the colour code		
+	$html_colour =~ s/^#//;
+
+	# Update default colour
+	my $q = database->prepare("
+		UPDATE block_type SET colour_html_code = DECODE(?, 'hex')
+		WHERE id = ?
+	");
+
+	$q->execute(
+		$html_colour,
+		$info->{id},
+	) or do {
+		database->rollback;
+		send_error('error updating block_type default colour' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'block type "%s" (id %u) default colour changed to #%s (was "%s")',
+		$info->{name},
+		$info->{id},
+		$html_colour,
+		$info->{html_colour},
+	);
+
+	$al->record({
+		function   => 'kronekeeper::BlockType::update_colour',
+                account_id => $account_id,
+		note       => $note,
+	});
+
+	return;
+}
+
+
+sub update_dimension {
+
+	my $info = shift;
+	my $field = shift;
+	my $value = shift;
+	my $account_id = session('account')->{id};
+
+	# Field name is used to build query - constrain to valid field names
+	$field =~ m/^circuit_count|circuit_pin_count$/ or do {
+		send_error("invalid field $field" => 400);
+	};
+
+	# Validate value - must be numeric
+	if($value !~ m/^\d+$/) {
+		send_error("$field is not a valid integer" => 400);
+        }
+
+	my $q = database->prepare("
+		UPDATE block_type
+		SET $field = ?
+		WHERE id = ?
+	");
+
+	$q->execute(
+		$value,
+		$info->{id},
+	);
+
+	# Update Activity Log
+	my $note = sprintf(
+		'block_type "%s" (id %u) %s changed to %s (was %s)',
+		$info->{name},
+		$info->{id},
+		$field,
+		$value,
+		$info->{$field},
+	);
+
+	$al->record({
+		function   => 'kronekeeper::BlockType::update_dimension',
+                account_id => $account_id,
+		note       => $note,
+	});
+
+	return;
+}
+
 
 1;
