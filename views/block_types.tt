@@ -15,22 +15,49 @@
 			<th>colour</th>
 		</tr>
 		[% FOREACH block_type IN block_types %]
-		<tr>
+		<tr data-block_type_id="[% block_type.id %]">
 			<td class="buttons">
 				<a href="/block_type/[% block_type.id %]" title="edit block_type" class="lsf">edit</a>
-				[% UNLESS block_type.is_used %]
-				<a href="javascript:void(0)" title="delete" class="lsf delete">delete</a>
-				[% END %]
+				<a href="javascript:void(0)" [% IF block_type.is_used %]style="visibility:hidden" [% END -%]title="delete" class="lsf delete">delete</a>
 			</td>
 			<td class="name">[% block_type.name | html %]</td>
-			<td class="name">[% block_type.circuit_count | html %]</td>
-			<td class="name">[% block_type.circuit_pin_count | html %]</td>
-			<td class="name" style="background:[% block_type.html_colour %]">[% block_type.html_colour | html %]</td>
+			<td class="circuit_count">[% block_type.circuit_count | html %]</td>
+			<td class="circuit_pin_count">[% block_type.circuit_pin_count | html %]</td>
+			<td class="colour" style="background:[% block_type.html_colour %]">[% block_type.html_colour | html %]</td>
 		</tr>
 		[% END %]
 	</table>
 
 </div>
 
+<div
+	id="dialog_confirm_delete"
+	title="Delete block type?"
+	style="display:none"
+>
+	<div class="section main">
+		<p>
+			<span class="ui-icon ui-icon-alert"></span>
+			Block type "<span id="name_of_block_type_to_delete"></span>" will be deleted.
+		</p>
+		<p>
+			Are you sure?
+		</p>
+	</div>
+	<div class="section messages">
+		<div class="message" id="deleting_message">
+			<span class="lsf">sync</span>
+			Deleting block type...
+		</div>
+
+		<div class="message error" id="delete_error_message">
+			<span class="ui-icon ui-icon-alert"></span>
+			Error deleting block type.
+		</div>
+	</div>
+</div>
+
+
 <script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/block_types.js"></script>
 

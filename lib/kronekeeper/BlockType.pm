@@ -78,6 +78,8 @@ prefix '/block_type' => sub {
 		};
 
 		my $block_type_id = param('block_type_id');
+
+		# Confirm block exists and belongs to the session's account
 		my $block_type = block_type_info($block_type_id) or do {
 			send_error('not found' => 404);
 		};
@@ -87,7 +89,6 @@ prefix '/block_type' => sub {
 		};
 		template('block_type', $template_data);
 	};
-
 };
 
 
@@ -137,6 +138,8 @@ prefix '/api/block_type' => sub {
 		}
 
 		my $block_type_id = param('block_type_id');
+
+		# Confirm block exists and belongs to the session's account
 		my $info = block_type_info($block_type_id) or do {
 			send_error('block type does not exist' => 400);
 		};
@@ -173,8 +176,26 @@ prefix '/api/block_type' => sub {
 		content_type 'application/json';
 		return to_json $changes;
 	};
-};
 
+	del '/:block_type_id' => require_login sub {
+
+		my $block_type_id = param('block_type_id');
+
+		unless(user_has_role('configure_block_types')) {
+			error("user does not have configure_block_types role");
+			send_error('forbidden' => 403);
+		}
+
+		# Confirm block exists and belongs to the session's account
+		my $info = block_type_info($block_type_id) or do {
+			send_error('block type does not exist or is invalid for this account' => 403);
+		};
+
+		delete_block_type($info);
+		database->commit;
+		return to_json({id => $block_type_id});
+	};
+};
 
 
 
@@ -194,6 +215,8 @@ sub account_block_types {
 
 
 sub block_type_info {
+	# This will only return info for blocks belonging to the
+	# current session's account
 	my $account_id = session('account')->{id};
 	my $block_type_id = shift;
 	my $q = database->prepare("
@@ -381,5 +404,40 @@ sub update_dimension {
 	return;
 }
 
+
+sub delete_block_type {
+
+	my $info = shift;
+	my $account_id = session('account')->{id};
+
+	my $q = database->prepare("
+		DELETE FROM block_type
+		WHERE id = ?
+		AND account_id = ?
+	");
+
+	$q->execute(
+		$info->{id},
+		$account_id,
+	);
+
+	my $rows = $q->rows;
+	debug("deleted $rows rows");
+
+	# Update Activity Log
+	my $note = sprintf(
+		'deleted block_type "%s" (id %u)',
+		$info->{name},
+		$info->{id},
+	);
+
+	$al->record({
+		function   => 'kronekeeper::BlockType::delete_block_type',
+                account_id => $account_id,
+		note       => $note,
+	});
+
+	return $rows;
+}
 
 1;
