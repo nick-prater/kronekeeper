@@ -5,7 +5,7 @@ package kronekeeper::Jumper;
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016-2017 NP Broadcast Limited
+Copyright (C) 2016-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -44,6 +44,7 @@ our $VERSION = '0.02';
 our @EXPORT_OK = qw(
 	delete_jumper
 	get_connection_count
+	get_jumper_templates
 	pins_are_connected
 	add_empty_jumper
 	add_jumper_wire
@@ -695,17 +696,28 @@ sub prettify_designation {
 
 sub get_jumper_templates {
 
+	# If wire_count argument is undef, all jumper templates will be returned
 	my $wire_count = shift;
 	my $account_id = session('account')->{id};
+
+	# Build query parameters
+	my $filter_sql = '';
+	my @filter_params;
+	if(defined $wire_count) {
+		$filter_sql = 'AND jumper_template_wire_count(id) = ?';
+		push(@filter_params, $wire_count);
+	}
 
 	# Get the templates
 	my $q = database->prepare("
 		SELECT *
 		FROM jumper_template
-		WHERE jumper_template_wire_count(id) = ?
-		AND account_id = ?
+		WHERE account_id = ? 
+		$filter_sql
+		ORDER BY name ASC
 	");
-	$q->execute($wire_count, $account_id);
+	$q->execute($account_id, @filter_params);
+
 	my $templates = $q->fetchall_arrayref({});
 
 	# Add the wires for each template
