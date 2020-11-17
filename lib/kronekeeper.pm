@@ -34,6 +34,7 @@ use kronekeeper::BlockType;
 use kronekeeper::Circuit;
 use kronekeeper::Configuration;
 use kronekeeper::Jumper;
+use kronekeeper::JumperTemplate;
 use kronekeeper::User;
 use kronekeeper::Activity_Log;
 use kronekeeper::Frame::Import::KRIS;

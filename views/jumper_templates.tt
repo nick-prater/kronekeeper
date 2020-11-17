@@ -1,0 +1,67 @@
+
+<div class="container add_frame jumper_template_list list">
+	<h1>Jumper Templates</h1>
+
+	<div class="menu">
+		<a href="new">new jumper template</a>
+	</div>
+
+	<table>
+		<tr>
+			<th></th>
+			<th>name</th>
+			<th>designation</th>
+			<th>wires</th>
+		</tr>
+		[% FOREACH jumper_template IN jumper_templates %]
+		<tr data-jumper_template_id="[% jumper_template.id %]">
+			<td class="buttons">
+				<a href="/jumper_template/[% jumper_template.id %]" title="edit jumper_template" class="lsf">edit</a>
+				<a href="javascript:void(0)" [% IF jumper_template.is_used %]style="visibility:hidden" [% END -%]title="delete" class="lsf delete">delete</a>
+			</td>
+			<td class="name">[% jumper_template.name | html %]</td>
+			<td class="designation">[% jumper_template.designation | html %]</td>
+			<td class="wires">
+				<div class="wire_group">
+				[%- FOREACH wire IN jumper_template.wires %]
+					<div class="wire_colour" style="background:[% wire.html_colour %]; color:[% wire.contrasting_html_colour %]">[% wire.colour_name | html %]</div>
+				[%- END %]
+				</div>
+			</td>
+		</tr>
+		[% END %]
+	</table>
+
+</div>
+
+<div
+	id="dialog_confirm_delete"
+	title="Delete jumper template?"
+	style="display:none"
+>
+	<div class="section main">
+		<p>
+			<span class="ui-icon ui-icon-alert"></span>
+			Jumper template "<span id="name_of_jumper_template_to_delete"></span>" will be deleted.
+		</p>
+		<p>
+			Are you sure?
+		</p>
+	</div>
+	<div class="section messages">
+		<div class="message" id="deleting_message">
+			<span class="lsf">sync</span>
+			Deleting jumper template...
+		</div>
+
+		<div class="message error" id="delete_error_message">
+			<span class="ui-icon ui-icon-alert"></span>
+			Error deleting jumper template type.
+		</div>
+	</div>
+</div>
+
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/jumper_templates.js"></script>
+

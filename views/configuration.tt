@@ -7,7 +7,7 @@
 		<a href="/block_type/">block types</a>
 		[% END %]
                 [% IF user_roles.configure_jumper_templates %]
-		<a href="/jumper_templates/">jumper templates</a>
+		<a href="/jumper_template/">jumper templates</a>
 		[% END %]
 	</div>
 
