@@ -31,6 +31,7 @@ use Dancer2::Plugin::Auth::Extensible;
 use kronekeeper::Activity_Log;
 use kronekeeper::Jumper qw(
 	get_jumper_templates
+	get_colours
 );
 use Exporter qw(import);
 our $VERSION = '0.01';
@@ -59,8 +60,40 @@ prefix '/jumper_template' => sub {
 			send_error('forbidden' => 403);
 		};
 
+		my $jumper_template = {
+			id => undef,
+			name => '',
+			designation => '',
+			wires => [],
+		};
+
+		my $template_data = {
+			jumper_template => $jumper_template,
+			wire_colours => get_colours(),
+		};
+		template('jumper_template', $template_data);
 	};
 
+	get '/:jumper_template_id' => require_login sub {
+
+		user_has_role('configure_jumper_templates') or do {
+			send_error('forbidden' => 403);
+		};
+
+		my $jumper_template_id = param('jumper_template_id');
+
+		# Confirm jumper_template exists and belongs to the session's account
+		my $jumper_template = jumper_template_info($jumper_template_id) or do {
+			send_error('not found' => 404);
+		};
+
+		my $template_data = {
+			jumper_template => $jumper_template,
+			wire_colours => get_colours(),
+		};
+
+		template('jumper_template', $template_data);
+	};
 };
 
 
@@ -103,7 +136,27 @@ sub jumper_template_info {
 		$jumper_template_id,
 	);
 
-	return $q->fetchrow_hashref;
+	my $template = $q->fetchrow_hashref;
+
+	# Add the wires for the template
+	$q = database->prepare("
+		SELECT
+			jumper_template_wire.position AS position,
+			colour.id AS colour_id,
+			colour.name AS colour_name,
+			colour.short_name AS colour_short_name,
+			CONCAT('#', ENCODE(colour.html_code, 'hex')) AS html_colour,
+			CONCAT('#', ENCODE(colour.contrasting_html_code, 'hex')) AS contrasting_html_colour
+		FROM jumper_template_wire
+		JOIN colour ON (colour.id = jumper_template_wire.colour_id)
+		WHERE jumper_template_id = ?
+		ORDER BY position ASC
+	");
+
+	$q->execute($template->{id});
+	$template->{wires} = $q->fetchall_arrayref({});
+
+	return $template;
 }
 
 

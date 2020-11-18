@@ -721,8 +721,14 @@ div.credits.container {
 .change_password .message .success {
 	color: green;
 }
-
-
+#jumper_template_form ol {
+	display: inline-block;
+	vertical-align: top;
+}
+#jumper_template_form ol li:last-child {
+	list-style: none;
+}
+	
 
 
 .credits dt {
@@ -849,6 +855,10 @@ td.arrow {
 	background: #fff;
 }
 
+#jumper_template_form div.selection {
+	width: 11em;
+}
+
 .custom-select .selection span.arrow {
 	margin-right: 0.25em;
 	float: right;
@@ -893,6 +903,16 @@ td.arrow {
 	float: left;
 	margin-top: 1px;
 }
+
+#jumper_template_form .custom-select span.wire {
+	border: 1px solid black;
+	display: inline-block;
+	width: 11em;
+	font-size: 85%;
+	text-align: center;
+	margin: 2px;
+}
+
 
 .custom-select div.wire_b {
 	margin-right: 1em;
@@ -943,8 +963,8 @@ td.arrow {
 	margin-left: -2em;
 }
 .edit form input.name,
-.edit_user form input.email,
-.edit_user form input.name {
+.edit form input.email,
+.edit form input.jumper_designation {
 	width: 25em;
 }
 .edit_account form input.frame_limit {

@@ -44,6 +44,7 @@ our $VERSION = '0.02';
 our @EXPORT_OK = qw(
 	delete_jumper
 	get_connection_count
+	get_colours
 	get_jumper_templates
 	pins_are_connected
 	add_empty_jumper
