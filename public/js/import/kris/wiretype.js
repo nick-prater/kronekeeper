@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -20,7 +20,7 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 define([
-	'import/kris/dropdown',
+	'dropdown',
 	'backbone',
         'jquery',
 	'jqueryui'
