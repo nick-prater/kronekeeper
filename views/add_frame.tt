@@ -1,5 +1,5 @@
 
-<div class="container add_frame">
+<div class="container add_frame edit">
 	[% IF is_template %]
 	<h1>Add Template</h1>
 	[% ELSE %]

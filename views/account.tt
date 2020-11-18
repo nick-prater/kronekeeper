@@ -1,5 +1,5 @@
 
-<div class="container edit_account">
+<div class="container edit_account edit">
 	<h1>Account details</h1>
 
 	<form id="account_form">

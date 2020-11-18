@@ -1,5 +1,5 @@
 
-<div class="container edit_block_type">
+<div class="container edit_block_type edit">
 	<h1>Block Type</h1>
 
 	<form id="block_type_form">

@@ -672,28 +672,19 @@ div.credits.container {
 }
 
 .change_password form ul,
-.edit_account form ul,
-.edit_block_type form ul,
-.edit_user form ul,
-.add_frame form ul {
+.edit form ul {
 	list-style-type: none;
 	list-style-position: outside;
 	margin: 0px;
 	padding: 0px;
 }
 .change_password form li,
-.edit_account form li,
-.edit_block_type form li,
-.edit_user form li,
-.add_frame form li {
+.edit form li {
 	padding: 3px;
 	position: relative;
 }
 .change_password form label,
-.edit_account form label,
-.edit_block_type form label,
-.edit_user form label,
-.add_frame form label {
+.edit form label {
 	width: 8em;
 	text-align: right;
 	display: inline-block;
@@ -710,10 +701,7 @@ div.credits.container {
 	text-align: center;
 	margin-top: 1em;
 }
-.edit_user .message div,
-.edit_account .message div,
-.edit_block_type .message div,
-.add_frame div.message,
+.edit .message div,
 .dialog.password_result .message div,
 .change_password .message div {
 	display: none;
@@ -723,18 +711,12 @@ div.credits.container {
 	font-style: italic;
 	text-align: left;
 }
-.edit_user .message .error,
-.edit_account .message .error,
-.edit_block_type .message .error,
-.add_frame .message.error,
+.edit .message .error,
 .dialog.password_result .message .error,
 .change_password .message .error {
 	color: red;
 }
-.edit_user .message .success,
-.edit_account .message .success,
-.edit_block_type .message .success,
-.add_frame .message.success,
+.edit .message .success,
 .dialog.password_result .message .success,
 .change_password .message .success {
 	color: green;
@@ -960,7 +942,7 @@ td.arrow {
 .edit_user form .roles input {
 	margin-left: -2em;
 }
-.edit_account form input.name,
+.edit form input.name,
 .edit_user form input.email,
 .edit_user form input.name {
 	width: 25em;

@@ -14,7 +14,7 @@ role_names = {
 %]
 
 
-<div class="container edit_user">
+<div class="container edit_user edit">
 	<h1>User details</h1>
 
 
