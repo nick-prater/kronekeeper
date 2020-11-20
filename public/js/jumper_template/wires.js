@@ -83,6 +83,8 @@ define([
 		},
 		remove_wire: function(e) {
 			e.preventDefault();
+			console.log("removing wire");
+			wire_collection.remove(this.model);
 			this.remove();
 		}
 	});
@@ -113,6 +115,9 @@ define([
 			 * than just appending it to the end of the list.
 			 */
 			wire_element.insertBefore(this.$el.find("li:last-child"));
+
+			/* Remove any validation warning caused by having no wires */
+			$("a.add_wire.button").removeClass("validation_error");
 		}
 	});
 
@@ -134,7 +139,7 @@ define([
 		/* Returns an ordered array of the wire colour ids */
 		let models = wire_collection.toJSON();
 		let colours = models.map((model) => {
-			return model.colour_id;
+			return Number(model.colour_id);
 		});
 		return colours;
 	}
@@ -142,7 +147,16 @@ define([
 	function is_valid() {
 		let valid = wire_collection.models.every((model) => {
 			return model.isValid();
-		});
+		}) && (wire_collection.models.length > 0);
+
+		/* Jumper templates must have at least one wire.
+		 * highlight the 'add wire' button if not.
+		 */
+		if(wire_collection.models.length == 0) {
+			console.log("highlighting add_wire button");
+			$("a.add_wire.button").addClass("validation_error");
+		}
+
 		return valid;
 	}
 

@@ -31,6 +31,7 @@ use Dancer2::Plugin::Auth::Extensible;
 use kronekeeper::Activity_Log;
 use kronekeeper::Jumper qw(
 	get_jumper_templates
+	get_jumper_template_colour_names
 	get_colours
 );
 use Exporter qw(import);
@@ -117,6 +118,54 @@ prefix '/api/jumper_template' => sub {
 		database->commit;
 		return to_json({id => $jumper_template_id});
 	};
+
+	patch '/:jumper_template_id' => require_login sub {
+
+		unless(user_has_role('configure_jumper_templates')) {
+			error("user does not have configure_jumper_templates role");
+			send_error('forbidden' => 403);
+		}
+
+		my $jumper_template_id = param('jumper_template_id');
+
+		# Confirm jumper_template exists and belongs to the session's account
+		my $info = jumper_template_info($jumper_template_id) or do {
+			send_error('jumper_template does not exist' => 400);
+		};
+
+		debug request->body;
+		my $data = from_json(request->body);
+		my $changes = {};
+
+		foreach my $field(keys %{$data}) {
+			my $value = $data->{$field};
+			for($field) {
+				m/^name$/ and do {
+					update_name($info, $value);
+					$changes->{name} = $value;
+					last;
+				};
+				m/^designation$/ and do {
+					update_designation($info, $value);
+					$changes->{designation} = $value;
+					last;
+				};
+				m/^wires$/ and do {
+					update_wires($info, $value);
+					$changes->{wires} = $value;
+					last;
+				};
+				# else
+				error "failed to update unrecognised jumper_template field '$field'";
+			}
+		};
+
+		database->commit;
+
+		content_type 'application/json';
+		return to_json $changes;
+	};
+
 };
 
 
@@ -170,6 +219,153 @@ sub delete_jumper_template {
 
 	$al->record({
 		function   => 'kronekeeper::JumperTemplate::delete_jumper_template',
+                account_id => $account_id,
+		note       => $note,
+	});
+
+	return;
+}
+
+
+sub update_name {
+
+	my $info = shift;
+	my $name = shift;
+	my $account_id = session('account')->{id};
+
+	my $q = database->prepare("
+		UPDATE jumper_template SET name = ?
+		WHERE id = ?
+		AND account_id = ?
+	");
+
+	$q->execute(
+		$name,
+		$info->{id},
+		$account_id
+	) or do {
+		database->rollback;
+		send_error('error updating jumper_template name' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'jumper template with id %u renamed to "%s" (was "%s")',
+		$info->{id},
+		$name,
+		$info->{name},
+	);
+
+	$al->record({
+		function   => 'kronekeeper::JumperTemplate::update_name',
+                account_id => $account_id,
+		note       => $note,
+	});
+
+	return;
+}
+
+
+sub update_designation {
+
+	my $info = shift;
+	my $designation = shift;
+	my $account_id = session('account')->{id};
+
+	my $q = database->prepare("
+		UPDATE jumper_template SET designation = ?
+		WHERE id = ?
+		AND account_id = ?
+	");
+
+	$q->execute(
+		$designation,
+		$info->{id},
+		$account_id
+	) or do {
+		database->rollback;
+		send_error('error updating jumper_template designation' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'jumper template %s (id %u) designation changed to "%s" (was "%s")',
+		$info->{name},
+		$info->{id},
+		$designation,
+		$info->{designation},
+	);
+
+	$al->record({
+		function   => 'kronekeeper::JumperTemplate::update_designation',
+                account_id => $account_id,
+		note       => $note,
+	});
+
+	return;
+}
+
+
+sub update_wires {
+
+	my $info = shift;
+	my $wires = shift;
+	my $account_id = session('account')->{id};
+
+	unless($wires && ref $wires eq 'ARRAY') {
+		database->rollback;
+		send_error("invalid wires specification for jumper template", 400);
+	};
+
+	# Store old wire colour names to write descriptive activity log
+	my @old_colours = @{get_jumper_template_colour_names($info->{id})};
+
+	# Handle any changes to wires by deleting all wires for the template
+	# then inserting the new specification
+	my $q = database->prepare("
+		DELETE FROM jumper_template_wire
+		WHERE jumper_template_id = ?
+	");
+	$q->execute($info->{id}) or do {
+		database->rollback;
+		send_error('error removing old jumper template wires' => 500);
+	};
+
+	$q = database->prepare("
+		INSERT INTO jumper_template_wire (
+			jumper_template_id,
+			position,
+			colour_id
+		) VALUES (?, ?, ?)
+	");
+
+	my $count = 1;
+	foreach my $colour_id (@{$wires}) {
+		$q->execute(
+			$info->{id},
+			$count,
+			$colour_id
+		) or do {
+			database->rollback,
+			send_error('error inserting jumper_template_wire' => 500);
+		};
+		$count ++;
+	}
+
+	# Store new wire colour names to write descriptive activity log
+	my @new_colours = @{get_jumper_template_colour_names($info->{id})};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'jumper template %s (id %u) wire colours changed to [%s] (previously [%s])',
+		$info->{name},
+		$info->{id},
+		join(', ', @new_colours),
+		join(', ', @old_colours),
+	);
+
+	$al->record({
+		function   => 'kronekeeper::JumperTemplate::update_designation',
                 account_id => $account_id,
 		note       => $note,
 	});

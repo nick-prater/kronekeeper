@@ -46,6 +46,7 @@ our @EXPORT_OK = qw(
 	get_connection_count
 	get_colours
 	get_jumper_templates
+	get_jumper_template_colour_names
 	pins_are_connected
 	add_empty_jumper
 	add_jumper_wire
