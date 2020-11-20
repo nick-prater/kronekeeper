@@ -100,6 +100,31 @@ prefix '/jumper_template' => sub {
 
 prefix '/api/jumper_template' => sub {
 
+	post '' => require_login sub {
+
+		unless(user_has_role('configure_jumper_templates')) {
+			error("user does not have configure_jumper_templates role");
+			send_error('forbidden' => 403);
+		}
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		unless($data->{name}) {
+			error("name parameter missing or invalid");
+			send_error("INVALID NAME" => 400);
+		}
+		unless($data->{designation}) {
+			error("designation parameter missing or invalid");
+			send_error("INVALID DESIGNATION" => 400);
+		}
+
+		my $jumper_template_id = create_jumper_template($data);
+
+		database->commit;
+		return to_json jumper_template_info($jumper_template_id);
+	};
+
 	del '/:jumper_template_id' => require_login sub {
 
 		my $jumper_template_id = param('jumper_template_id');
@@ -199,6 +224,45 @@ sub jumper_template_info {
 	$template->{wires} = $q->fetchall_arrayref({});
 
 	return $template;
+}
+
+
+sub create_jumper_template {
+
+	my $info = shift;
+	my $account_id = session('account')->{id};
+
+	# First insert the jumper with no wires attached
+	my $q = database->prepare("
+		SELECT create_jumper_template(?, ?, ?, ARRAY[]::text[])
+		AS jumper_template_id
+	");
+	$q->execute(
+		$account_id,
+		$info->{name},
+		$info->{designation}
+	);
+	my $result = $q->fetchrow_hashref();
+	$info->{id} = $result->{jumper_template_id};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'created new jumper template %s (id %u) with designation "%s"',
+		$info->{name},
+		$info->{id},
+		$info->{designation},
+	);
+
+	$al->record({
+		function   => 'kronekeeper::JumperTemplate::create_jumper_template',
+                account_id => $account_id,
+		note       => $note,
+	});
+
+	# Add wires to newly created jumper template
+	update_wires($info, $info->{wires});
+
+	return $info->{id};
 }
 
 
@@ -312,7 +376,7 @@ sub update_wires {
 	my $wires = shift;
 	my $account_id = session('account')->{id};
 
-	unless($wires && ref $wires eq 'ARRAY') {
+	unless($wires && ref $wires eq 'ARRAY' && scalar @{$wires} > 0) {
 		database->rollback;
 		send_error("invalid wires specification for jumper template", 400);
 	};
@@ -341,12 +405,18 @@ sub update_wires {
 
 	my $count = 1;
 	foreach my $colour_id (@{$wires}) {
+
+		unless($colour_id && $colour_id =~ m/^\d+$/) {
+			database->rollback;
+			send_error('invalid wire colour' => 400);
+		}
+
 		$q->execute(
 			$info->{id},
 			$count,
 			$colour_id
 		) or do {
-			database->rollback,
+			database->rollback;
 			send_error('error inserting jumper_template_wire' => 500);
 		};
 		$count ++;
