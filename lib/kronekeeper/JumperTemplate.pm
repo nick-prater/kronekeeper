@@ -177,7 +177,7 @@ prefix '/api/jumper_template' => sub {
 				};
 				m/^wires$/ and do {
 					update_wires($info, $value);
-					$changes->{wires} = $value;
+					$changes->{wires} = numify($value);
 					last;
 				};
 				# else
@@ -221,7 +221,12 @@ sub jumper_template_info {
 	");
 
 	$q->execute($template->{id});
-	$template->{wires} = $q->fetchall_arrayref({});
+
+	# Coerce wires into a flat array of numbers (rather than text)
+	$template->{wires} = [
+		map {$_->{colour_id} * 1}
+		@{$q->fetchall_arrayref({})}
+	];
 
 	return $template;
 }
@@ -443,5 +448,15 @@ sub update_wires {
 	return;
 }
 
+
+sub numify {
+	# Coerce each element of an array into a number.
+	# This is used with arrays of wire colour ids
+	# so that they are not interpreted as strings when
+	# converted to json.
+	my $arrayref = shift;
+	foreach my $element(@{$arrayref}) { $element *= 1 }
+	return $arrayref;
+}
 
 1;

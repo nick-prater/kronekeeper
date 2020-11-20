@@ -41,7 +41,6 @@ require([
 			wires: wires.colours()
 		};
 
-		console.log(rv);
 		return rv;
 	}
 

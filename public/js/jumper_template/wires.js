@@ -122,10 +122,19 @@ define([
 	});
 
 
-	function initialise() {	
-		wire_collection = new Wire_Collection(window.wires);
+	function initialise() {
+		/* Map a simple array/list of wire colours into an array
+		 * of key/value pairs
+		 */
+		let model_data = window.wires.map((colour_id) => {
+			return {colour_id: colour_id};
+		});
+
+		wire_collection = new Wire_Collection(model_data);
+
 		let list = new List_View({collection: wire_collection});
 		list.render();
+
 		console.log(wire_collection.length + " wires initialised");
 		return wire_collection;
 	};
