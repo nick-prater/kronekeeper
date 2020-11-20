@@ -5,13 +5,14 @@
 #  Otherwise this should run on anything that supports Perl.
 #
 #  Instructions tested 2019-01-05 on a base-spec VPS from Bytemark
+#  Instructions tested 2020-05-28 on Ubuntu 18.04
 
 
 # Install needed system packages
 # Running as root:
 apt-get update
 apt-get upgrade
-apt install git postgresql nginx libdbd-pg-perl starman \
+apt install git postgresql-10 nginx libdbd-pg-perl starman \
   libexcel-writer-xlsx-perl libdancer2-perl libarray-utils-perl \
   libtext-csv-xs-perl libcrypt-saltedhash-perl \
   libjson-xs-perl libjson-perl libdancer2-plugin-database-perl \
@@ -19,6 +20,9 @@ apt install git postgresql nginx libdbd-pg-perl starman \
   libtest-deep-perl libdatetime-perl libdatetime-format-dateparse-perl \
   libtest-warnings-perl libhttp-browserdetect-perl libtest-exception-perl \
   libdbd-sqlite3-perl libmoose-perl dh-make-perl
+
+# If installing on recent versions of Ubuntu this package required to build Dancer2 Auth modules
+dh-make-perl --install --cpan Test::Fatal
 
 # Some perl modules are not packaged by Debian - make and install
 # them ourselves
@@ -83,7 +87,7 @@ END_OF_SERVICE
 # editor to make the change manually.
 sed -i \
   's/^local\s*all\s*postgres\s*peer$/local   kronekeeper     kkdancer    md5\n&/' \
-  /etc/postgresql/9.6/main/pg_hba.conf
+  /etc/postgresql/10/main/pg_hba.conf
 
 
 # Configure nginx as a reverse proxy for Kronekeeper.
