@@ -108,7 +108,11 @@ require([
 		},
 
 		do_update: function(e) {
-			var form_is_valid = $("#jumper_template_form").get(0).reportValidity();
+
+			var form_is_valid = (
+				$("#jumper_template_form").get(0).reportValidity() &&
+				wires.is_valid()
+			);
 
 			if(form_is_valid) {
 				this.disable_buttons();

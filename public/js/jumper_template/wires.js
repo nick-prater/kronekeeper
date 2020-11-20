@@ -38,6 +38,11 @@ define([
 				id: null,
 				colour_id: null
 			};
+		},
+		validate: function() {
+			if(!this.get("colour_id")) {
+				return "no wire colour has been selected";
+			}
 		}
 	});
 
@@ -53,7 +58,8 @@ define([
 			"click a.button.remove_wire" : "remove_wire"
 		},
 		render: function() {
-			let model = this.model;
+			let view = this;
+			let model = view.model;
 			this.$el.html(this.template());
 
 			/* Select jumper template */
@@ -61,10 +67,19 @@ define([
 				initial_value: model.get("colour_id"),
 				on_change: function(value) {
 					model.set("colour_id", value);
+					if(model.isValid()) {
+						view.$el.find("div.selection").removeClass("validation_error");
+					}
 				}
 			});
 
 			return this;
+		},
+		initialize: function() {
+			this.model.on("invalid", () => {
+				console.log("trapped Invalid data");
+				this.$el.find("div.selection").addClass("validation_error");
+			});
 		},
 		remove_wire: function(e) {
 			e.preventDefault();
@@ -115,14 +130,21 @@ define([
 		var r = wire_collection.add([{}]);
 	};
 
-	function colours () {
+	function colours() {
 		/* Returns an ordered array of the wire colour ids */
 		let models = wire_collection.toJSON();
-		return models.map((model) => {
+		let colours = models.map((model) => {
 			return model.colour_id;
 		});
+		return colours;
 	}
 
+	function is_valid() {
+		let valid = wire_collection.models.every((model) => {
+			return model.isValid();
+		});
+		return valid;
+	}
 
 	console.log("loaded jumper_template/wire.js");
 
@@ -130,7 +152,8 @@ define([
 	return {
 		add_wire: add_wire,
 		colours: colours,
-		initialise: initialise
+		initialise: initialise,
+		is_valid: is_valid
 	};
 
 });
