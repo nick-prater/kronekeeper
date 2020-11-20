@@ -37,7 +37,8 @@ Kronekeeper can be hosted on your own infrastructure as a private instance. Simp
 
 # Supporters
 
-Development of Kronekeeper is being supported by [Global Radio](http://www.thisisglobal.com/radio/). Contributions are welcome from any other interested parties.
+Development of Kronekeeper is being supported by [Global Radio](https://global.com/radio/) and
+[Bauer Media](https://www.bauermedia.co.uk/). Contributions are welcome from any other interested parties.
 
 # Development Status
 
