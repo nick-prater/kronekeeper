@@ -1,3 +1,4 @@
+[% USE JSON %]
 
 <div class="container edit_jumper_template edit">
 	<h1>Jumper Template</h1>
@@ -30,30 +31,10 @@
 			</li>
 			<li>
 				<label for="wire_list">wires:</label>
-				<ol>
-					[%- FOREACH wire IN jumper_template.wires %]
-					<li>
-					<div class="custom-select" data-initial_value="[% wire.colour_id %]">
-						<div class="selection">
-							<span class="option">Select wire colour</span>
-							<span class="arrow">&#9660;</span>
-						</div>
-						<ul>
-							[%- FOREACH wire_colour IN wire_colours %]
-							<li data-value="[% wire_colour.id %]">
-								<span
-									class="wire"
-									style="background:[% wire_colour.html_colour | html %]; color:[% wire_colour.contrasting_html_colour | html %];"
-								>
-									[% wire_colour.name | html %]
-								</span>
-							</li>
-							[%- END %]
-						</ul>
-					[%- END %]
-					</li>
-					<li>
-						<a href="javascript:void(0)">add wire</a>
+				<ol id="wire_list">
+					<!-- will be populated by javascript -->
+					<li id="add_wire_item">
+						<a href="javascript:void(0)" id="add_wire_button" class="button add_wire">add wire</a>
 					</li>
 				</ol>
 			</li>
@@ -80,12 +61,36 @@
 	</form>
 </div>
 
+<!-- Template for additional wire selection rows -->
+<script type="text/template" id="wire_template">
+					<div class="custom-select">
+						<div class="selection">
+							<span class="option">Select wire colour</span>
+							<span class="arrow">&#9660;</span>
+						</div>
+						<ul>
+							[%- FOREACH wire_colour IN wire_colours %]
+							<li data-value="[% wire_colour.id %]">
+								<span
+									class="wire"
+									style="background:[% wire_colour.html_colour | html %]; color:[% wire_colour.contrasting_html_colour | html %];"
+								>
+									[% wire_colour.name | html %]
+								</span>
+							</li>
+							[%- END %]
+						</ul>
+						<a href="javascript:void(0)" title="remove wire" class="lsf button remove_wire">remove</a>
+</script>
+
+
 <script type="text/javascript">
 [%- IF jumper_template.id %]
 	var jumper_template_id = [% jumper_template.id %];
 [%- ELSE %]
 	var jumper_template_id = null;
 [%- END %]
+	var wires = [% jumper_template.wires.json %];
 </script>
 
 <script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>

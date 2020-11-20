@@ -479,6 +479,7 @@ div.credits.container {
 .activity_log, a.notes_button,
 .activity_log, a.menu_button,
 .list .buttons a,
+.custom-select a.button,
 .frame_list td a,
 .block .circuit_buttons a {
 	text-decoration: none;
