@@ -53,7 +53,7 @@
 			[% IF show_templates %]
 			This template and any associated jumpers will be deleted.
 			[% ELSE %]
-			This template and any associated jumpers will be deleted.
+			This frame and any associated jumpers will be deleted.
 			[% END %]
 		</p>
 		<p>

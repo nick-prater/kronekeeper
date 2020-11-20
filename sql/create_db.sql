@@ -29,7 +29,7 @@ CREATE TABLE kronekeeper_data(
 	key TEXT NOT NULL PRIMARY KEY,
 	value TEXT
 );
-INSERT INTO kronekeeper_data(key, value) VALUES('db_version', '3');
+INSERT INTO kronekeeper_data(key, value) VALUES('db_version', '4');
 
 CREATE TABLE account(
         id SERIAL NOT NULL PRIMARY KEY,
@@ -67,6 +67,8 @@ INSERT INTO role(role, rank) VALUES
 	('view_activity_log', 200),
 	('edit_activity_log', 100),
 	('import', 200),
+        ('configure_block_types', 500),
+        ('configure_jumper_templates', 500),
 	('manage_users', 1000),
 	('manage_accounts', 2000);
 

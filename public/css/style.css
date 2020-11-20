@@ -3,7 +3,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -351,9 +351,8 @@ div.credits.container {
 
 
 .block table,
-.user_list table,
 .frame_list table,
-.account_list table,
+.list table,
 .kris_jumper_colours table {
 	border-collapse: collapse;
 }
@@ -362,10 +361,8 @@ div.credits.container {
 .block th,
 .frame_list td,
 .frame_list th,
-.account_list td,
-.account_list th,
-.user_list td,
-.user_list th,
+.list td,
+.list th,
 .kris_jumper_colours td,
 .kris_jumper_colours th {
 	border: 1px solid black;
@@ -373,9 +370,8 @@ div.credits.container {
 
 .activity_log th,
 .block th,
-.user_list th,
 .frame_list th,
-.account_list th,
+.list th,
 .kris_jumper_colours th {
 	background: #aaaaaa;
 }
@@ -386,8 +382,7 @@ div.credits.container {
 
 
 .block td,
-.user_list td,
-.account_list td,
+.list td,
 .kris_jumper_colours td {
 	background: white;
 	height: 10pt;
@@ -452,7 +447,7 @@ div.credits.container {
 	font-weight: bold;
 	background: white;
 	border: 1px solid gray;
-	width: 16em;
+	width: 24em;
 }
 
 .block caption input.editing {
@@ -472,8 +467,7 @@ div.credits.container {
 	vertical-align: middle;
 }
 
-.account_list td.buttons,
-.user_list td.buttons {
+.list td.buttons {
 	min-width: 4em;
 	text-align: center;
 }
@@ -484,8 +478,8 @@ div.credits.container {
 
 .activity_log, a.notes_button,
 .activity_log, a.menu_button,
-.account_list .buttons a,
-.user_list .buttons a,
+.list .buttons a,
+.custom-select a.button,
 .frame_list td a,
 .block .circuit_buttons a {
 	text-decoration: none;
@@ -495,16 +489,14 @@ div.credits.container {
 }
 .activity_log a.notes_button:hover,
 .activity_log a.menu_button:hover,
-.user_list .buttons a:hover,
-.account_list .buttons a:hover,
+.list .buttons a:hover,
 .frame_list td a:hover,
 .block .circuit_buttons a:hover {
         color: white;
         background: #aaaaaa;
 	border-color: black;
 }
-.user_list .buttons a,
-.account_list .buttons a,
+.list .buttons a,
 .frame_list .buttons a {
 	font-size: 16pt;
 }
@@ -603,6 +595,23 @@ div.credits.container {
 	height: 12pt;
 }
 
+
+.list div.wire_group {
+	display: flex;
+	justify-content: center;
+}
+.list div.wire_colour {
+	width: 7em;
+	text-align: center;
+	padding: 0.1rem;
+	border: 1px solid black;
+	font-size: 66%;	
+}
+.list div.wire_colour:not(:first-child) {
+	border-left: none;
+}
+
+
 #circuit_note_dialog .message {
 	margin-top: 1em;
 	font-style: italic;
@@ -664,25 +673,19 @@ div.credits.container {
 }
 
 .change_password form ul,
-.edit_account form ul,
-.edit_user form ul,
-.add_frame form ul {
+.edit form ul {
 	list-style-type: none;
 	list-style-position: outside;
 	margin: 0px;
 	padding: 0px;
 }
 .change_password form li,
-.edit_account form li,
-.edit_user form li,
-.add_frame form li {
+.edit form li {
 	padding: 3px;
 	position: relative;
 }
 .change_password form label,
-.edit_account form label,
-.edit_user form label,
-.add_frame form label {
+.edit form label {
 	width: 8em;
 	text-align: right;
 	display: inline-block;
@@ -699,9 +702,7 @@ div.credits.container {
 	text-align: center;
 	margin-top: 1em;
 }
-.edit_user .message div,
-.edit_account .message div,
-.add_frame div.message,
+.edit .message div,
 .dialog.password_result .message div,
 .change_password .message div {
 	display: none;
@@ -711,22 +712,24 @@ div.credits.container {
 	font-style: italic;
 	text-align: left;
 }
-.edit_user .message .error,
-.edit_account .message .error,
-.add_frame .message.error,
+.edit .message .error,
 .dialog.password_result .message .error,
 .change_password .message .error {
 	color: red;
 }
-.edit_user .message .success,
-.edit_account .message .success,
-.add_frame .message.success,
+.edit .message .success,
 .dialog.password_result .message .success,
 .change_password .message .success {
 	color: green;
 }
-
-
+#jumper_template_form ol {
+	display: inline-block;
+	vertical-align: top;
+}
+#jumper_template_form ol li:last-child {
+	list-style: none;
+}
+	
 
 
 .credits dt {
@@ -853,6 +856,10 @@ td.arrow {
 	background: #fff;
 }
 
+#jumper_template_form div.selection {
+	width: 11em;
+}
+
 .custom-select .selection span.arrow {
 	margin-right: 0.25em;
 	float: right;
@@ -897,6 +904,16 @@ td.arrow {
 	float: left;
 	margin-top: 1px;
 }
+
+#jumper_template_form .custom-select span.wire {
+	border: 1px solid black;
+	display: inline-block;
+	width: 11em;
+	font-size: 85%;
+	text-align: center;
+	margin: 2px;
+}
+
 
 .custom-select div.wire_b {
 	margin-right: 1em;
@@ -946,9 +963,9 @@ td.arrow {
 .edit_user form .roles input {
 	margin-left: -2em;
 }
-.edit_account form input.name,
-.edit_user form input.email,
-.edit_user form input.name {
+.edit form input.name,
+.edit form input.email,
+.edit form input.jumper_designation {
 	width: 25em;
 }
 .edit_account form input.frame_limit {

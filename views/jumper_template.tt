@@ -1,0 +1,98 @@
+[% USE JSON %]
+
+<div class="container edit_jumper_template edit">
+	<h1>Jumper Template</h1>
+
+	<form id="jumper_template_form">
+		<ul class="fields">
+			<li>
+				<label for="name">name:</label>
+				<input 
+					type="text"
+					id="name"
+					name="name"
+					class="name"
+					autocomplete="off"
+					required="required"
+					value="[% jumper_template.name | html %]"
+				/>
+			</li>
+			<li>
+				<label for="designation">designation:</label>
+				<input 
+					type="text"
+					id="designation"
+					name="designation"
+					class="jumper_designation"
+					autocomplete="off"
+					required="required"
+					value="[% jumper_template.designation | html %]"
+				/>
+			</li>
+			<li>
+				<label for="wire_list">wires:</label>
+				<ol id="wire_list">
+					<!-- will be populated by javascript -->
+					<li id="add_wire_item">
+						<a href="javascript:void(0)" id="add_wire_button" class="button add_wire">add wire</a>
+					</li>
+				</ol>
+			</li>
+		</ul>
+
+		<ul>
+			<li class="message">
+				<div id="saving_message">Saving data...</div>
+				<div id="saving_error_message" class="error">Error saving data.</div>
+				<div id="saving_ok_message" class="success">&#10004; Block type saved OK.</div>
+				<div id="no_change_message" class="success">&#10004; No changes to save.</div>
+				<div id="permission_denied_message" class="error">Permission denied when trying to update jumper template.</div>
+				<div id="validation_error_message" class="error">Invalid data. Plese correct the highlighted fields and try again.</div>
+			</li>
+
+			<li class="buttons">
+				<button
+					type="button"
+					id="update_button"
+					autocomplete="off"
+				><span class="lsf">check</span> Update</button>
+			</li>
+		</ul>
+	</form>
+</div>
+
+<!-- Template for additional wire selection rows -->
+<script type="text/template" id="wire_template">
+					<div class="custom-select">
+						<div class="selection">
+							<span class="option">Select wire colour</span>
+							<span class="arrow">&#9660;</span>
+						</div>
+						<ul>
+							[%- FOREACH wire_colour IN wire_colours %]
+							<li data-value="[% wire_colour.id %]">
+								<span
+									class="wire"
+									style="background:[% wire_colour.html_colour | html %]; color:[% wire_colour.contrasting_html_colour | html %];"
+								>
+									[% wire_colour.name | html %]
+								</span>
+							</li>
+							[%- END %]
+						</ul>
+						<a href="javascript:void(0)" title="remove wire" class="lsf button remove_wire">remove</a>
+</script>
+
+
+<script type="text/javascript">
+[%- IF jumper_template.id %]
+	var jumper_template_id = [% jumper_template.id %];
+[%- ELSE %]
+	var jumper_template_id = null;
+[%- END %]
+	var wires = [% jumper_template.wires.json %];
+</script>
+
+<script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
+<script type="text/javascript" src="[% request.uri_base %]/js/jumper_template.js"></script>
+
