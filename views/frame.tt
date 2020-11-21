@@ -44,7 +44,7 @@
 				</div>
 			</th>
 			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
-			<th data-vertical_id="[% frame_blocks.$vertical_position.id %]">
+			<th data-vertical_id="[% frame_blocks.$vertical_position.id %]" data-position="[% frame_blocks.$vertical_position.position %]">
 
 				<div class="container">
 					<div class="name">
@@ -355,6 +355,13 @@
 		Kronekeeper stores and displays vertical desginations as free text and does
 		not restrict the labelling, but to support direct keyboard entry of jumpers,
 		the vertical designation must use word characters and end in a capital letter.
+	</p>
+</div>
+<div id="dialog_insert_vertical" title="Insert vertical" class="dialog" style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-alert"></span>
+		You are about to insert a new frame vertical, which will change the frame
+		dimensions. All existing blocks and jumpering will remain intact.
 	</p>
 </div>
 <div id="dialog_updating_frame_message" title="Please wait..." style="display:none">

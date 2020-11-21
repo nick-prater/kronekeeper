@@ -602,6 +602,35 @@ prefix '/api/frame' => sub {
 
 		return to_json $rv;
 	};
+
+	post '/insert_vertical' => sub {
+
+		user_has_role('edit') or do {
+			error('user does not have the edit role');
+			send_error('forbidden' => 403);
+		};
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		frame_id_valid_for_account($data->{frame_id}) or do {
+			error("frame_id is not valid for this account");
+			send_error("frame_id invalid or not permitted" => 403);
+		};
+
+		unless($data->{position} && $data->{position} =~ m/^\d+$/) {
+			error("valid position parameter not supplied");
+			send_error("valid position parameter not supplied" => 400);
+		}
+
+		my $info = insert_vertical(
+			$data->{frame_id},
+			$data->{position}
+		);
+		database->commit;
+		return to_json $info;
+	};
+
 };
 
 
@@ -1046,6 +1075,43 @@ sub update_vertical_designation {
 		frame_id     => $info->{frame_id},
 		note         => $note,
 	});
+}
+
+
+sub insert_vertical {
+
+	my $frame_id = shift;
+	my $position = shift;
+
+	my $q = database->prepare("
+		SELECT insert_vertical(?, ?) as vertical_id
+	");
+
+	$q->execute(
+		$frame_id,
+		$position
+	) or do {
+		database->rollback;
+		send_error('error inserting vertical' => 500);
+	};
+
+	my $r = $q->fetchrow_hashref();
+	my $info = vertical_info($r->{vertical_id});
+
+	# Update Activity Log
+	my $note = sprintf(
+		'inserted vertical "%s" in position %u',
+		$info->{designation},
+		$info->{position},
+	);
+
+	$al->record({
+		function     => 'kronekeeper::Frame::insert_vertical',
+		frame_id     => $frame_id,
+		note         => $note,
+	});
+
+	return $info;
 }
 
 

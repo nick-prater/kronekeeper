@@ -53,11 +53,22 @@ require([
 		icon: "ui-icon-check",
 		click: rename_vertical
 	};
+	var insert_button = {
+		text: "Insert",
+		icon: "ui-icon-check",
+		click: insert_vertical
+	};
 
 	$("#dialog_rename_vertical").dialog({
 		autoOpen: false,
 		modal: true,
 		buttons: [cancel_button, rename_button]
+	});
+
+	$("#dialog_insert_vertical").dialog({
+		autoOpen: false,
+		modal: true,
+		buttons: [cancel_button, insert_button]
 	});
 
 	$("#dialog_updating_frame_message").dialog({
@@ -107,6 +118,10 @@ require([
 				$("#rename_vertical_duplicate_error").hide();
 				$("#dialog_rename_vertical").dialog("open");
 				break;
+			case "insert_vertical_left" :
+			case "insert_vertical_right" :
+				$("#dialog_insert_vertical").dialog("open");
+				break;
 		}
 	}
 
@@ -151,6 +166,47 @@ require([
 			}
 		});
 	}
+
+
+	function insert_vertical() {
+
+		let url = "/api/frame/insert_vertical";
+		let position = (
+			$(properties.trigger_element)
+			.closest("th")
+			.data("position")
+		);
+
+		if(properties.selected_menu_option == 'insert_vertical_right') {
+			position ++;
+		};
+
+		var data = {
+			frame_id: window.frame_info.id,
+			position: position
+		};
+
+		$("#dialog_insert_vertical").dialog("close");
+		$("#dialog_updating_frame_message").dialog("open");
+
+		$.ajax({
+			url: url,
+			type: "POST",
+			dataType: "json",
+			data: JSON.stringify(data),
+			contentType: 'application/json; charset=utf-8',
+			success: function(json) {
+				console.log("inserted vertical OK");
+				window.location.reload();
+			},
+			error: function(xhr, status) {
+				var error_code = xhr.status + " " + xhr.statusText;
+				$("#dialog_updating_frame_message").dialog("close");
+				alert("ERROR inserting vertical: " + error_code);
+			}
+		});
+	}
+
 
 	console.log("loaded vertical_menu.js");
 });
