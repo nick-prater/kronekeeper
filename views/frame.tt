@@ -44,7 +44,17 @@
 				</div>
 			</th>
 			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
-			<th>[% frame_blocks.$vertical_position.designation | html %]</th>
+			<th data-vertical_id="[% frame_blocks.$vertical_position.id %]">
+
+				<div class="container">
+					<div class="name">
+						[% frame_blocks.$vertical_position.designation | html %]
+					</div>
+					<div class="menu_button">
+						<a class="vertical_menu_button" title="menu" href="javascript:void(0)">&#9776;</a>
+					</div>
+				</div>
+			</th>
 			[% END %]
 			<th></th>
 		</tr>
@@ -171,6 +181,19 @@
 		</li>
 		[% END %]
 	</ul>
+	<ul class="context_menu" id="vertical_menu">
+		[% IF user_roles.edit %]
+		<li data-action="rename_vertical"><div>Rename Vertical</div></li>
+		<li data-action="insert_vertical">
+			<div>Insert Vertical</div>
+			<ul>
+				<li data-action="insert_vertical_left"><div>left</div></li>
+				<li data-action="insert_vertical_right"><div>right</div></li>
+			</ul>
+		</li>
+		[% END %]
+	</ul>
+
 </div>
 
 
@@ -311,6 +334,35 @@
 	</div>
 </div>
 
+<div id="dialog_rename_vertical" title="Rename vertical" class="dialog" style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-alert"></span>
+		You are about to rename a frame vertical. All jumper
+		designations within Kronekeeper will be updated automatically, but bear in mind that
+		any external documentation, cable numbering or labelling referring to block designations
+		will also need updating to match the new designations.
+	</p>
+	<form name="rename_vertical">
+		<input type="text" id="vertical_name"></input>
+	</form>
+
+	<p class="message error" id="rename_vertical_duplicate_error">
+		A vertical with that designation already exists in this frame.
+	</p>
+
+	<p class="small">
+		Vertical designations must be unique within the frame.
+		Kronekeeper stores and displays vertical desginations as free text and does
+		not restrict the labelling, but to support direct keyboard entry of jumpers,
+		the vertical designation must use word characters and end in a capital letter.
+	</p>
+</div>
+<div id="dialog_updating_frame_message" title="Please wait..." style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-refresh"></span>
+		Updating frame...
+	</p>
+</div>
 
 
 <!-- Global state variables -->

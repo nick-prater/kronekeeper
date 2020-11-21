@@ -5,7 +5,7 @@ package kronekeeper::Frame;
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016-2017 NP Broadcast Limited
+Copyright (C) 2016-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -490,6 +490,7 @@ prefix '/api/frame' => sub {
 
 		my $user = logged_in_user;
 		user_has_role('edit') or do {
+			error('user does not have the edit role');
 			send_error('forbidden' => 403);
 		};
 
@@ -551,8 +552,57 @@ prefix '/api/frame' => sub {
 		database->commit;
 		return to_json $result;
 	};
-};
 
+
+	post '/rename_vertical' => sub {
+
+		user_has_role('edit') or do {
+			error('user does not have the edit role');
+			send_error('forbidden' => 403);
+		};
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		# Confirm vertical exists for the logged-in account */
+		my $info = vertical_info($data->{vertical_id}) or do {
+			error("vertical does not exist or is invalid for this account");
+			send_error("vertical_id invalid or not permitted" => 403);
+		};
+
+		# The designation must be supplied, but can be blank
+		defined $data->{designation} or do {
+			send_error("designation parameter not supplied" => 400);
+		};
+
+		# Only process update if there is a change
+		if($data->{designation} ne $info->{designation}) {
+			if(vertical_designation_exists(
+				$info->{frame_id},
+				$data->{designation},
+			)) {
+				debug("cannot rename vertical as the new designation conflicts with an existing vertical");
+				send_error('Designation is already in use for this frame' => 409);
+			}
+
+			update_vertical_designation(
+				$info,
+				$data->{designation}
+			);
+			database->commit;
+		}
+		else {
+			debug("vertical designation is unchanged - nothing to do");
+		}
+
+		my $rv = {
+			vertical_id => $data->{vertical_id},
+			designation => $data->{designation},
+		};
+
+		return to_json $rv;
+	};
+};
 
 
 sub frame_id_valid_for_account {
@@ -584,6 +634,36 @@ sub frame_id_valid_for_account {
 	return $q->fetchrow_hashref;
 }
 
+
+sub vertical_id_valid_for_account {
+
+	my $vertical_id = shift;
+	my $account_id = shift || session('account')->{id};
+
+	$vertical_id && $vertical_id =~ m/^\d+$/ or do {
+		error "vertical_id is not an integer";
+		return undef;
+	};
+	$account_id && $account_id =~ m/^\d+$/ or do {
+		error "account_id is not an integer";
+		return undef;
+	};
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM vertical
+		JOIN frame ON (frame.id = vertical.frame_id)
+		WHERE vertical.id = ?
+		AND frame.account_id = ?
+	");
+
+	$q->execute(
+		$vertical_id,
+		$account_id,
+	);
+
+	return $q->fetchrow_hashref;
+}
 
 
 sub max_frames {
@@ -634,6 +714,44 @@ sub frame_info {
 	my $frame_id = shift;
 	my $q = database->prepare("SELECT * FROM frame_info WHERE id = ?");
 	$q->execute($frame_id);
+	return $q->fetchrow_hashref;
+}
+
+
+sub vertical_info {
+	my $vertical_id = shift;
+	my $account_id = shift || session('account')->{id};
+
+	my $q = database->prepare("
+		SELECT * FROM vertical_info
+		WHERE id = ?
+		AND account_id = ?
+	");
+	$q->execute(
+		$vertical_id,
+		$account_id,
+	);
+
+	return $q->fetchrow_hashref;
+}
+
+
+sub vertical_designation_exists {
+	my $frame_id = shift;
+	my $vertical_designation = shift;
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM vertical
+		WHERE frame_id = ?
+		AND designation = ?
+	");
+
+	$q->execute(
+		$frame_id,
+		$vertical_designation
+	);
+
 	return $q->fetchrow_hashref;
 }
 
@@ -890,6 +1008,42 @@ sub update_name {
 	$al->record({
 		function     => 'kronekeeper::Frame::update_name',
 		frame_id     => $info->{id},
+		note         => $note,
+	});
+}
+
+
+sub update_vertical_designation {
+
+	my $info = shift;
+	my $designation = shift;
+
+	# Rename circuit
+	my $q = database->prepare("
+		UPDATE vertical SET designation = ?
+		WHERE id = ?
+	");
+
+	$q->execute(
+		$designation,
+		$info->{id},
+	) or do {
+		database->rollback;
+		send_error('error updating frame' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'frame %s vertical position %u designation changed to "%s" (was "%s")',
+		$info->{frame_name},
+		$info->{position},
+		$designation,
+		$info->{designation} || '',
+	);
+
+	$al->record({
+		function     => 'kronekeeper::Frame::update_vertical_designation',
+		frame_id     => $info->{frame_id},
 		note         => $note,
 	});
 }
