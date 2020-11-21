@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -83,6 +83,7 @@ require([
 
 		e.stopPropagation();
 
+		$("ul.context_menu").not(this).menu().hide();
 		$("#frame_menu").menu("collapseAll", null, true);
 		$("#frame_menu").menu().show().position({
 			my: "left top",
@@ -92,7 +93,7 @@ require([
 		});
 
 		/* Clicking outside the menu closes it */
-		$(document).on("click", function() {
+		$(document).one("click", function() {
 			$("#frame_menu").menu().hide();
 		});
 	}
@@ -110,13 +111,10 @@ require([
 				break;
 
 			case "reverse_vertical_designations" :
-				$("#block_menu").menu().hide();
 				$("#dialog_confirm_reverse_vertical_designations").dialog("open");
 				break;
 
 			case "reverse_block_designations" :
-				$("#block_menu").menu().hide();
-
 				/* Can only automatically reverse block designations if there
 				 * are no differences in the size of each vertical. Differences
 				 * are apparent if there are blocks in the frame marked unavailable.

@@ -73,6 +73,7 @@ require([
 		e.stopPropagation();
 		properties.trigger_element = this;
 
+		$("ul.context_menu").not(this).menu().hide();
 		$("#vertical_menu").menu("collapseAll", null, true);
 		$("#vertical_menu").menu().show().position({
 			my: "left top",
@@ -82,7 +83,7 @@ require([
 		});
 
 		/* Clicking outside the menu closes it */
-		$(document).on("click", function() {
+		$(document).one("click", function() {
 			$("#vertical_menu").menu().hide();
 		});
 	}
@@ -104,7 +105,6 @@ require([
 				);
 				$("#vertical_name").val(current_name);
 				$("#rename_vertical_duplicate_error").hide();
-				$("#block_menu").menu().hide();
 				$("#dialog_rename_vertical").dialog("open");
 				break;
 		}

@@ -85,6 +85,9 @@ require([
 
 		e.stopPropagation();
 
+		/* Close any other menus */
+		$("ul.context_menu").not(this).menu().hide();
+
 		/* Set global block_id - which block opened the menu? */
 		jq_block = $(e.target).closest("td");
 
@@ -98,7 +101,7 @@ require([
 		});
 
 		/* Clicking outside the menu closes it */
-		$(document).on("click", function() {
+		$(document).one("click", function() {
 			$("#block_menu").menu().hide();
 			$("#block_menu").menu("collapseAll", null, true);
 		});
