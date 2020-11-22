@@ -39,19 +39,18 @@
 
 		<tr>
 			<th>
-				<div class="menu_button">
-					<a class="frame_menu_button" title="menu" href="javascript:void(0)">&#9776;</a>
+				<div class="menu_button frame_menu">
+					<a class="frame_menu_button" title="frame menu" href="javascript:void(0)">&#9776;</a>
 				</div>
 			</th>
 			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
 			<th data-vertical_id="[% frame_blocks.$vertical_position.id %]" data-position="[% frame_blocks.$vertical_position.position %]">
-
 				<div class="container">
 					<div class="name">
 						[% frame_blocks.$vertical_position.designation | html %]
 					</div>
-					<div class="menu_button">
-						<a class="vertical_menu_button" title="menu" href="javascript:void(0)">&#9776;</a>
+					<div class="menu_button vertical_menu">
+						<a class="vertical_menu_button" title="vertical menu" href="javascript:void(0)">&#9776;</a>
 					</div>
 				</div>
 			</th>
@@ -109,7 +108,7 @@
 						[% block.block_type_name | html %]
 					</div>
 					<div class="menu_button">
-						<a title="menu" href="javascript:void(0)">&#9776;</a>
+						<a title="block menu" href="javascript:void(0)">&#9776;</a>
 					</div>
 					<div class="designation" title="block designation">
 						[% "$vertical.designation$block.designation" | html %]
