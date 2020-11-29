@@ -223,7 +223,7 @@ div.credits.container {
 	background: inherit;
 	border: none;
 }
-.frame .unavailable div.label {
+.frame .block.unavailable div.label {
 	color: gray;
 	font-size: 6pt;
 	font-style: italic;

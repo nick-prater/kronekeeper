@@ -422,7 +422,7 @@ prefix '/api/frame' => sub {
 			$data->{block_id},
 		) or do {
 			database->rollback;
-			die;
+			send_error("failed to remove block" => 500);
 		};
 
 		# Update Activity Log
@@ -434,6 +434,48 @@ prefix '/api/frame' => sub {
 
 		$al->record({
 			function     => 'kronekeeper::Frame::remove_block',
+			frame_id     => $info->{frame_id},
+			block_id_a   => $info->{block_id},
+			note         => $note,
+		});
+
+		database->commit;
+
+		return to_json {
+			success => $removed_block,
+			activity_log_note => $note,
+		};
+	};
+
+
+	post '/remove_block_position' => sub {
+		
+		# Removes a block position, which must not be in use
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		block_id_valid_for_account($data->{block_id}) or do {
+			send_error("block_id invalid or not permitted" => 403);
+		};
+		my $info = block_info($data->{block_id});
+
+		debug("removing position of block_id $data->{block_id} and all associated elements");
+		my $removed_block = remove_block_position(
+			$data->{block_id},
+		);
+
+		# Update Activity Log
+		my $note = sprintf(
+			'Removed inactive block position %s',
+			$info->{full_designation},
+		);
+
+		$al->record({
+			function     => 'kronekeeper::Frame::remove_block_position',
 			frame_id     => $info->{frame_id},
 			block_id_a   => $info->{block_id},
 			note         => $note,
@@ -922,6 +964,24 @@ sub remove_block {
 	};
 
 	return $result->{removed_block};
+}
+
+
+sub remove_block_position {
+
+	my $block_id = shift;
+	my $q = database->prepare("
+		SELECT remove_block_position(?) AS success
+	");
+	$q->execute($block_id);
+	my $result = $q->fetchrow_hashref;
+
+	$result && $result->{success} or do {
+		database->rollback;
+		send_error("failed to remove block position $block_id");
+	};	
+
+	return $result->{success};
 }
 
 

@@ -24,6 +24,7 @@ require([
 	'util',
 	'scroll_element',
 	'frame/remove_block',
+	'frame/block_position',
 	'frame/title',
 	'frame/block_colour',
 	'frame/template',
@@ -36,15 +37,17 @@ require([
 	util,
 	scroll_element,
 	remove_block,
+	block_position,
 	title,
 	block_colour,
 	template
 ) {
         'use strict';
 
-	/* Keep track of the block we are associated with */
+	/* Keep track of the block we are associated with. This gets
+	 * assigned whichever block <td> element opens the block menu.
+	 */
 	var jq_block = null;
-	
 
 	/* Initialise the menus and associated events */
 	$("#block_menu").menu({
@@ -117,6 +120,14 @@ require([
 		enable_menu_action_if_true(
 			"place_submenu",
 			jq_block.hasClass("is_free") && !jq_block.hasClass("unavailable")
+		);
+		enable_menu_action_if_true(
+			"remove_block_position",
+			!jq_block.hasClass("unavailable")
+		);
+		enable_menu_action_if_true(
+			"create_block_position",
+			jq_block.hasClass("unavailable")
 		);
 		enable_menu_action_if_true(
 			"place_template",
@@ -192,17 +203,33 @@ require([
 
 			case "remove" :
 				$("#block_menu").menu().hide();
-				remove_block.activate({
+				remove_block.begin({
 					block_id: jq_block.data("block_id"),
 					success: function () {
-						jq_block.removeClass("in_use");
-						jq_block.removeAttr("style");
-						jq_block.addClass("is_free");
-						jq_block.find("span.name").first().text("unused");
-						jq_block.find("div.block_type").first().text("");
+						display_block_unused(jq_block);
 						console.log("finished removing block");
 					}
 				});
+				break;
+
+			case "remove_block_position" :
+				$("#block_menu").menu().hide();
+				if(jq_block.hasClass("in_use")) {
+					/* First remove block from the position */
+					let block = jq_block;
+					remove_block.begin({
+						block_id: block.data("block_id"),
+						success: function () {
+							display_block_unused(block);
+							remove_block_position(block);
+						}
+					});
+				}
+				else {
+					/* No existing block to remove - just the position */
+					remove_block_position(jq_block);
+				}
+				jq_block = null; /* save accidents, clear the reference */
 				break;
 
 			case "change_colour" :
@@ -215,6 +242,37 @@ require([
 				break;
 		}
 
+	}
+
+
+	function display_block_unused(block) {
+		/* Updates the page to display for the the specified block
+		 * <td> element as unused. Requires that the block element
+		 * is already active (not unavailable).
+		 */
+		block.removeClass("in_use");
+		block.removeAttr("style");
+		block.addClass("is_free");
+		block.find("span.name").first().text("unused");
+		block.find("div.block_type").first().text("");
+	}
+
+
+	function remove_block_position(block) {
+		/* Removes the position of the specified block <td> element.
+		 * Requires that the block position is active and not
+		 * currently occupied by a block.
+		 */
+		block_position.remove({
+			block_id: block.data("block_id"),
+			success: function () {
+				let new_block = $(
+					$("#unavailable_block_template").html()
+				);
+				new_block.find(".menu_button a").on("click", show_block_menu);
+				block.replaceWith(new_block);
+			}
+		});
 	}
 
 

@@ -365,6 +365,23 @@ END
 $$ LANGUAGE plpgsql;
 
 
+/* Remove the specified block position from the frame.
+ * Returns TRUE on success.
+ */
+CREATE OR REPLACE FUNCTION remove_block_position(
+	p_block_id INTEGER
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+
+	DELETE FROM block
+	WHERE id = p_block_id;
+
+	RETURN FOUND;
+END
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE VIEW frame_info AS
 SELECT
         frame.id,

@@ -14,6 +14,19 @@
 ] %]
 [% block_name_max_chars = 60 %]
 
+[%- BLOCK unavailable_block_template %]
+			<td class="block unavailable">
+				<div class="container">
+					<div class="label">
+						unavailable
+					</div>
+					<div class="menu_button">
+						<a title="menu" href="javascript:void(0)">&#9776;</a>
+					</div>
+				</div>
+			</td>
+[% END %]
+
 <div class="container frame">
 
 	<table>
@@ -117,18 +130,7 @@
 			</td>
 
 		    [% ELSE %]
-
-			<td class="block unavailable">
-				<div class="container">
-					<div class="label">
-						unavailable
-					</div>
-					<div class="menu_button">
-						<a title="menu" href="javascript:void(0)">&#9776;</a>
-					</div>
-				</div>
-			</td>
-
+			[% PROCESS unavailable_block_template %]
 		    [% END %]
 		  [% END %]
 			<th>[% row_designation | html %]</th>
@@ -149,6 +151,13 @@
 	<ul class="context_menu" id="block_menu">
 		<li data-action="open"><div>Open</div></li>
 		[% IF user_roles.edit %]
+		<li data-action="position_submenu">
+			<div>Block Position</div>
+			<ul>
+				<li data-action="remove_block_position"><div>Remove</div></li>
+				<li data-action="create_block_position"><div>Create</div></li>
+			</ul>
+		</li>
 		<li data-action="place_submenu">
 			<div>Add Block</div>
 			<ul>
@@ -157,10 +166,10 @@
 			[% END %]
 			</ul>
 		</li>
+		<li data-action="remove"><div>Remove Block</div></li>
 		<li data-action="place_template"><div>Place Template</div></li>
 		<li data-action="copy"><div>Copy</div></li>
 		<li data-action="paste"><div>Paste</div></li>
-		<li data-action="remove"><div>Remove Block</div></li>
 		<li data-action="change_colour"><div>Change Colour</div></li>
 		[% END %]
 	</ul>
@@ -370,6 +379,11 @@
 	</p>
 </div>
 
+
+<!-- Templates for dynamic content -->
+<script type="text/template" id="unavailable_block_template">
+[%- PROCESS unavailable_block_template %]
+</script>
 
 <!-- Global state variables -->
 <script type="text/javascript">

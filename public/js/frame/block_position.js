@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016-2020 NP Broadcast Limited
+Copyright (C) 2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -28,35 +28,12 @@ define([
 ) {
         'use strict';
 
-	var properties = {};
+	function remove_block_position(params) {
 
-	/* Initialise dialog */
-	var cancel_button = {
-		text: "Cancel",
-		icon: "ui-icon-close",
-		click: function(e) {
-			$(this).dialog("close");
-		}
-	};
-	var remove_button = {
-		text: "Remove",
-		icon: "ui-icon-trash",
-		click: remove_block
-	};
-
-	$("#dialog_confirm_remove").dialog({
-		autoOpen: false,
-		modal: true,
-		buttons: [cancel_button, remove_button],
-	});
-
-
-	function remove_block() {
-
-		console.log("removing block_id", properties.block_id, "and all its jumpers");
-		var url = '/api/frame/remove_block';
+		console.log("removing position of block_id %i", params.block_id);
+		var url = '/api/frame/remove_block_position';
 		var data = {
-			block_id: properties.block_id
+			block_id: params.block_id
 		};
 
 		$.ajax({
@@ -66,30 +43,21 @@ define([
 			data: JSON.stringify(data),
 			dataType: "json",
 			success: function(json) {
-				console.log("removed block ok");
-				$("#dialog_confirm_remove").dialog("close");
-				properties.success_callback();
+				console.log("removed block position ok");
+				params.success();
 			},
 			error: function(xhr, status) {
 				var error_code = xhr.status + " " + xhr.statusText;
-				alert("ERROR removing block: " + error_code);
+				alert("ERROR removing block position: " + error_code);
 			}
 		});
 	}
 
 
-	function begin(args) {
+	console.log("loaded block_position.js");
 
-		console.log("remove block triggered");
-		properties.block_id = args.block_id;
-		properties.success_callback = args.success;
-
-		$("#dialog_confirm_remove").dialog("open");
-	}
-
-	console.log("loaded remove_block.js");
-
+	/* Exports */
 	return {
-		begin: begin
+		remove: remove_block_position
 	};
 });
