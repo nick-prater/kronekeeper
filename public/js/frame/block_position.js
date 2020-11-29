@@ -54,10 +54,37 @@ define([
 	}
 
 
+	function create_block_position(params) {
+
+		console.log("enabling position of block_id %i", params.block_id);
+		var url = '/api/frame/enable_block_position';
+		var data = {
+			block_id: params.block_id
+		};
+
+		$.ajax({
+			url: url,
+			type: "POST",
+			contentType: 'application/json; charset=utf-8',
+			data: JSON.stringify(data),
+			dataType: "json",
+			success: function(json) {
+				console.log("enabled block position ok");
+				params.success();
+			},
+			error: function(xhr, status) {
+				var error_code = xhr.status + " " + xhr.statusText;
+				alert("ERROR enabling block position: " + error_code);
+			}
+		});
+	}
+
+
 	console.log("loaded block_position.js");
 
 	/* Exports */
 	return {
-		remove: remove_block_position
+		remove: remove_block_position,
+		create: create_block_position
 	};
 });

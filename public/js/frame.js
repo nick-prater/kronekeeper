@@ -232,6 +232,12 @@ require([
 				jq_block = null; /* save accidents, clear the reference */
 				break;
 
+			case "create_block_position" :
+				/* No existing block to remove - just the position */
+				create_block_position(jq_block);
+				jq_block = null;
+				break;
+
 			case "change_colour" :
 				block_colour.show_dialog({
 					block_id: jq_block.data("block_id"),
@@ -266,11 +272,23 @@ require([
 		block_position.remove({
 			block_id: block.data("block_id"),
 			success: function () {
-				let new_block = $(
-					$("#unavailable_block_template").html()
-				);
-				new_block.find(".menu_button a").on("click", show_block_menu);
-				block.replaceWith(new_block);
+				block.removeClass("is_free");
+				block.addClass("unavailable");
+			}
+		});
+	}
+
+	
+	function create_block_position(block) {
+		/* Created an available block position at the specified block
+		 * <td> element. Requires that the block position is currently
+		 * unavailable.
+		 */
+		block_position.create({
+			block_id: block.data("block_id"),
+			success: function () {
+				block.removeClass("unavailable");
+				block.addClass("is_free");
 			}
 		});
 	}

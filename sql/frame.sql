@@ -365,8 +365,9 @@ END
 $$ LANGUAGE plpgsql;
 
 
-/* Remove the specified block position from the frame.
+/* Mark the specified block position as inactive.
  * Returns TRUE on success.
+ * Only empty block positions can be marked as inactive.
  */
 CREATE OR REPLACE FUNCTION remove_block_position(
 	p_block_id INTEGER
@@ -374,12 +375,37 @@ CREATE OR REPLACE FUNCTION remove_block_position(
 RETURNS BOOLEAN AS $$
 BEGIN
 
-	DELETE FROM block
+	UPDATE block
+	SET is_active = FALSE
 	WHERE id = p_block_id;
 
 	RETURN FOUND;
 END
 $$ LANGUAGE plpgsql;
+
+/* Mark the specified block position as active, so that blocks
+ * may be placed in it.
+ * Returns TRUE on success.
+ * Raises an exception if the specified position does not exist.
+ */
+CREATE OR REPLACE FUNCTION enable_block_position(
+	p_block_id INTEGER
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+
+	UPDATE block
+	SET is_active = TRUE
+	WHERE id = p_block_id;
+
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'Block position does not exist';
+	END IF;
+
+	RETURN FOUND;
+END
+$$ LANGUAGE plpgsql;
+
 
 
 CREATE OR REPLACE VIEW frame_info AS

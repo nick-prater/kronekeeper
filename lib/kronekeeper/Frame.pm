@@ -463,14 +463,14 @@ prefix '/api/frame' => sub {
 		};
 		my $info = block_info($data->{block_id});
 
-		debug("removing position of block_id $data->{block_id} and all associated elements");
-		my $removed_block = remove_block_position(
+		debug("removing position of block_id $data->{block_id}");
+		my $success = remove_block_position(
 			$data->{block_id},
 		);
 
 		# Update Activity Log
 		my $note = sprintf(
-			'Removed inactive block position %s',
+			'Removed (marked inactive) unused block position %s',
 			$info->{full_designation},
 		);
 
@@ -484,7 +484,48 @@ prefix '/api/frame' => sub {
 		database->commit;
 
 		return to_json {
-			success => $removed_block,
+			success => $success,
+			activity_log_note => $note,
+		};
+	};
+
+	post '/enable_block_position' => sub {
+		
+		# Removes a block position, which must not be in use
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		block_id_valid_for_account($data->{block_id}) or do {
+			send_error("block_id invalid or not permitted" => 403);
+		};
+		my $info = block_info($data->{block_id});
+
+		debug("enabling position of block_id $data->{block_id}");
+		my $success = enable_block_position(
+			$data->{block_id},
+		);
+
+		# Update Activity Log
+		my $note = sprintf(
+			'Enabled block position %s',
+			$info->{full_designation},
+		);
+
+		$al->record({
+			function     => 'kronekeeper::Frame::enable_block_position',
+			frame_id     => $info->{frame_id},
+			block_id_a   => $info->{block_id},
+			note         => $note,
+		});
+
+		database->commit;
+
+		return to_json {
+			success => $success,
 			activity_log_note => $note,
 		};
 	};
@@ -979,6 +1020,24 @@ sub remove_block_position {
 	$result && $result->{success} or do {
 		database->rollback;
 		send_error("failed to remove block position $block_id");
+	};	
+
+	return $result->{success};
+}
+
+
+sub enable_block_position {
+
+	my $block_id = shift;
+	my $q = database->prepare("
+		SELECT enable_block_position(?) AS success
+	");
+	$q->execute($block_id);
+	my $result = $q->fetchrow_hashref;
+
+	$result && $result->{success} or do {
+		database->rollback;
+		send_error("failed to enable block position $block_id");
 	};	
 
 	return $result->{success};

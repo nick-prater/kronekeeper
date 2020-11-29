@@ -14,19 +14,6 @@
 ] %]
 [% block_name_max_chars = 60 %]
 
-[%- BLOCK unavailable_block_template %]
-			<td class="block unavailable">
-				<div class="container">
-					<div class="label">
-						unavailable
-					</div>
-					<div class="menu_button">
-						<a title="menu" href="javascript:void(0)">&#9776;</a>
-					</div>
-				</div>
-			</td>
-[% END %]
-
 <div class="container frame">
 
 	<table>
@@ -70,52 +57,52 @@
 			[% END %]
 			<th></th>
 		</tr>
+		[%# -- Block positions are numbered bottom-to-top, so start with the highest %]
 		[% block_position = frame_info.block_count %]
 		[% WHILE block_position > 0 %]
-		<tr>
 
-		  [%# -- work out 'row' designation from first occupied block
-		      -- note that the schema currently allows a different sequence of
-		      -- of designations for every vertical, but in practice that would
-		      -- be very confusing
-		   %]
-		  [% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
-		    [% SET row_designation= frame_blocks.$vertical_position.blocks.$block_position.designation %]
-		    [% LAST IF row_designation %]
-		  [% END %]
+		<tr data-block_position="[% block_position %]">
 
-		  [% UNLESS row_designation %]
-		    [% row_designation = '--' %]
-		  [% END %]
+			[%# -- Display row designation taken from the first vertical
+			    -- The UI expects all blocks in the same 'row' position to have
+			    -- matching designations, though technically the database allows
+			    -- them to differ.
+			 %]
+			[% SET row_designation = frame_blocks.1.blocks.$block_position.designation %]
+			<th>
+				[% row_designation | html %]
+			</th>
 
-			<th>[% row_designation | html %]</th>
-		  [% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
-		    [% SET vertical = frame_blocks.$vertical_position %]
-		    [% SET block = vertical.blocks.$block_position %]
-		    [% IF block.id  # -- Block exists -- %]
-
-		      [% SET id = frame_blocks.$vertical_position.blocks.$block_position.id %]
-		      [% SET url = "/block/$id" %]
-		      [% SET title = "block $vertical.designation$block.designation" %]
-		      [% IF block.is_free  # -- Block position is unused -- %]
-			<td class="block is_free" data-block_id="[% id %]" id="block-[% id %]">
-		      [% ELSE  # -- Block position is in use -- %]
-			<td
+			[%- FOREACH vertical_position IN [1..frame_info.vertical_count] %]
+				[% SET vertical = frame_blocks.$vertical_position %]
+				[% SET block = vertical.blocks.$block_position %]
+				[% SET id = block.id %]
+				[% SET url = "/block/$id" %]
+				[% SET title = "block $vertical.designation$block.designation" %]
+			<td 
+			    [%- IF NOT block.is_active %]
+				class="block unavailable"
+			    [%- ELSIF block.is_free %]
+				class="block is_free"
+			    [%- ELSE %]
 				class="block in_use"
-				id="block-[% id %]"
-				data-block_id="[% id %]"
 				data-default_block_colour="[% block.default_html_colour %]"
 				style="background:[% block.html_colour %]"
+			    [%- END %]
+				id="block-[% id %]"
+				data-block_id="[% id %]"
 			>
-		      [% END %]
 				<div class="container">
 					<a class="link" href="[% url %]" title="[% title | html %]">
 						<span class="name">
 							[% block.name | truncate(block_name_max_chars) | html %]
 						</span>
 					</a>
-					<div class="label">
+					<div class="label unused">
 						unused
+					</div>
+					<div class="label unavailable">
+						unavailable
 					</div>
 					<div class="block_type" title="block type">
 						[% block.block_type_name | html %]
@@ -128,14 +115,12 @@
 					</div>
 				</div>
 			</td>
-
-		    [% ELSE %]
-			[% PROCESS unavailable_block_template %]
-		    [% END %]
 		  [% END %]
-			<th>[% row_designation | html %]</th>
+			<th>
+				[% row_designation | html %]
+			</th>
 		</tr>
-		[%   block_position = block_position - 1 %]
+		[% block_position = block_position - 1 %]
 		[% END %]
 		<tr>
 			<th></th>
@@ -144,7 +129,6 @@
 			[% END %]
 			<th></th>
 		</tr>
-
 	</table>
 
 	
@@ -379,12 +363,6 @@
 	</p>
 </div>
 
-
-<!-- Templates for dynamic content -->
-<script type="text/template" id="unavailable_block_template">
-[%- PROCESS unavailable_block_template %]
-</script>
-
 <!-- Global state variables -->
 <script type="text/javascript">
 var frame_info = [% frame_info.json %];
@@ -393,5 +371,4 @@ var block_name_max_chars = [% block_name_max_chars %];
 
 <script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
 <script type="text/javascript" src="[% request.uri_base %]/js/frame.js"></script>
-
 

@@ -123,7 +123,8 @@ CREATE TABLE block(
 	designation TEXT,
 	name TEXT,
 	block_type_id INTEGER REFERENCES block_type(id),
-	colour_html_code BYTEA
+	colour_html_code BYTEA,
+	is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
 CREATE UNIQUE INDEX block_vertical_position_idx ON block(vertical_id, position);
 CREATE UNIQUE INDEX block_designation_vertical_idx ON block(designation, vertical_id);
@@ -139,6 +140,16 @@ ADD CONSTRAINT block_unique_vertical_designation
 UNIQUE USING INDEX block_designation_vertical_idx
 DEFERRABLE INITIALLY IMMEDIATE;
 
+ALTER TABLE block
+ADD CONSTRAINT inactive_block_must_be_empty
+CHECK (
+	is_active IS TRUE
+	OR (
+		name IS NULL
+		AND block_type_id IS NULL
+		AND colour_html_code IS NULL
+	)
+);
 
 CREATE TABLE circuit(
 	id SERIAL NOT NULL PRIMARY KEY,
