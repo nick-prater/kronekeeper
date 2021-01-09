@@ -91,6 +91,7 @@
 			    [%- END %]
 				id="block-[% id %]"
 				data-block_id="[% id %]"
+				data-vertical_id="[% vertical.id %]"
 			>
 				<div class="container">
 					<a class="link" href="[% url %]" title="[% title | html %]">
@@ -125,7 +126,9 @@
 		<tr>
 			<th></th>
 			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
-			<th>[% frame_blocks.$vertical_position.designation | html %]</th>
+			<th data-vertical_id="[% frame_blocks.$vertical_position.id %]">
+				[% frame_blocks.$vertical_position.designation | html %]
+			</th>
 			[% END %]
 			<th></th>
 		</tr>
@@ -183,12 +186,11 @@
 				<li data-action="insert_vertical_right"><div>right</div></li>
 			</ul>
 		</li>
+		<li data-action="remove_vertical"><div>Remove Vertical</div></li>
 		[% END %]
 	</ul>
 
 </div>
-
-
 
 
 <!-- Dialogs hidden on page load -->
@@ -196,6 +198,15 @@
 	<p>
 		<span class="ui-icon ui-icon-alert"></span>
 		This block and any associated jumpers will be permanently deleted and cannot be recovered.
+	</p>
+	<p>
+		Are you sure?
+	</p>
+</div>
+<div id="dialog_confirm_remove_vertical" title="Permanently remove vertical?" style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-alert"></span>
+		This vertical, its blocks and any associated jumpers will be permanently deleted and cannot be recovered.
 	</p>
 	<p>
 		Are you sure?

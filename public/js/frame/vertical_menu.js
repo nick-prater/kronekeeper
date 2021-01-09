@@ -21,16 +21,19 @@ along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 
 
 require([
+	'frame/remove_vertical',
 	'backbone',
         'jquery',
 	'jqueryui'
 ], function (
+	remove_vertical
 ) {
         'use strict';
 
 	var properties = {
 		selected_menu_option: null,
-		trigger_element: null
+		trigger_element: null,
+		vertical_id: null
 	};
 
 	/* Initialise the menus and associated events */
@@ -83,6 +86,11 @@ require([
 
 		e.stopPropagation();
 		properties.trigger_element = this;
+		properties.vertical_id = (
+			$(this)
+			.closest("th")
+			.data("vertical_id")
+		);
 
 		$("ul.context_menu").not(this).menu().hide();
 		$("#vertical_menu").menu("collapseAll", null, true);
@@ -118,6 +126,16 @@ require([
 				$("#rename_vertical_duplicate_error").hide();
 				$("#dialog_rename_vertical").dialog("open");
 				break;
+
+			case "remove_vertical" :
+				remove_vertical.begin({
+					vertical_id: properties.vertical_id,
+					success: function () {
+						remove_vertical.remove_from_display(properties.vertical_id)
+					}
+				});
+				break;
+
 			case "insert_vertical_left" :
 			case "insert_vertical_right" :
 				$("#dialog_insert_vertical").dialog("open");
@@ -129,13 +147,8 @@ require([
 	function rename_vertical() {
 
 		var url = "/api/frame/rename_vertical";
-		let vertical_id = (
-			$(properties.trigger_element)
-			.closest("th")
-			.data("vertical_id")
-		);
 		var data = {
-			vertical_id: vertical_id,
+			vertical_id: properties.vertical_id,
 			designation: $("#vertical_name").val()
 		};
 

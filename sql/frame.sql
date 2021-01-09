@@ -407,6 +407,52 @@ END
 $$ LANGUAGE plpgsql;
 
 
+/* Remove the specified vertical from a frame,
+ * including any associated blocks, jumpers, circuits etc.
+ * Decrements the position of subsequent verticals to maintain
+ * a contiguous positon sequence.
+ */
+CREATE OR REPLACE FUNCTION remove_vertical(
+	p_vertical_id INTEGER
+)
+RETURNS BOOLEAN AS $$
+DECLARE p_frame_id INTEGER;
+DECLARE p_removed_position INTEGER;
+BEGIN
+	SELECT frame_id, position
+	INTO p_frame_id, p_removed_position
+	FROM vertical
+	WHERE id = p_vertical_id;
+
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'vertical does not exist';
+	END IF;
+
+	PERFORM remove_block(id)
+	FROM block
+	WHERE vertical_id = p_vertical_id;
+
+	UPDATE activity_log
+	SET block_id_a = NULL
+	FROM block
+	WHERE block.vertical_id = p_vertical_id
+	AND activity_log.block_id_a = block.id;
+
+	DELETE FROM block
+	WHERE vertical_id = p_vertical_id;
+
+	DELETE FROM vertical
+	WHERE id = p_vertical_id;
+
+	UPDATE vertical
+	SET position = position - 1
+	WHERE frame_id = p_frame_id
+	AND position > p_removed_position;
+
+	RETURN TRUE;
+END
+$$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE VIEW frame_info AS
 SELECT
