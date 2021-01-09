@@ -217,13 +217,11 @@ div.credits.container {
 .frame td.block.is_free {
 	background: inherit;
 }
-
-
 .frame td.block.unavailable {
 	background: inherit;
-	border: none;
+	border-color: transparent;
 }
-.frame .unavailable div.label {
+.frame .block.unavailable div.label {
 	color: gray;
 	font-size: 6pt;
 	font-style: italic;
@@ -233,6 +231,7 @@ div.credits.container {
 	background-color: #aaaaaa;
 }
 
+.frame th div.container,
 .frame .block div.container {
 	position: relative;
 	width: 100%;
@@ -278,14 +277,24 @@ div.credits.container {
 
 
 /* Don't display block link unless a block is placed there */
-.frame .is_free a.link {
+.frame .is_free a.link,
+.frame .unavailable a.link {
 	display: none;
 }
 
-/* Don't display 'unused' label if block is in use */
-.frame .block.in_use div.label {
-	display:none;
+/* Don't display 'unused' or 'unavailable label if block is in use */
+.frame .block div.label {
+	/* By default display neither label */
+	display: none;
 }
+.frame .block.unavailable div.label.unavailable {
+	display: initial;
+}
+.frame .block.is_free div.label.unused {
+	display: initial;
+}
+
+
 
 
 
@@ -294,12 +303,19 @@ div.credits.container {
 .frame .block div.menu_button,
 .block div.menu_button {
 	position: absolute;
-	top: 0px;
 	right: 0px;
+	top: 0px;
 	text-align: right;
 }
-.frame .menu_button a,
-.block .menu_button a {
+.frame th div.menu_button {
+	position: absolute;
+	right: 0px;
+	top: 4pt;
+}
+.frame div.frame_menu.menu_button {
+	position: static;
+}
+.frame .menu_button a {
 	right: 0px;
 	border-radius: 1px;
 	background: #dddddd;
@@ -311,8 +327,7 @@ div.credits.container {
 	font-size: 6pt;
 	background: inherit;
 }
-.frame .menu_button a:hover,
-.block .menu_button a:hover {
+.frame .menu_button a:hover{
         color: white;
         background: #aaaaaa;
 	border-color: black;
@@ -327,17 +342,6 @@ div.credits.container {
 	border: 0px;
 	background: inherit; 
 }
-/*
-.frame div.block_type {
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	text-align: left;
-	font-size: 6pt;
-	border: 0px;
-	background: inherit;
-}
-*/
 .frame div.block_type {
 	position: absolute;
 	bottom: 0px;
@@ -347,13 +351,16 @@ div.credits.container {
 	border: 0px;
 	background: inherit;
 }
-
-
+.frame .block.unavailable div.designation,
+.frame .block.unavailable div.block_type {
+	display: none;
+}
 
 .block table,
 .frame_list table,
 .list table,
-.kris_jumper_colours table {
+.kris_jumper_colours table
+table {
 	border-collapse: collapse;
 }
 

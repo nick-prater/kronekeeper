@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016-2017 NP Broadcast Limited
+Copyright (C) 2016-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -76,7 +76,8 @@ SELECT
 	)) AS html_colour,
 	CONCAT('#', ENCODE(block_type.colour_html_code, 'hex')) AS default_html_colour,
 	vertical.id AS vertical_id,
-	ENCODE(block.colour_html_code,'hex') AS block_html_colour
+	ENCODE(block.colour_html_code,'hex') AS block_html_colour,
+	block.is_active
 FROM block
 JOIN vertical ON (vertical.id = block.vertical_id)
 JOIN frame ON (frame.id = vertical.frame_id)

@@ -111,7 +111,10 @@ prefix '/api/block_type' => sub {
 
 		# circuit and pin counts must be numeric
 		foreach my $field (qw(circuit_count circuit_pin_count)) {
-			unless ($data->{$field} && $data->{$field} =~ m/^\d+$/) {
+			unless(
+				defined $data->{$field} &&
+				$data->{$field} =~ m/^\d+$/
+			) {
 				send_error("INVALID $field" => 400);
 			}
 		}

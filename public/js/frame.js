@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016-2017 NP Broadcast Limited
+Copyright (C) 2016-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -24,10 +24,12 @@ require([
 	'util',
 	'scroll_element',
 	'frame/remove_block',
+	'frame/block_position',
 	'frame/title',
 	'frame/block_colour',
 	'frame/template',
 	'frame/frame_menu',
+	'frame/vertical_menu',
 	'backbone',
         'jquery',
 	'jqueryui'
@@ -35,15 +37,17 @@ require([
 	util,
 	scroll_element,
 	remove_block,
+	block_position,
 	title,
 	block_colour,
 	template
 ) {
         'use strict';
 
-	/* Keep track of the block we are associated with */
+	/* Keep track of the block we are associated with. This gets
+	 * assigned whichever block <td> element opens the block menu.
+	 */
 	var jq_block = null;
-	
 
 	/* Initialise the menus and associated events */
 	$("#block_menu").menu({
@@ -84,6 +88,9 @@ require([
 
 		e.stopPropagation();
 
+		/* Close any other menus */
+		$("ul.context_menu").not(this).menu().hide();
+
 		/* Set global block_id - which block opened the menu? */
 		jq_block = $(e.target).closest("td");
 
@@ -97,7 +104,7 @@ require([
 		});
 
 		/* Clicking outside the menu closes it */
-		$(document).on("click", function() {
+		$(document).one("click", function() {
 			$("#block_menu").menu().hide();
 			$("#block_menu").menu("collapseAll", null, true);
 		});
@@ -113,6 +120,14 @@ require([
 		enable_menu_action_if_true(
 			"place_submenu",
 			jq_block.hasClass("is_free") && !jq_block.hasClass("unavailable")
+		);
+		enable_menu_action_if_true(
+			"remove_block_position",
+			!jq_block.hasClass("unavailable")
+		);
+		enable_menu_action_if_true(
+			"create_block_position",
+			jq_block.hasClass("unavailable")
 		);
 		enable_menu_action_if_true(
 			"place_template",
@@ -188,17 +203,39 @@ require([
 
 			case "remove" :
 				$("#block_menu").menu().hide();
-				remove_block.activate({
+				remove_block.begin({
 					block_id: jq_block.data("block_id"),
 					success: function () {
-						jq_block.removeClass("in_use");
-						jq_block.removeAttr("style");
-						jq_block.addClass("is_free");
-						jq_block.find("span.name").first().text("unused");
-						jq_block.find("div.block_type").first().text("");
+						display_block_unused(jq_block);
 						console.log("finished removing block");
 					}
 				});
+				break;
+
+			case "remove_block_position" :
+				$("#block_menu").menu().hide();
+				if(jq_block.hasClass("in_use")) {
+					/* First remove block from the position */
+					let block = jq_block;
+					remove_block.begin({
+						block_id: block.data("block_id"),
+						success: function () {
+							display_block_unused(block);
+							remove_block_position(block);
+						}
+					});
+				}
+				else {
+					/* No existing block to remove - just the position */
+					remove_block_position(jq_block);
+				}
+				jq_block = null; /* save accidents, clear the reference */
+				break;
+
+			case "create_block_position" :
+				/* No existing block to remove - just the position */
+				create_block_position(jq_block);
+				jq_block = null;
 				break;
 
 			case "change_colour" :
@@ -211,6 +248,49 @@ require([
 				break;
 		}
 
+	}
+
+
+	function display_block_unused(block) {
+		/* Updates the page to display for the the specified block
+		 * <td> element as unused. Requires that the block element
+		 * is already active (not unavailable).
+		 */
+		block.removeClass("in_use");
+		block.removeAttr("style");
+		block.addClass("is_free");
+		block.find("span.name").first().text("unused");
+		block.find("div.block_type").first().text("");
+	}
+
+
+	function remove_block_position(block) {
+		/* Removes the position of the specified block <td> element.
+		 * Requires that the block position is active and not
+		 * currently occupied by a block.
+		 */
+		block_position.remove({
+			block_id: block.data("block_id"),
+			success: function () {
+				block.removeClass("is_free");
+				block.addClass("unavailable");
+			}
+		});
+	}
+
+	
+	function create_block_position(block) {
+		/* Created an available block position at the specified block
+		 * <td> element. Requires that the block position is currently
+		 * unavailable.
+		 */
+		block_position.create({
+			block_id: block.data("block_id"),
+			success: function () {
+				block.removeClass("unavailable");
+				block.addClass("is_free");
+			}
+		});
 	}
 
 

@@ -5,7 +5,7 @@ package kronekeeper::Frame;
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016-2017 NP Broadcast Limited
+Copyright (C) 2016-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -399,6 +399,33 @@ prefix '/api/frame' => sub {
 		return to_json $info;
 	};
 
+	post '/remove_vertical' => sub {
+		# Removes a vertical and all associated blocks, jumpers, circuits etc...
+		
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		vertical_id_valid_for_account($data->{vertical_id}) or do {
+			send_error('block_id invalid or not permitted' => 403);
+		};
+
+		my $success = remove_vertical(
+			$data->{vertical_id},
+		) or do {
+			database->rollback;
+			send_error('failed to remove vertical' => 500);
+		};
+
+		database->commit;
+
+		return to_json {
+			success => $success,
+		};
+	};
 
 	post '/remove_block' => sub {
 		
@@ -415,25 +442,50 @@ prefix '/api/frame' => sub {
 		block_id_valid_for_account($data->{block_id}) or do {
 			send_error("block_id invalid or not permitted" => 403);
 		};
-		my $info = block_info($data->{block_id});
 
-		debug("removing block_id $data->{block_id} and all associated elements");
 		my $removed_block = remove_block(
 			$data->{block_id},
 		) or do {
 			database->rollback;
-			die;
+			send_error("failed to remove block" => 500);
 		};
+
+		database->commit;
+
+		return to_json {
+			success => $removed_block,
+		};
+	};
+
+
+	post '/remove_block_position' => sub {
+		
+		# Removes a block position, which must not be in use
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		block_id_valid_for_account($data->{block_id}) or do {
+			send_error("block_id invalid or not permitted" => 403);
+		};
+		my $info = block_info($data->{block_id});
+
+		debug("removing position of block_id $data->{block_id}");
+		my $success = remove_block_position(
+			$data->{block_id},
+		);
 
 		# Update Activity Log
 		my $note = sprintf(
-			'Removed block from %s (was "%s")',
+			'Removed (marked inactive) unused block position %s',
 			$info->{full_designation},
-			$info->{name} || '',
 		);
 
 		$al->record({
-			function     => 'kronekeeper::Frame::remove_block',
+			function     => 'kronekeeper::Frame::remove_block_position',
 			frame_id     => $info->{frame_id},
 			block_id_a   => $info->{block_id},
 			note         => $note,
@@ -442,7 +494,48 @@ prefix '/api/frame' => sub {
 		database->commit;
 
 		return to_json {
-			success => $removed_block,
+			success => $success,
+			activity_log_note => $note,
+		};
+	};
+
+	post '/enable_block_position' => sub {
+		
+		# Removes a block position, which must not be in use
+		user_has_role('edit') or do {
+			send_error('forbidden' => 403);
+		};
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		block_id_valid_for_account($data->{block_id}) or do {
+			send_error("block_id invalid or not permitted" => 403);
+		};
+		my $info = block_info($data->{block_id});
+
+		debug("enabling position of block_id $data->{block_id}");
+		my $success = enable_block_position(
+			$data->{block_id},
+		);
+
+		# Update Activity Log
+		my $note = sprintf(
+			'Enabled block position %s',
+			$info->{full_designation},
+		);
+
+		$al->record({
+			function     => 'kronekeeper::Frame::enable_block_position',
+			frame_id     => $info->{frame_id},
+			block_id_a   => $info->{block_id},
+			note         => $note,
+		});
+
+		database->commit;
+
+		return to_json {
+			success => $success,
 			activity_log_note => $note,
 		};
 	};
@@ -490,6 +583,7 @@ prefix '/api/frame' => sub {
 
 		my $user = logged_in_user;
 		user_has_role('edit') or do {
+			error('user does not have the edit role');
 			send_error('forbidden' => 403);
 		};
 
@@ -551,8 +645,86 @@ prefix '/api/frame' => sub {
 		database->commit;
 		return to_json $result;
 	};
-};
 
+
+	post '/rename_vertical' => sub {
+
+		user_has_role('edit') or do {
+			error('user does not have the edit role');
+			send_error('forbidden' => 403);
+		};
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		# Confirm vertical exists for the logged-in account */
+		my $info = vertical_info($data->{vertical_id}) or do {
+			error("vertical does not exist or is invalid for this account");
+			send_error("vertical_id invalid or not permitted" => 403);
+		};
+
+		# The designation must be supplied, but can be blank
+		defined $data->{designation} or do {
+			send_error("designation parameter not supplied" => 400);
+		};
+
+		# Only process update if there is a change
+		if($data->{designation} ne $info->{designation}) {
+			if(vertical_designation_exists(
+				$info->{frame_id},
+				$data->{designation},
+			)) {
+				debug("cannot rename vertical as the new designation conflicts with an existing vertical");
+				send_error('Designation is already in use for this frame' => 409);
+			}
+
+			update_vertical_designation(
+				$info,
+				$data->{designation}
+			);
+			database->commit;
+		}
+		else {
+			debug("vertical designation is unchanged - nothing to do");
+		}
+
+		my $rv = {
+			vertical_id => $data->{vertical_id},
+			designation => $data->{designation},
+		};
+
+		return to_json $rv;
+	};
+
+	post '/insert_vertical' => sub {
+
+		user_has_role('edit') or do {
+			error('user does not have the edit role');
+			send_error('forbidden' => 403);
+		};
+
+		debug request->body;
+		my $data = from_json(request->body);
+
+		frame_id_valid_for_account($data->{frame_id}) or do {
+			error("frame_id is not valid for this account");
+			send_error("frame_id invalid or not permitted" => 403);
+		};
+
+		unless($data->{position} && $data->{position} =~ m/^\d+$/) {
+			error("valid position parameter not supplied");
+			send_error("valid position parameter not supplied" => 400);
+		}
+
+		my $info = insert_vertical(
+			$data->{frame_id},
+			$data->{position}
+		);
+		database->commit;
+		return to_json $info;
+	};
+
+};
 
 
 sub frame_id_valid_for_account {
@@ -584,6 +756,36 @@ sub frame_id_valid_for_account {
 	return $q->fetchrow_hashref;
 }
 
+
+sub vertical_id_valid_for_account {
+
+	my $vertical_id = shift;
+	my $account_id = shift || session('account')->{id};
+
+	$vertical_id && $vertical_id =~ m/^\d+$/ or do {
+		error "vertical_id is not an integer";
+		return undef;
+	};
+	$account_id && $account_id =~ m/^\d+$/ or do {
+		error "account_id is not an integer";
+		return undef;
+	};
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM vertical
+		JOIN frame ON (frame.id = vertical.frame_id)
+		WHERE vertical.id = ?
+		AND frame.account_id = ?
+	");
+
+	$q->execute(
+		$vertical_id,
+		$account_id,
+	);
+
+	return $q->fetchrow_hashref;
+}
 
 
 sub max_frames {
@@ -638,6 +840,44 @@ sub frame_info {
 }
 
 
+sub vertical_info {
+	my $vertical_id = shift;
+	my $account_id = shift || session('account')->{id};
+
+	my $q = database->prepare("
+		SELECT * FROM vertical_info
+		WHERE id = ?
+		AND account_id = ?
+	");
+	$q->execute(
+		$vertical_id,
+		$account_id,
+	);
+
+	return $q->fetchrow_hashref;
+}
+
+
+sub vertical_designation_exists {
+	my $frame_id = shift;
+	my $vertical_designation = shift;
+
+	my $q = database->prepare("
+		SELECT 1
+		FROM vertical
+		WHERE frame_id = ?
+		AND designation = ?
+	");
+
+	$q->execute(
+		$frame_id,
+		$vertical_designation
+	);
+
+	return $q->fetchrow_hashref;
+}
+
+
 sub verticals {
 	my $frame_id = shift;
 	my $q = database->prepare("
@@ -650,9 +890,8 @@ sub verticals {
 }
 
 
-sub frame_blocks {
-	my $frame_id = shift;
-	my $verticals = verticals($frame_id);
+sub vertical_blocks {
+	my $vertical_id = shift;
 	my $q = database->prepare("
 		SELECT *
 		FROM block_info
@@ -660,11 +899,21 @@ sub frame_blocks {
 		ORDER BY position ASC
 	");
 
+	$q->execute($vertical_id);
+	my $blocks = $q->fetchall_hashref('position');
+
+	return $blocks;
+}
+
+
+sub frame_blocks {
+	my $frame_id = shift;
+	my $verticals = verticals($frame_id);
+
 	# Query blocks vertical at a time	
 	foreach my $vertical_position(keys %{$verticals}) {
 		my $vertical = $verticals->{$vertical_position};
-		$q->execute($vertical->{id});
-		$vertical->{blocks} = $q->fetchall_hashref('position');
+		$vertical->{blocks} = vertical_blocks($vertical->{id});
 	}	
 
 	return $verticals;
@@ -735,6 +984,75 @@ sub place_block {
 }
 
 
+sub remove_vertical {
+
+	my $vertical_id = shift;
+
+	# We deal with the activity log at this application level,
+	# rather than within the database. As we want to record the
+	# removal of every active block (and its associated parts),
+	# before the vertical itself is removed.
+
+	debug("removing vertical $vertical_id");
+
+	# Remove individual blocks one-by-one so that the removals
+	# are recorded in the activity log. If we weren't bothered
+	# about the activity log, we could skip this, as the blocks
+	# would be removed anyway within the remove_vertical() database
+	# function call.
+	my $info = vertical_info($vertical_id);
+	my $blocks = vertical_blocks($vertical_id);
+	foreach my $position (keys %{$blocks}) {
+		my $block = $blocks->{$position};
+
+		unless($block->{is_active}) {
+			debug(sprintf(
+				'block %u is not active',
+				$block->{id}
+			));
+			next;
+		}
+		elsif($block->{is_free}) {
+			debug(sprintf(
+				'block %u is not in use',
+				$block->{id}
+			));
+			next;
+		}
+		else {
+			remove_block($block->{id});
+		}
+	}
+
+	# Finally remove the vertical and its empty block positions
+	my $q = database->prepare("SELECT remove_vertical(?) AS success");
+	$q->execute($vertical_id) or do {
+		error("ERROR running database command to remove vertical");
+		database->rollback;
+		die;
+	};
+
+	my $result = $q->fetchrow_hashref or do {
+		error("received no result back from database after removing vertical");
+		database->rollback;
+		die;
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'Removed vertical %s',
+		$info->{designation},
+	);
+	$al->record({
+		function     => 'kronekeeper::Frame::remove_vertical',
+		frame_id     => $info->{frame_id},
+		note         => $note,
+	});
+
+	return $result->{success};
+}
+
+
 sub remove_block {
 
 	my $block_id = shift;
@@ -749,7 +1067,10 @@ sub remove_block {
 	# That remains available as a position for a new block to be
 	# placed.
 
+	debug("removing block_id $block_id and all associated elements");
+
 	# Get jumpers on this block
+	my $info = block_info($block_id);
 	my $block_circuits = block_circuits($block_id);
 
 	# Delete the jumpers one-by-one
@@ -774,7 +1095,56 @@ sub remove_block {
 		die;
 	};
 
+	# Update Activity Log
+	my $note = sprintf(
+		'Removed block from %s (was "%s")',
+		$info->{full_designation},
+		$info->{name} || '',
+	);
+	$al->record({
+		function     => 'kronekeeper::Frame::remove_block',
+		frame_id     => $info->{frame_id},
+		block_id_a   => $info->{block_id},
+		note         => $note,
+	});
+
 	return $result->{removed_block};
+}
+
+
+sub remove_block_position {
+
+	my $block_id = shift;
+	my $q = database->prepare("
+		SELECT remove_block_position(?) AS success
+	");
+	$q->execute($block_id);
+	my $result = $q->fetchrow_hashref;
+
+	$result && $result->{success} or do {
+		database->rollback;
+		send_error("failed to remove block position $block_id");
+	};	
+
+	return $result->{success};
+}
+
+
+sub enable_block_position {
+
+	my $block_id = shift;
+	my $q = database->prepare("
+		SELECT enable_block_position(?) AS success
+	");
+	$q->execute($block_id);
+	my $result = $q->fetchrow_hashref;
+
+	$result && $result->{success} or do {
+		database->rollback;
+		send_error("failed to enable block position $block_id");
+	};	
+
+	return $result->{success};
 }
 
 
@@ -892,6 +1262,79 @@ sub update_name {
 		frame_id     => $info->{id},
 		note         => $note,
 	});
+}
+
+
+sub update_vertical_designation {
+
+	my $info = shift;
+	my $designation = shift;
+
+	# Rename circuit
+	my $q = database->prepare("
+		UPDATE vertical SET designation = ?
+		WHERE id = ?
+	");
+
+	$q->execute(
+		$designation,
+		$info->{id},
+	) or do {
+		database->rollback;
+		send_error('error updating frame' => 500);
+	};
+
+	# Update Activity Log
+	my $note = sprintf(
+		'frame %s vertical position %u designation changed to "%s" (was "%s")',
+		$info->{frame_name},
+		$info->{position},
+		$designation,
+		$info->{designation} || '',
+	);
+
+	$al->record({
+		function     => 'kronekeeper::Frame::update_vertical_designation',
+		frame_id     => $info->{frame_id},
+		note         => $note,
+	});
+}
+
+
+sub insert_vertical {
+
+	my $frame_id = shift;
+	my $position = shift;
+
+	my $q = database->prepare("
+		SELECT insert_vertical(?, ?) as vertical_id
+	");
+
+	$q->execute(
+		$frame_id,
+		$position
+	) or do {
+		database->rollback;
+		send_error('error inserting vertical' => 500);
+	};
+
+	my $r = $q->fetchrow_hashref();
+	my $info = vertical_info($r->{vertical_id});
+
+	# Update Activity Log
+	my $note = sprintf(
+		'inserted vertical "%s" in position %u',
+		$info->{designation},
+		$info->{position},
+	);
+
+	$al->record({
+		function     => 'kronekeeper::Frame::insert_vertical',
+		frame_id     => $frame_id,
+		note         => $note,
+	});
+
+	return $info;
 }
 
 

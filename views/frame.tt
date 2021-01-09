@@ -39,107 +39,112 @@
 
 		<tr>
 			<th>
-				<div class="menu_button">
-					<a class="frame_menu_button" title="menu" href="javascript:void(0)">&#9776;</a>
+				<div class="menu_button frame_menu">
+					<a class="frame_menu_button" title="frame menu" href="javascript:void(0)">&#9776;</a>
 				</div>
 			</th>
 			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
-			<th>[% frame_blocks.$vertical_position.designation | html %]</th>
+			<th data-vertical_id="[% frame_blocks.$vertical_position.id %]" data-position="[% frame_blocks.$vertical_position.position %]">
+				<div class="container">
+					<div class="name">
+						[% frame_blocks.$vertical_position.designation | html %]
+					</div>
+					<div class="menu_button vertical_menu">
+						<a class="vertical_menu_button" title="vertical menu" href="javascript:void(0)">&#9776;</a>
+					</div>
+				</div>
+			</th>
 			[% END %]
 			<th></th>
 		</tr>
+		[%# -- Block positions are numbered bottom-to-top, so start with the highest %]
 		[% block_position = frame_info.block_count %]
 		[% WHILE block_position > 0 %]
-		<tr>
 
-		  [%# -- work out 'row' designation from first occupied block
-		      -- note that the schema currently allows a different sequence of
-		      -- of designations for every vertical, but in practice that would
-		      -- be very confusing
-		   %]
-		  [% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
-		    [% SET row_designation= frame_blocks.$vertical_position.blocks.$block_position.designation %]
-		    [% LAST IF row_designation %]
-		  [% END %]
+		<tr data-block_position="[% block_position %]">
 
-		  [% UNLESS row_designation %]
-		    [% row_designation = '--' %]
-		  [% END %]
+			[%# -- Display row designation taken from the first vertical
+			    -- The UI expects all blocks in the same 'row' position to have
+			    -- matching designations, though technically the database allows
+			    -- them to differ.
+			 %]
+			[% SET row_designation = frame_blocks.1.blocks.$block_position.designation %]
+			<th>
+				[% row_designation | html %]
+			</th>
 
-			<th>[% row_designation | html %]</th>
-		  [% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
-		    [% SET vertical = frame_blocks.$vertical_position %]
-		    [% SET block = vertical.blocks.$block_position %]
-		    [% IF block.id  # -- Block exists -- %]
-
-		      [% SET id = frame_blocks.$vertical_position.blocks.$block_position.id %]
-		      [% SET url = "/block/$id" %]
-		      [% SET title = "block $vertical.designation$block.designation" %]
-		      [% IF block.is_free  # -- Block position is unused -- %]
-			<td class="block is_free" data-block_id="[% id %]" id="block-[% id %]">
-		      [% ELSE  # -- Block position is in use -- %]
-			<td
+			[%- FOREACH vertical_position IN [1..frame_info.vertical_count] %]
+				[% SET vertical = frame_blocks.$vertical_position %]
+				[% SET block = vertical.blocks.$block_position %]
+				[% SET id = block.id %]
+				[% SET url = "/block/$id" %]
+				[% SET title = "block $vertical.designation$block.designation" %]
+			<td 
+			    [%- IF NOT block.is_active %]
+				class="block unavailable"
+			    [%- ELSIF block.is_free %]
+				class="block is_free"
+			    [%- ELSE %]
 				class="block in_use"
-				id="block-[% id %]"
-				data-block_id="[% id %]"
 				data-default_block_colour="[% block.default_html_colour %]"
 				style="background:[% block.html_colour %]"
+			    [%- END %]
+				id="block-[% id %]"
+				data-block_id="[% id %]"
+				data-vertical_id="[% vertical.id %]"
 			>
-		      [% END %]
 				<div class="container">
 					<a class="link" href="[% url %]" title="[% title | html %]">
 						<span class="name">
 							[% block.name | truncate(block_name_max_chars) | html %]
 						</span>
 					</a>
-					<div class="label">
+					<div class="label unused">
 						unused
+					</div>
+					<div class="label unavailable">
+						unavailable
 					</div>
 					<div class="block_type" title="block type">
 						[% block.block_type_name | html %]
 					</div>
 					<div class="menu_button">
-						<a title="menu" href="javascript:void(0)">&#9776;</a>
+						<a title="block menu" href="javascript:void(0)">&#9776;</a>
 					</div>
 					<div class="designation" title="block designation">
 						[% "$vertical.designation$block.designation" | html %]
 					</div>
 				</div>
 			</td>
-
-		    [% ELSE %]
-
-			<td class="block unavailable">
-				<div class="container">
-					<div class="label">
-						unavailable
-					</div>
-					<div class="menu_button">
-						<a title="menu" href="javascript:void(0)">&#9776;</a>
-					</div>
-				</div>
-			</td>
-
-		    [% END %]
 		  [% END %]
-			<th>[% row_designation | html %]</th>
+			<th>
+				[% row_designation | html %]
+			</th>
 		</tr>
-		[%   block_position = block_position - 1 %]
+		[% block_position = block_position - 1 %]
 		[% END %]
 		<tr>
 			<th></th>
 			[% FOREACH vertical_position IN [1..frame_info.vertical_count] %]
-			<th>[% frame_blocks.$vertical_position.designation | html %]</th>
+			<th data-vertical_id="[% frame_blocks.$vertical_position.id %]">
+				[% frame_blocks.$vertical_position.designation | html %]
+			</th>
 			[% END %]
 			<th></th>
 		</tr>
-
 	</table>
 
 	
 	<ul class="context_menu" id="block_menu">
 		<li data-action="open"><div>Open</div></li>
 		[% IF user_roles.edit %]
+		<li data-action="position_submenu">
+			<div>Block Position</div>
+			<ul>
+				<li data-action="remove_block_position"><div>Remove</div></li>
+				<li data-action="create_block_position"><div>Create</div></li>
+			</ul>
+		</li>
 		<li data-action="place_submenu">
 			<div>Add Block</div>
 			<ul>
@@ -148,10 +153,10 @@
 			[% END %]
 			</ul>
 		</li>
+		<li data-action="remove"><div>Remove Block</div></li>
 		<li data-action="place_template"><div>Place Template</div></li>
 		<li data-action="copy"><div>Copy</div></li>
 		<li data-action="paste"><div>Paste</div></li>
-		<li data-action="remove"><div>Remove Block</div></li>
 		<li data-action="change_colour"><div>Change Colour</div></li>
 		[% END %]
 	</ul>
@@ -171,9 +176,21 @@
 		</li>
 		[% END %]
 	</ul>
+	<ul class="context_menu" id="vertical_menu">
+		[% IF user_roles.edit %]
+		<li data-action="rename_vertical"><div>Rename Vertical</div></li>
+		<li data-action="insert_vertical">
+			<div>Insert Vertical</div>
+			<ul>
+				<li data-action="insert_vertical_left"><div>left</div></li>
+				<li data-action="insert_vertical_right"><div>right</div></li>
+			</ul>
+		</li>
+		<li data-action="remove_vertical"><div>Remove Vertical</div></li>
+		[% END %]
+	</ul>
+
 </div>
-
-
 
 
 <!-- Dialogs hidden on page load -->
@@ -181,6 +198,15 @@
 	<p>
 		<span class="ui-icon ui-icon-alert"></span>
 		This block and any associated jumpers will be permanently deleted and cannot be recovered.
+	</p>
+	<p>
+		Are you sure?
+	</p>
+</div>
+<div id="dialog_confirm_remove_vertical" title="Permanently remove vertical?" style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-alert"></span>
+		This vertical, its blocks and any associated jumpers will be permanently deleted and cannot be recovered.
 	</p>
 	<p>
 		Are you sure?
@@ -311,7 +337,42 @@
 	</div>
 </div>
 
+<div id="dialog_rename_vertical" title="Rename vertical" class="dialog" style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-alert"></span>
+		You are about to rename a frame vertical. All jumper
+		designations within Kronekeeper will be updated automatically, but bear in mind that
+		any external documentation, cable numbering or labelling referring to block designations
+		will also need updating to match the new designations.
+	</p>
+	<form name="rename_vertical">
+		<input type="text" id="vertical_name"></input>
+	</form>
 
+	<p class="message error" id="rename_vertical_duplicate_error">
+		A vertical with that designation already exists in this frame.
+	</p>
+
+	<p class="small">
+		Vertical designations must be unique within the frame.
+		Kronekeeper stores and displays vertical desginations as free text and does
+		not restrict the labelling, but to support direct keyboard entry of jumpers,
+		the vertical designation must use word characters and end in a capital letter.
+	</p>
+</div>
+<div id="dialog_insert_vertical" title="Insert vertical" class="dialog" style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-alert"></span>
+		You are about to insert a new frame vertical, which will change the frame
+		dimensions. All existing blocks and jumpering will remain intact.
+	</p>
+</div>
+<div id="dialog_updating_frame_message" title="Please wait..." style="display:none">
+	<p>
+		<span class="ui-icon ui-icon-refresh"></span>
+		Updating frame...
+	</p>
+</div>
 
 <!-- Global state variables -->
 <script type="text/javascript">
@@ -321,5 +382,4 @@ var block_name_max_chars = [% block_name_max_chars %];
 
 <script type="text/javascript" src="[% request.uri_base %]/js/main.js"></script>
 <script type="text/javascript" src="[% request.uri_base %]/js/frame.js"></script>
-
 

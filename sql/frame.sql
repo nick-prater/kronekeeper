@@ -2,7 +2,7 @@
 This file is part of Kronekeeper, a web based application for 
 recording and managing wiring frame records.
 
-Copyright (C) 2016 NP Broadcast Limited
+Copyright (C) 2016-2020 NP Broadcast Limited
 
 Kronekeeper is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -17,6 +17,48 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with Kronekeeper.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+
+/* Returns the next unused standard vertical designation
+ * for the given frame.
+ *
+ * This is achieved by iterating through possible designations
+ * in sequence, until an unused designation is found. A limit
+ * of 1000 iterations is set, so this function will fail with
+ * an exception if a frame ever exceeds 1000 verticals.
+ */
+CREATE OR REPLACE FUNCTION next_vertical_designation(
+	p_frame_id INTEGER
+)
+RETURNS TEXT AS $$
+DECLARE p_max_position_count INTEGER := 1000;
+DECLARE p_designation TEXT;
+BEGIN
+
+	/* Iterate through possible designations until we find one
+	 * that is not in use.
+	 */
+	FOR position IN 1..p_max_position_count LOOP
+
+		SELECT regular_vertical_designation_from_position(position)
+		INTO p_designation;
+
+		/* Is this in use? */
+		PERFORM 1 FROM vertical
+		WHERE frame_id = p_frame_id
+		AND designation = p_designation;
+
+		IF NOT FOUND THEN
+			RETURN p_designation;
+		END IF;
+
+	END LOOP;
+
+	/* If we get here, we've failed to find a unique designation */
+	RAISE EXCEPTION 'Failed to find unique designation after % iterations', p_max_position_count;
+
+END
+$$ LANGUAGE plpgsql;
 
 
 
@@ -251,6 +293,167 @@ END
 $$ LANGUAGE plpgsql;
 
 
+/* Inserts a new vertical into a frame at the specified position,
+ * which must be within, or contiguous with the existing range of
+ * block positions.
+ *
+ * The new vertical will be initialised with empty block positions
+ * having positions and designations that copy the vertical
+ * currently in the insert position. If there is no vertical
+ * occupying the insert position, block positions will be copied
+ * from the next lower vertical position. An exception will be
+ * raised if no existing vertical is found.
+ *
+ * Returns the id of the newly created vertical.
+ */
+CREATE OR REPLACE FUNCTION insert_vertical(
+	p_frame_id INTEGER,
+	p_insert_at_position INTEGER
+)
+RETURNS INTEGER AS $$
+DECLARE p_designation TEXT;
+DECLARE p_new_vertical_id INTEGER;
+DECLARE p_copy_blocks_from_vertical_id INTEGER;
+BEGIN
+
+	/* Find an existing vertical as template for blocks and designations */
+	SELECT vertical.id
+	INTO p_copy_blocks_from_vertical_id
+	FROM vertical
+	WHERE frame_id = p_frame_id
+	AND position <= p_insert_at_position
+	ORDER BY position DESC
+	LIMIT 1;
+
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'No existing vertical found to act as template';
+	END IF;
+
+	RAISE DEBUG 'Using vertical % as template for new vertical', p_copy_blocks_from_vertical_id;
+
+	/* Make space in position sequence */
+	UPDATE vertical
+	SET position = position + 1
+	WHERE position >= p_insert_at_position
+	AND frame_id = p_frame_id;
+
+	/* Insert new vertical */
+	INSERT INTO vertical (
+		frame_id,
+		position,
+		designation
+	)
+	VALUES (
+		p_frame_id,
+		p_insert_at_position,
+		next_vertical_designation(p_frame_id)
+	)
+	RETURNING vertical.id INTO p_new_vertical_id;
+
+	/* Insert empty blocks into vertical */
+	INSERT INTO block (
+		vertical_id,
+		position,
+		designation
+	)
+	SELECT p_new_vertical_id, position, designation
+	FROM block
+	WHERE vertical_id = p_copy_blocks_from_vertical_id;
+
+	RETURN p_new_vertical_id;
+END
+$$ LANGUAGE plpgsql;
+
+
+/* Mark the specified block position as inactive.
+ * Returns TRUE on success.
+ * Only empty block positions can be marked as inactive.
+ */
+CREATE OR REPLACE FUNCTION remove_block_position(
+	p_block_id INTEGER
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+
+	UPDATE block
+	SET is_active = FALSE
+	WHERE id = p_block_id;
+
+	RETURN FOUND;
+END
+$$ LANGUAGE plpgsql;
+
+/* Mark the specified block position as active, so that blocks
+ * may be placed in it.
+ * Returns TRUE on success.
+ * Raises an exception if the specified position does not exist.
+ */
+CREATE OR REPLACE FUNCTION enable_block_position(
+	p_block_id INTEGER
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+
+	UPDATE block
+	SET is_active = TRUE
+	WHERE id = p_block_id;
+
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'Block position does not exist';
+	END IF;
+
+	RETURN FOUND;
+END
+$$ LANGUAGE plpgsql;
+
+
+/* Remove the specified vertical from a frame,
+ * including any associated blocks, jumpers, circuits etc.
+ * Decrements the position of subsequent verticals to maintain
+ * a contiguous positon sequence.
+ */
+CREATE OR REPLACE FUNCTION remove_vertical(
+	p_vertical_id INTEGER
+)
+RETURNS BOOLEAN AS $$
+DECLARE p_frame_id INTEGER;
+DECLARE p_removed_position INTEGER;
+BEGIN
+	SELECT frame_id, position
+	INTO p_frame_id, p_removed_position
+	FROM vertical
+	WHERE id = p_vertical_id;
+
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'vertical does not exist';
+	END IF;
+
+	PERFORM remove_block(id)
+	FROM block
+	WHERE vertical_id = p_vertical_id;
+
+	UPDATE activity_log
+	SET block_id_a = NULL
+	FROM block
+	WHERE block.vertical_id = p_vertical_id
+	AND activity_log.block_id_a = block.id;
+
+	DELETE FROM block
+	WHERE vertical_id = p_vertical_id;
+
+	DELETE FROM vertical
+	WHERE id = p_vertical_id;
+
+	UPDATE vertical
+	SET position = position - 1
+	WHERE frame_id = p_frame_id
+	AND position > p_removed_position;
+
+	RETURN TRUE;
+END
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE VIEW frame_info AS
 SELECT
         frame.id,
@@ -264,5 +467,17 @@ FROM frame
 LEFT JOIN vertical ON (vertical.frame_id = frame.id)
 LEFT JOIN block ON (block.vertical_id = vertical.id)
 GROUP BY frame.id;
+
+
+CREATE OR REPLACE VIEW vertical_info AS
+SELECT
+	vertical.id AS id,
+	vertical.position AS position,
+	vertical.designation AS designation,
+	frame.id AS frame_id,
+	frame.name AS frame_name,
+        frame.account_id AS account_id
+FROM vertical
+JOIN frame ON (vertical.frame_id = frame.id);
 
 
